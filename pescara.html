@@ -1,32 +1,599 @@
 <!doctype html>
 <html lang="it">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c7b5a">
-<meta name="description" content="Abruzzo Assistenza dispone di mezzi in partenza da Sulmona e Pescara. Il punto di partenza viene scelto in base alla zona e al trasporto richiesto.">
-<title>Partenze da Sulmona e Pescara | Abruzzo Assistenza</title>
-<link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/styles.css"><script defer src="assets/app.js"></script>
-</head>
-<body>
-<a class="skip-link" href="#main">Vai al contenuto</a><div class="emergency-bar"><strong>Emergenza sanitaria?</strong> Chiama <a href="tel:112">112</a> o <a href="tel:118">118</a>.</div>
-<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><img src="assets/logo-officiale.png" alt="" width="44" height="44"><span><strong>Abruzzo</strong> Assistenza</span></a><button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="site-nav"><span class="sr-only">Apri menu</span><span></span><span></span><span></span></button><nav id="site-nav" class="site-nav" data-nav><a href="servizi.html">Servizi</a><a class="active" href="pescara.html">Partenze</a><a href="volontari.html">Volontari</a><a href="sostienici.html">Sostienici</a><a href="trasparenza.html">Trasparenza</a><a href="contatti.html" class="button button-small">Contatti</a></nav></div></header>
-<main id="main">
-<section class="page-hero page-hero-map"><div class="container narrow"><span class="eyebrow">Partenze dei mezzi</span><h1>Mezzi disponibili a Sulmona e Pescara.</h1><p class="lead">La partenza viene organizzata da Sulmona oppure da Pescara in base al trasporto richiesto, alla zona di presa in carico, alla destinazione e alla disponibilità del mezzo.</p></div></section>
-
-<section class="section"><div class="container cards cards-3">
-<article class="card"><span class="number-tag">01</span><h3>Ci indichi la tratta</h3><p>Partenza del paziente, destinazione, data e tipo di servizio necessario.</p></article>
-<article class="card"><span class="number-tag">02</span><h3>Valutiamo la zona</h3><p>Consideriamo il percorso complessivo e individuiamo il punto di partenza più adatto tra Sulmona e Pescara.</p></article>
-<article class="card"><span class="number-tag">03</span><h3>Confermiamo il servizio</h3><p>Ti comunichiamo organizzazione, disponibilità e condizioni prima della conferma.</p></article>
-</div></section>
-
-<section class="section section-alt"><div class="container two-col">
-<div><span class="eyebrow">Due punti operativi</span><h2>La scelta dipende dal viaggio, non da un confine geografico.</h2><p>I mezzi possono partire sia da Sulmona sia da Pescara. Questo ci permette di organizzare meglio trasporti locali, nazionali e internazionali in funzione del punto di presa in carico e della destinazione.</p></div>
-<div class="info-panel">
-  <div class="info-row"><span>S</span><div><b>Sulmona</b><small>Mezzi disponibili in partenza</small></div></div>
-  <div class="info-row"><span>P</span><div><b>Pescara</b><small>Mezzi disponibili in partenza</small></div></div>
-</div>
-</div></section>
-
-<section class="section"><div class="container callout"><div><span class="eyebrow eyebrow-light">Dove devi andare?</span><h2>Italia o estero: scrivici la tratta e verifichiamo il servizio.</h2></div><div class="callout-actions"><a class="button button-white" data-whatsapp href="#">WhatsApp</a><a class="button button-outline-white" href="tel:+393336823324">Chiama</a></div></div></section>
-</main>
-<footer class="site-footer"><div class="container footer-grid"><div><a class="brand brand-footer" href="index.html"><img src="assets/logo-officiale.png" alt="" width="40" height="40"><span><strong>Abruzzo</strong> Assistenza</span></a><p>Assistenza e trasporto sanitario in Italia e all’estero.</p></div><div><h3>Contatti</h3><a href="tel:+393336823324">333 682 3324</a><span>Via Fonte d'Amore SNC, Sulmona (AQ)</span></div><div><h3>Link</h3><a href="servizi.html">Servizi</a><a href="sostienici.html">Sostienici</a><a href="privacy.html">Privacy</a></div><div><h3>Social</h3><a href="https://www.instagram.com/abruzzo.assistenza/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/share/19bb4Rh37u/" target="_blank" rel="noopener">Facebook</a></div></div><div class="container footer-bottom"><span>© <span data-year></span> Abruzzo Assistenza</span><span>C.F. / P.IVA 02227430663</span></div></footer>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1"
+    />
+    <meta
+      name="theme-color"
+      content="#15584d"
+    />
+    <meta
+      name="color-scheme"
+      content="light"
+    />
+    <title>Partenze | Abruzzo Assistenza</title>
+    <meta
+      name="description"
+      content="Organizzazione delle partenze dei mezzi da Sulmona e Pescara per trasporti sanitari in Italia e all’estero."
+    />
+    <link
+      rel="icon"
+      href="assets/logo-associazione-small.jpg"
+      type="image/jpeg"
+    />
+    <link
+      rel="preload"
+      href="assets/fonts/IBMPlexSans-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      href="assets/styles.css"
+    />
+    <script
+      defer
+      src="assets/app.js"
+    ></script>
+    <meta
+      property="og:type"
+      content="website"
+    />
+    <meta
+      property="og:locale"
+      content="it_IT"
+    />
+    <meta
+      property="og:site_name"
+      content="Abruzzo Assistenza"
+    />
+    <meta
+      property="og:title"
+      content="Partenze | Abruzzo Assistenza"
+    />
+    <meta
+      property="og:description"
+      content="Organizzazione delle partenze dei mezzi da Sulmona e Pescara per trasporti sanitari in Italia e all’estero."
+    />
+  </head>
+  <body class="has-mobile-contact page-pescara">
+    <a
+      class="skip-link"
+      href="#main"
+    >
+      Vai al contenuto
+    </a>
+    <!-- site-header:start -->
+    <div class="utility-bar">
+      <div class="container utility-inner">
+        <span>Trasporti sanitari programmati · Italia ed estero</span>
+        <a href="tel:+393336823324">
+          <span
+            class="availability-dot"
+            aria-hidden="true"
+          ></span>
+          <span>333 682 3324</span>
+          <small>Contatto H24</small>
+        </a>
+      </div>
+    </div>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="Abruzzo Assistenza, home"
+        >
+          <img
+            src="assets/logo-associazione-small.jpg"
+            alt=""
+            width="48"
+            height="48"
+          />
+          <span>
+            <strong>Abruzzo Assistenza</strong>
+            <small>Assistenza e trasporto sanitario</small>
+          </span>
+        </a>
+        <button
+          class="nav-toggle"
+          type="button"
+          data-nav-toggle
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          <span data-nav-label>Menu</span>
+          <span
+            class="menu-lines"
+            aria-hidden="true"
+          >
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+        <nav
+          id="site-nav"
+          class="site-nav"
+          data-nav
+          aria-label="Navigazione principale"
+        >
+          <span class="nav-caption">Altre informazioni</span>
+          <a
+            class="nav-link"
+            href="index.html"
+          >
+            Home
+          </a>
+          <details
+            class="nav-group"
+            data-nav-group="services"
+          >
+            <summary>
+              Servizi
+              <svg
+                class="nav-chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="nav-panel nav-panel-services">
+              <div class="nav-panel-heading">
+                <span>Trasporto e assistenza</span>
+                <a href="servizi.html">Tutti i servizi ↗</a>
+              </div>
+              <div class="nav-panel-links">
+                <a href="servizi.html#trasporti">
+                  <strong>Visite e dimissioni</strong>
+                  <small>Da casa o tra strutture</small>
+                </a>
+                <a href="servizi.html#dialisi">
+                  <strong>Dialisi e terapie</strong>
+                  <small>Trasporti ricorrenti</small>
+                </a>
+                <a href="servizi.html#nazionali">
+                  <strong>Trasferimenti in Italia</strong>
+                  <small>Anche su lunghe distanze</small>
+                </a>
+                <a href="servizi.html#esteri">
+                  <strong>Trasferimenti all’estero</strong>
+                  <small>Partenze e rientri</small>
+                </a>
+                <a href="servizi.html#eventi">
+                  <strong>Assistenza a eventi</strong>
+                  <small>Per organizzatori e strutture</small>
+                </a>
+              </div>
+            </div>
+          </details>
+          <a
+            class="nav-link"
+            href="pescara.html"
+            aria-current="page"
+          >
+            Partenze
+          </a>
+          <details
+            class="nav-group"
+            data-nav-group="association"
+          >
+            <summary>
+              Associazione
+              <svg
+                class="nav-chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="nav-panel nav-panel-association">
+              <div class="nav-panel-links">
+                <a href="volontari.html">
+                  <strong>Volontariato</strong>
+                  <small>Entra in contatto con noi</small>
+                </a>
+                <a href="sostienici.html">
+                  <strong>Sostieni l’associazione</strong>
+                  <small>Come contribuire alle attività</small>
+                </a>
+                <a href="trasparenza.html">
+                  <strong>Dati e trasparenza</strong>
+                  <small>Informazioni sull’associazione</small>
+                </a>
+              </div>
+            </div>
+          </details>
+          <a
+            class="button nav-contact"
+            href="contatti.html"
+          >
+            Contattaci
+            <span aria-hidden="true">↗</span>
+          </a>
+          <div class="nav-mobile-secondary nav-panel-links">
+            <a
+              href="pescara.html"
+              aria-current="page"
+            >
+              <strong>Partenze</strong>
+              <small>Sulmona e Pescara</small>
+            </a>
+            <a href="volontari.html">
+              <strong>Volontariato</strong>
+              <small>Entra in contatto con noi</small>
+            </a>
+            <a href="sostienici.html">
+              <strong>Sostieni l’associazione</strong>
+              <small>Come contribuire alle attività</small>
+            </a>
+            <a href="trasparenza.html">
+              <strong>Dati e trasparenza</strong>
+              <small>Informazioni sull’associazione</small>
+            </a>
+          </div>
+        </nav>
+      </div>
+      <button
+        class="nav-backdrop"
+        type="button"
+        data-nav-backdrop
+        tabindex="-1"
+        aria-label="Chiudi menu"
+        hidden
+      ></button>
+    </header>
+    <!-- site-header:end -->
+    <main
+      id="main"
+      tabindex="-1"
+    >
+      <section class="page-hero">
+        <div class="container">
+          <nav aria-label="Percorso">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Home</a></li>
+              <li aria-current="page">Partenze</li>
+            </ol>
+          </nav>
+          <div class="page-heading">
+            <h1>Partenze e operatività.</h1>
+            <p class="lead">
+              Da Sulmona o Pescara, in base al percorso e alla disponibilità del mezzo.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="container operational-grid">
+          <figure class="documentary-photo">
+            <img
+              src="assets/mezzi-associazione.jpg"
+              srcset="assets/mezzi-associazione-800.jpg 800w, assets/mezzi-associazione.jpg 1440w"
+              sizes="(max-width: 700px) calc(100vw - 32px), (max-width: 1200px) 45vw, 540px"
+              alt="Ambulanze e veicoli con il nome e il logo di Abruzzo Assistenza"
+              width="1440"
+              height="808"
+              loading="lazy"
+              decoding="async"
+            />
+            <figcaption>Mezzi di Abruzzo Assistenza · Foto dal canale ufficiale</figcaption>
+          </figure>
+          <div>
+            <span class="eyebrow">Organizzazione del servizio</span>
+            <h2>La tratta guida la scelta.</h2>
+            <p>
+              I mezzi possono partire da Sulmona oppure da Pescara, per servizi locali, nazionali e
+              internazionali.
+            </p>
+            <div class="location-list">
+              <article>
+                <span class="location-code">AQ</span>
+                <div>
+                  <h3>Sulmona</h3>
+                  <p>Partenza dei mezzi</p>
+                </div>
+              </article>
+              <article>
+                <span class="location-code">PE</span>
+                <div>
+                  <h3>Pescara</h3>
+                  <p>Partenza dei mezzi</p>
+                </div>
+              </article>
+            </div>
+            <p class="microcopy">
+              La sede legale è a Sulmona, in Via Fonte d’Amore SNC. I punti di partenza non sono
+              indicati come sportelli aperti al pubblico.
+            </p>
+          </div>
+        </div>
+      </section>
+      <section class="section section-alt">
+        <div class="container">
+          <div class="section-heading">
+            <span class="eyebrow">Per organizzare il trasporto</span>
+            <h2>Le informazioni necessarie.</h2>
+          </div>
+          <ol class="process-list">
+            <li>
+              <span class="step-number">01</span>
+              <h3>La richiesta</h3>
+              <p>Tipo di servizio, partenza, destinazione e data indicativa.</p>
+            </li>
+            <li>
+              <span class="step-number">02</span>
+              <h3>La valutazione</h3>
+              <p>Verifichiamo percorso, disponibilità e organizzazione del servizio.</p>
+            </li>
+            <li>
+              <span class="step-number">03</span>
+              <h3>La conferma</h3>
+              <p>Concordiamo modalità e condizioni prima di organizzare il trasporto.</p>
+            </li>
+          </ol>
+        </div>
+      </section>
+      <section class="section">
+        <div class="container contact-callout">
+          <div>
+            <span class="eyebrow">Contatto H24</span>
+            <h2>Richiedi informazioni sul servizio.</h2>
+            <p>
+              Indicaci la tratta e una data orientativa. Verifichiamo disponibilità e organizzazione
+              prima della conferma.
+            </p>
+          </div>
+          <div class="callout-actions">
+            <a
+              class="button"
+              href="contatti.html#richiesta"
+            >
+              Prepara una richiesta
+              <svg
+                class="icon"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="M5 12h14m-6-6 6 6-6 6" />
+              </svg>
+            </a>
+            <a
+              class="callout-phone"
+              href="tel:+393336823324"
+            >
+              333 682 3324
+            </a>
+          </div>
+        </div>
+      </section>
+    </main>
+    <!-- site-footer:start -->
+    <div
+      class="emergency-bar"
+      role="note"
+    >
+      <div class="container">
+        <strong>Emergenza sanitaria?</strong>
+        <span>
+          Chiama
+          <a href="tel:112">112</a>
+          o
+          <a href="tel:118">118</a>
+          . I nostri servizi sono programmati.
+        </span>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-identity">
+          <a
+            class="brand"
+            href="index.html"
+            aria-label="Abruzzo Assistenza, home"
+          >
+            <img
+              src="assets/logo-associazione-small.jpg"
+              alt=""
+              width="40"
+              height="40"
+            />
+            <strong>Abruzzo Assistenza</strong>
+          </a>
+          <p>Trasporti sanitari da Sulmona e Pescara, in Italia e all’estero.</p>
+        </div>
+        <div class="footer-contacts">
+          <h2>Parla con noi</h2>
+          <a
+            class="footer-phone"
+            href="tel:+393336823324"
+          >
+            333 682 3324
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a
+            class="footer-email"
+            href="mailto:abruzzoassistenza@libero.it"
+          >
+            abruzzoassistenza@libero.it
+          </a>
+          <a
+            class="footer-whatsapp"
+            href="https://wa.me/393336823324"
+            data-whatsapp
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Scrivi su WhatsApp
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <details
+          class="footer-disclosure"
+          data-footer-disclosure
+          open
+        >
+          <summary>
+            L’associazione
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div class="footer-links">
+            <a href="volontari.html">Volontariato</a>
+            <a href="sostienici.html">Sostegno</a>
+            <a href="trasparenza.html">Dati e trasparenza</a>
+            <a href="contatti.html">Contatti</a>
+          </div>
+        </details>
+        <details
+          class="footer-disclosure"
+          data-footer-disclosure
+          open
+        >
+          <summary>
+            Sede e canali ufficiali
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div class="footer-links">
+            <p>
+              Via Fonte d’Amore SNC
+              <br />
+              Sulmona (AQ)
+            </p>
+            <a
+              href="https://www.instagram.com/abruzzo.assistenza/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Instagram ↗
+            </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=100057216829022"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Facebook ↗
+            </a>
+          </div>
+        </details>
+      </div>
+      <div class="container footer-bottom">
+        <span>
+          ©
+          <span data-year>2026</span>
+          Abruzzo Assistenza
+        </span>
+        <span>C.F. / P.IVA 02227430663</span>
+        <a href="privacy.html">Privacy</a>
+      </div>
+    </footer>
+    <!-- site-footer:end -->
+    <nav
+      class="mobile-contact mobile-navigation"
+      aria-label="Navigazione mobile"
+    >
+      <a href="index.html">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m3 10 9-7 9 7v10H3V10Z" />
+          <path d="M9 20v-7h6v7" />
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="servizi.html">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1"
+          />
+          <rect
+            x="14"
+            y="3"
+            width="7"
+            height="7"
+            rx="1"
+          />
+          <rect
+            x="3"
+            y="14"
+            width="7"
+            height="7"
+            rx="1"
+          />
+          <rect
+            x="14"
+            y="14"
+            width="7"
+            height="7"
+            rx="1"
+          />
+        </svg>
+        <span>Servizi</span>
+      </a>
+      <a href="contatti.html">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.8-5A9 9 0 1 1 21 11Z" />
+          <path d="M8 10h8m-8 4h5" />
+        </svg>
+        <span>Contatti</span>
+      </a>
+      <a href="tel:+393336823324">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m8 3 3 5-3 3c2 3 3 4 6 6l3-3 4 3c1 1 0 4-2 4C10 21 3 14 3 6c0-2 4-4 5-3Z" />
+        </svg>
+        <span>Chiama</span>
+      </a>
+    </nav>
+  </body>
+</html>

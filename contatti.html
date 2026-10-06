@@ -1,35 +1,770 @@
 <!doctype html>
 <html lang="it">
-<head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0c7b5a">
-<meta name="description" content="Contatta Abruzzo Assistenza per trasporti sanitari, trasferimenti nazionali ed esteri, dimissioni, ricoveri, visite, dialisi ed eventi.">
-<title>Contatti | Abruzzo Assistenza</title>
-<link rel="icon" href="assets/logo-mark.svg" type="image/svg+xml"><link rel="stylesheet" href="assets/styles.css"><script defer src="assets/app.js"></script>
-</head>
-<body>
-<a class="skip-link" href="#main">Vai al contenuto</a><div class="emergency-bar"><strong>Emergenza sanitaria?</strong> Chiama <a href="tel:112">112</a> o <a href="tel:118">118</a>.</div>
-<header class="site-header"><div class="container nav-wrap"><a class="brand" href="index.html"><img src="assets/logo-officiale.png" alt="" width="44" height="44"><span><strong>Abruzzo</strong> Assistenza</span></a><button class="nav-toggle" data-nav-toggle aria-expanded="false" aria-controls="site-nav"><span class="sr-only">Apri menu</span><span></span><span></span><span></span></button><nav id="site-nav" class="site-nav" data-nav><a href="servizi.html">Servizi</a><a href="pescara.html">Partenze</a><a href="volontari.html">Volontari</a><a href="sostienici.html">Sostienici</a><a href="trasparenza.html">Trasparenza</a><a class="button button-small active-button" href="contatti.html">Contatti</a></nav></div></header>
-<main id="main">
-<section class="page-hero"><div class="container narrow"><span class="eyebrow">Contatti</span><h1>Dicci dove, quando e per cosa ti serve il servizio.</h1><p class="lead">Per una prima valutazione bastano poche informazioni. Il modulo qui sotto non salva i dati sul sito: prepara un messaggio WhatsApp che potrai controllare prima di inviare.</p></div></section>
-<section class="section"><div class="container contact-grid">
-<div>
-  <div class="contact-card"><small>Telefono</small><a class="contact-big" href="tel:+393336823324">333 682 3324</a><p>Per informazioni e richieste programmate.</p></div>
-  <div class="contact-card"><small>Sede legale</small><strong>Via Fonte d'Amore SNC<br>Sulmona (AQ)</strong><a class="text-link" href="https://www.google.com/maps/search/?api=1&query=Via+Fonte+d%27Amore+SNC%2C+Sulmona+AQ" target="_blank" rel="noopener">Apri su Maps →</a></div>
-  <div class="contact-card"><small>Social</small><div class="social-buttons"><a href="https://www.instagram.com/abruzzo.assistenza/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/share/19bb4Rh37u/" target="_blank" rel="noopener">Facebook</a></div></div>
-</div>
-<form class="request-form" data-request-form>
-  <div class="form-heading"><span class="eyebrow">Richiesta rapida</span><h2>Prepara il messaggio</h2></div>
-  <label>Nome e cognome<input name="name" autocomplete="name" required></label>
-  <label>Telefono<input name="phone" type="tel" autocomplete="tel" required></label>
-  <label>Tipo di richiesta<select name="service" required><option value="">Seleziona</option><option>Dimissione / ricovero / visita</option><option>Dialisi / terapia ricorrente</option><option>Trasferimento nazionale</option><option>Trasferimento estero</option><option>Assistenza a evento</option><option>Volontariato</option><option>Sostegno / donazione</option><option>Altro</option></select></label>
-  <div class="form-row"><label>Partenza<input name="from" placeholder="Es. Roma / Pescara / estero"></label><label>Destinazione<input name="to" placeholder="Es. Milano / Sulmona / estero"></label></div>
-  <label>Data indicativa<input name="date" type="date"></label>
-  <label>Note<textarea name="notes" rows="4" placeholder="Aggiungi le informazioni utili, senza inserire dati sanitari non necessari."></textarea></label>
-  <label class="consent"><input type="checkbox" required><span>Ho letto la <a href="privacy.html">privacy</a> e scelgo di aprire WhatsApp per inviare volontariamente il messaggio.</span></label>
-  <button class="button" type="submit">Apri messaggio WhatsApp</button>
-  <p class="microcopy">Il sito non invia automaticamente il messaggio e non memorizza il contenuto del modulo.</p>
-</form>
-</div></section>
-</main>
-<footer class="site-footer"><div class="container footer-grid"><div><a class="brand brand-footer" href="index.html"><img src="assets/logo-officiale.png" alt="" width="40" height="40"><span><strong>Abruzzo</strong> Assistenza</span></a><p>Assistenza e trasporto sanitario in Italia e all’estero.</p></div><div><h3>Contatti</h3><a href="tel:+393336823324">333 682 3324</a><span>Via Fonte d'Amore SNC, Sulmona (AQ)</span></div><div><h3>Link</h3><a href="servizi.html">Servizi</a><a href="sostienici.html">Sostienici</a><a href="privacy.html">Privacy</a></div><div><h3>Social</h3><a href="https://www.instagram.com/abruzzo.assistenza/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/share/19bb4Rh37u/" target="_blank" rel="noopener">Facebook</a></div></div><div class="container footer-bottom"><span>© <span data-year></span> Abruzzo Assistenza</span><span>C.F. / P.IVA 02227430663</span></div></footer>
-</body></html>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width,initial-scale=1"
+    />
+    <meta
+      name="theme-color"
+      content="#15584d"
+    />
+    <meta
+      name="color-scheme"
+      content="light"
+    />
+    <title>Contatti | Abruzzo Assistenza</title>
+    <meta
+      name="description"
+      content="Telefono, WhatsApp ed email di Abruzzo Assistenza. Prepara una richiesta per trasporti sanitari e assistenza a eventi."
+    />
+    <link
+      rel="icon"
+      href="assets/logo-associazione-small.jpg"
+      type="image/jpeg"
+    />
+    <link
+      rel="preload"
+      href="assets/fonts/IBMPlexSans-Regular.woff2"
+      as="font"
+      type="font/woff2"
+      crossorigin
+    />
+    <link
+      rel="stylesheet"
+      href="assets/styles.css"
+    />
+    <script
+      defer
+      src="assets/app.js"
+    ></script>
+    <meta
+      property="og:type"
+      content="website"
+    />
+    <meta
+      property="og:locale"
+      content="it_IT"
+    />
+    <meta
+      property="og:site_name"
+      content="Abruzzo Assistenza"
+    />
+    <meta
+      property="og:title"
+      content="Contatti | Abruzzo Assistenza"
+    />
+    <meta
+      property="og:description"
+      content="Telefono, WhatsApp ed email di Abruzzo Assistenza. Prepara una richiesta per trasporti sanitari e assistenza a eventi."
+    />
+  </head>
+  <body class="has-mobile-contact page-contatti">
+    <a
+      class="skip-link"
+      href="#main"
+    >
+      Vai al contenuto
+    </a>
+    <!-- site-header:start -->
+    <div class="utility-bar">
+      <div class="container utility-inner">
+        <span>Trasporti sanitari programmati · Italia ed estero</span>
+        <a href="tel:+393336823324">
+          <span
+            class="availability-dot"
+            aria-hidden="true"
+          ></span>
+          <span>333 682 3324</span>
+          <small>Contatto H24</small>
+        </a>
+      </div>
+    </div>
+    <header class="site-header">
+      <div class="container nav-wrap">
+        <a
+          class="brand"
+          href="index.html"
+          aria-label="Abruzzo Assistenza, home"
+        >
+          <img
+            src="assets/logo-associazione-small.jpg"
+            alt=""
+            width="48"
+            height="48"
+          />
+          <span>
+            <strong>Abruzzo Assistenza</strong>
+            <small>Assistenza e trasporto sanitario</small>
+          </span>
+        </a>
+        <button
+          class="nav-toggle"
+          type="button"
+          data-nav-toggle
+          aria-expanded="false"
+          aria-controls="site-nav"
+        >
+          <span data-nav-label>Menu</span>
+          <span
+            class="menu-lines"
+            aria-hidden="true"
+          >
+            <span></span>
+            <span></span>
+          </span>
+        </button>
+        <nav
+          id="site-nav"
+          class="site-nav"
+          data-nav
+          aria-label="Navigazione principale"
+        >
+          <span class="nav-caption">Altre informazioni</span>
+          <a
+            class="nav-link"
+            href="index.html"
+          >
+            Home
+          </a>
+          <details
+            class="nav-group"
+            data-nav-group="services"
+          >
+            <summary>
+              Servizi
+              <svg
+                class="nav-chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="nav-panel nav-panel-services">
+              <div class="nav-panel-heading">
+                <span>Trasporto e assistenza</span>
+                <a href="servizi.html">Tutti i servizi ↗</a>
+              </div>
+              <div class="nav-panel-links">
+                <a href="servizi.html#trasporti">
+                  <strong>Visite e dimissioni</strong>
+                  <small>Da casa o tra strutture</small>
+                </a>
+                <a href="servizi.html#dialisi">
+                  <strong>Dialisi e terapie</strong>
+                  <small>Trasporti ricorrenti</small>
+                </a>
+                <a href="servizi.html#nazionali">
+                  <strong>Trasferimenti in Italia</strong>
+                  <small>Anche su lunghe distanze</small>
+                </a>
+                <a href="servizi.html#esteri">
+                  <strong>Trasferimenti all’estero</strong>
+                  <small>Partenze e rientri</small>
+                </a>
+                <a href="servizi.html#eventi">
+                  <strong>Assistenza a eventi</strong>
+                  <small>Per organizzatori e strutture</small>
+                </a>
+              </div>
+            </div>
+          </details>
+          <a
+            class="nav-link"
+            href="pescara.html"
+          >
+            Partenze
+          </a>
+          <details
+            class="nav-group"
+            data-nav-group="association"
+          >
+            <summary>
+              Associazione
+              <svg
+                class="nav-chevron"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                aria-hidden="true"
+              >
+                <path d="m6 9 6 6 6-6" />
+              </svg>
+            </summary>
+            <div class="nav-panel nav-panel-association">
+              <div class="nav-panel-links">
+                <a href="volontari.html">
+                  <strong>Volontariato</strong>
+                  <small>Entra in contatto con noi</small>
+                </a>
+                <a href="sostienici.html">
+                  <strong>Sostieni l’associazione</strong>
+                  <small>Come contribuire alle attività</small>
+                </a>
+                <a href="trasparenza.html">
+                  <strong>Dati e trasparenza</strong>
+                  <small>Informazioni sull’associazione</small>
+                </a>
+              </div>
+            </div>
+          </details>
+          <a
+            class="button nav-contact"
+            href="contatti.html"
+            aria-current="page"
+          >
+            Contattaci
+            <span aria-hidden="true">↗</span>
+          </a>
+          <div class="nav-mobile-secondary nav-panel-links">
+            <a href="pescara.html">
+              <strong>Partenze</strong>
+              <small>Sulmona e Pescara</small>
+            </a>
+            <a href="volontari.html">
+              <strong>Volontariato</strong>
+              <small>Entra in contatto con noi</small>
+            </a>
+            <a href="sostienici.html">
+              <strong>Sostieni l’associazione</strong>
+              <small>Come contribuire alle attività</small>
+            </a>
+            <a href="trasparenza.html">
+              <strong>Dati e trasparenza</strong>
+              <small>Informazioni sull’associazione</small>
+            </a>
+          </div>
+        </nav>
+      </div>
+      <button
+        class="nav-backdrop"
+        type="button"
+        data-nav-backdrop
+        tabindex="-1"
+        aria-label="Chiudi menu"
+        hidden
+      ></button>
+    </header>
+    <!-- site-header:end -->
+    <main
+      id="main"
+      tabindex="-1"
+    >
+      <section class="page-hero">
+        <div class="container">
+          <nav aria-label="Percorso">
+            <ol class="breadcrumb">
+              <li><a href="index.html">Home</a></li>
+              <li aria-current="page">Contatti</li>
+            </ol>
+          </nav>
+          <div class="page-heading">
+            <h1>Contatti e richieste.</h1>
+            <p class="lead">Chiama o scrivici per informazioni sul servizio.</p>
+          </div>
+        </div>
+      </section>
+      <section class="section">
+        <div class="container contact-grid">
+          <aside class="contact-sidebar">
+            <div class="contact-card contact-primary">
+              <div class="contact-label">
+                <span>Parla con l’associazione</span>
+                <span class="availability-label">Contatto H24</span>
+              </div>
+              <a
+                class="contact-big"
+                href="tel:+393336823324"
+              >
+                333 682 3324
+              </a>
+              <p>Servizi programmati · Disponibilità da confermare</p>
+              <a
+                class="button contact-whatsapp"
+                href="https://wa.me/393336823324"
+                data-whatsapp
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Scrivi su WhatsApp
+                <span aria-hidden="true">↗</span>
+              </a>
+              <a
+                class="contact-email"
+                href="mailto:abruzzoassistenza@libero.it"
+              >
+                abruzzoassistenza@libero.it
+                <span aria-hidden="true">↗</span>
+              </a>
+            </div>
+            <div class="contact-secondary">
+              <div class="contact-card">
+                <h2>Sede legale</h2>
+                <p>Via Fonte d’Amore SNC · Sulmona (AQ)</p>
+                <a
+                  class="text-link"
+                  href="https://www.google.com/maps/search/?api=1&amp;query=Via+Fonte+d%27Amore+SNC%2C+Sulmona+AQ"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Apri su Maps ↗
+                </a>
+              </div>
+              <div class="contact-card">
+                <h2>Canali ufficiali</h2>
+                <div class="social-links">
+                  <a
+                    href="https://www.instagram.com/abruzzo.assistenza/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Instagram ↗
+                  </a>
+                  <a
+                    href="https://www.facebook.com/profile.php?id=100057216829022"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Facebook ↗
+                  </a>
+                </div>
+              </div>
+            </div>
+          </aside>
+          <form
+            id="richiesta"
+            class="request-form"
+            data-request-form
+          >
+            <div class="form-heading">
+              <h2>Prepara una richiesta.</h2>
+              <p>* Campi obbligatori. Vedrai il messaggio prima di aprire WhatsApp.</p>
+            </div>
+            <fieldset>
+              <legend>01 · Come ricontattarti</legend>
+              <div class="form-row">
+                <label>
+                  <span>Nome e cognome *</span>
+                  <input
+                    name="name"
+                    autocomplete="name"
+                    maxlength="100"
+                    pattern=".*\S.*"
+                    required
+                  />
+                </label>
+                <label>
+                  <span>Telefono *</span>
+                  <input
+                    name="phone"
+                    type="tel"
+                    autocomplete="tel"
+                    inputmode="tel"
+                    maxlength="30"
+                    pattern=".*\S.*"
+                    required
+                  />
+                </label>
+              </div>
+            </fieldset>
+            <fieldset>
+              <legend>02 · Il servizio</legend>
+              <label>
+                <span>Tipo di richiesta *</span>
+                <select
+                  name="service"
+                  required
+                >
+                  <option value="">Seleziona un servizio</option>
+                  <option value="trasporti">Dimissione / ricovero / visita</option>
+                  <option value="dialisi">Dialisi / terapia ricorrente</option>
+                  <option value="nazionali">Trasferimento nazionale</option>
+                  <option value="esteri">Trasferimento estero</option>
+                  <option value="eventi">Assistenza a evento</option>
+                  <option value="volontari">Volontariato</option>
+                  <option value="sostegno">Sostegno / donazione</option>
+                  <option value="altro">Altro</option>
+                </select>
+              </label>
+              <details class="optional-details">
+                <summary>
+                  Dettagli del viaggio
+                  <small>Facoltativi</small>
+                  <span aria-hidden="true">+</span>
+                </summary>
+                <div class="optional-fields">
+                  <div class="form-row">
+                    <label>
+                      <span>
+                        Partenza
+                        <small>Facoltativo</small>
+                      </span>
+                      <input
+                        name="from"
+                        autocomplete="off"
+                        placeholder="Città o struttura"
+                        maxlength="160"
+                      />
+                    </label>
+                    <label>
+                      <span>
+                        Destinazione
+                        <small>Facoltativo</small>
+                      </span>
+                      <input
+                        name="to"
+                        autocomplete="off"
+                        placeholder="Città o struttura"
+                        maxlength="160"
+                      />
+                    </label>
+                  </div>
+                  <label>
+                    <span>
+                      Data indicativa
+                      <small>Facoltativo</small>
+                    </span>
+                    <input
+                      name="date"
+                      type="date"
+                    />
+                  </label>
+                  <label>
+                    <span>
+                      Altre informazioni
+                      <small>Facoltativo</small>
+                    </span>
+                    <textarea
+                      name="notes"
+                      rows="3"
+                      maxlength="1200"
+                      aria-describedby="notes-help"
+                      placeholder="Es. orario della visita o durata dell’evento"
+                    ></textarea>
+                  </label>
+                  <p
+                    id="notes-help"
+                    class="microcopy"
+                  >
+                    Per questo primo contatto evita di inserire diagnosi, referti o altri dati
+                    sanitari non necessari.
+                  </p>
+                </div>
+              </details>
+            </fieldset>
+            <label class="consent">
+              <input
+                name="consent"
+                type="checkbox"
+                required
+              />
+              <span>
+                Ho letto la
+                <a href="privacy.html">privacy</a>
+                . Controllerò il messaggio prima di aprire WhatsApp.
+              </span>
+            </label>
+            <button
+              class="button"
+              type="submit"
+              data-preview-button
+              hidden
+              disabled
+            >
+              Prepara l’anteprima
+              <span aria-hidden="true">→</span>
+            </button>
+            <section
+              class="message-preview"
+              id="request-preview"
+              data-message-preview
+              hidden
+              aria-labelledby="preview-heading"
+            >
+              <h3
+                id="preview-heading"
+                tabindex="-1"
+              >
+                Il tuo messaggio è pronto
+              </h3>
+              <pre data-message-text></pre>
+              <div class="inline-actions">
+                <a
+                  class="button"
+                  data-message-link
+                  href="https://wa.me/393336823324"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Apri su WhatsApp ↗
+                </a>
+                <button
+                  type="button"
+                  class="copy-button"
+                  data-copy-message
+                >
+                  Copia il messaggio
+                </button>
+              </div>
+              <p class="microcopy">
+                Aprendo WhatsApp, il testo viene condiviso con il servizio esterno. L’invio alla
+                chat resta una tua scelta.
+              </p>
+              <p
+                class="microcopy"
+                data-copy-status
+                role="status"
+              ></p>
+            </section>
+            <p class="microcopy">
+              Il modulo prepara il testo sul tuo dispositivo e non lo salva sul sito.
+            </p>
+            <noscript>
+              <p>
+                Per preparare l’anteprima serve JavaScript. Puoi
+                <a
+                  class="text-link"
+                  href="https://wa.me/393336823324"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  scriverci direttamente su WhatsApp
+                </a>
+                oppure
+                <a
+                  class="text-link"
+                  href="tel:+393336823324"
+                >
+                  chiamarci
+                </a>
+                .
+              </p>
+            </noscript>
+          </form>
+        </div>
+      </section>
+    </main>
+    <!-- site-footer:start -->
+    <div
+      class="emergency-bar"
+      role="note"
+    >
+      <div class="container">
+        <strong>Emergenza sanitaria?</strong>
+        <span>
+          Chiama
+          <a href="tel:112">112</a>
+          o
+          <a href="tel:118">118</a>
+          . I nostri servizi sono programmati.
+        </span>
+      </div>
+    </div>
+    <footer class="site-footer">
+      <div class="container footer-grid">
+        <div class="footer-identity">
+          <a
+            class="brand"
+            href="index.html"
+            aria-label="Abruzzo Assistenza, home"
+          >
+            <img
+              src="assets/logo-associazione-small.jpg"
+              alt=""
+              width="40"
+              height="40"
+            />
+            <strong>Abruzzo Assistenza</strong>
+          </a>
+          <p>Trasporti sanitari da Sulmona e Pescara, in Italia e all’estero.</p>
+        </div>
+        <div class="footer-contacts">
+          <h2>Parla con noi</h2>
+          <a
+            class="footer-phone"
+            href="tel:+393336823324"
+          >
+            333 682 3324
+            <span aria-hidden="true">↗</span>
+          </a>
+          <a
+            class="footer-email"
+            href="mailto:abruzzoassistenza@libero.it"
+          >
+            abruzzoassistenza@libero.it
+          </a>
+          <a
+            class="footer-whatsapp"
+            href="https://wa.me/393336823324"
+            data-whatsapp
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Scrivi su WhatsApp
+            <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <details
+          class="footer-disclosure"
+          data-footer-disclosure
+          open
+        >
+          <summary>
+            L’associazione
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div class="footer-links">
+            <a href="volontari.html">Volontariato</a>
+            <a href="sostienici.html">Sostegno</a>
+            <a href="trasparenza.html">Dati e trasparenza</a>
+            <a href="contatti.html">Contatti</a>
+          </div>
+        </details>
+        <details
+          class="footer-disclosure"
+          data-footer-disclosure
+          open
+        >
+          <summary>
+            Sede e canali ufficiali
+            <span aria-hidden="true">+</span>
+          </summary>
+          <div class="footer-links">
+            <p>
+              Via Fonte d’Amore SNC
+              <br />
+              Sulmona (AQ)
+            </p>
+            <a
+              href="https://www.instagram.com/abruzzo.assistenza/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Instagram ↗
+            </a>
+            <a
+              href="https://www.facebook.com/profile.php?id=100057216829022"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Facebook ↗
+            </a>
+          </div>
+        </details>
+      </div>
+      <div class="container footer-bottom">
+        <span>
+          ©
+          <span data-year>2026</span>
+          Abruzzo Assistenza
+        </span>
+        <span>C.F. / P.IVA 02227430663</span>
+        <a href="privacy.html">Privacy</a>
+      </div>
+    </footer>
+    <!-- site-footer:end -->
+    <nav
+      class="mobile-contact mobile-navigation"
+      aria-label="Navigazione mobile"
+    >
+      <a href="index.html">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m3 10 9-7 9 7v10H3V10Z" />
+          <path d="M9 20v-7h6v7" />
+        </svg>
+        <span>Home</span>
+      </a>
+      <a href="servizi.html">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <rect
+            x="3"
+            y="3"
+            width="7"
+            height="7"
+            rx="1"
+          />
+          <rect
+            x="14"
+            y="3"
+            width="7"
+            height="7"
+            rx="1"
+          />
+          <rect
+            x="3"
+            y="14"
+            width="7"
+            height="7"
+            rx="1"
+          />
+          <rect
+            x="14"
+            y="14"
+            width="7"
+            height="7"
+            rx="1"
+          />
+        </svg>
+        <span>Servizi</span>
+      </a>
+      <a
+        href="contatti.html"
+        aria-current="page"
+      >
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.8-5A9 9 0 1 1 21 11Z" />
+          <path d="M8 10h8m-8 4h5" />
+        </svg>
+        <span>Contatti</span>
+      </a>
+      <a href="tel:+393336823324">
+        <svg
+          class="icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m8 3 3 5-3 3c2 3 3 4 6 6l3-3 4 3c1 1 0 4-2 4C10 21 3 14 3 6c0-2 4-4 5-3Z" />
+        </svg>
+        <span>Chiama</span>
+      </a>
+    </nav>
+  </body>
+</html>
