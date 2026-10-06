@@ -1,6 +1,6 @@
 # Abruzzo Assistenza
 
-Sito istituzionale di **Abruzzo Assistenza**, associazione di assistenza e trasporto sanitario con sede a Sulmona e operatività in Abruzzo.
+Sito istituzionale di **Abruzzo Assistenza**, associazione di assistenza e trasporto sanitario con trasferimenti in tutta Italia e all’estero.
 
 ## Stack
 
@@ -20,7 +20,7 @@ Sito statico in HTML/CSS/JavaScript, senza framework e senza dipendenze runtime.
 - Codice fiscale / P.IVA: **02227430663**
 - Instagram: **@abruzzo.assistenza**
 - Facebook: pagina condivisa dall'associazione
-- Operatività: **Abruzzo**. La sede dell'associazione è a **Sulmona**; in base alla disponibilità e al servizio richiesto, i mezzi possono partire da **Sulmona** oppure da **Pescara**. Pescara non è indicata come seconda sede.
+- Operatività: trasporti locali, **nazionali e internazionali**. I mezzi sono disponibili in partenza da **Sulmona** e **Pescara**; il punto di partenza viene scelto in base al trasporto richiesto, alla zona e alla destinazione.
 
 ## Canali ancora da configurare
 
@@ -62,6 +62,6 @@ Verificare con il responsabile dell'associazione:
 - coordinate per donazioni;
 - posizione 5×1000 e relativa comunicazione;
 - documenti da pubblicare in Trasparenza;
-- logo originale e fotografie autorizzate dei mezzi/volontari.
+- fotografie autorizzate dei mezzi/volontari.
 
 Il sito distingue sempre i servizi programmati dall'emergenza pubblica: in caso di emergenza invita a contattare **112 / 118**.
