@@ -20,7 +20,7 @@ Sito statico in HTML/CSS/JavaScript, senza framework e senza dipendenze runtime.
 - Codice fiscale / P.IVA: **02227430663**
 - Instagram: **@abruzzo.assistenza**
 - Facebook: pagina condivisa dall'associazione
-- Operatività: **Abruzzo**, con partenze da **Sulmona** e **Pescara** in base alla disponibilità dei mezzi.
+- Operatività: **Abruzzo**. La sede dell'associazione è a **Sulmona**; in base alla disponibilità e al servizio richiesto, i mezzi possono partire da **Sulmona** oppure da **Pescara**. Pescara non è indicata come seconda sede.
 
 ## Canali ancora da configurare
 
