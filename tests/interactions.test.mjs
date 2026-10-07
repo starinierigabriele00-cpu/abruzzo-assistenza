@@ -76,11 +76,11 @@ test("mobile upper menu complements the bottom bar without duplicating its desti
     ),
   );
   const secondary = [...p.document.querySelectorAll(".nav-mobile-secondary a")];
-  assert.equal(secondary.length, 4);
+  assert.equal(secondary.length, 3);
   assert.ok(secondary.every((link) => !primary.has(link.getAttribute("href"))));
   assert.deepEqual(
     secondary.map((link) => link.getAttribute("href")),
-    ["pescara.html", "volontari.html", "sostienici.html", "trasparenza.html"],
+    ["volontari.html", "sostienici.html", "trasparenza.html"],
   );
 });
 
