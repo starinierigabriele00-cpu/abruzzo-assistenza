@@ -3,15 +3,16 @@
 const SITE_CONFIG = {
   phone: "+393336823324",
   whatsapp: "393336823324",
-  email: "abruzzoassistenza@libero.it",
+  email: "abruzzoassistanzaodv@gmail.com",
   pec: "",
   donation: { iban: "", beneficiary: "", paypalUrl: "" },
-  fivePerMille: { enabled: false, taxId: "02227430663" },
+  fivePerMille: { enabled: true, taxId: "02227430663" },
 };
 
 const SERVICE_LABELS = {
   trasporti: "Dimissione / ricovero / visita",
   dialisi: "Dialisi / terapia ricorrente",
+  disabili: "Trasporto disabili / servizi sociali",
   nazionali: "Trasferimento nazionale",
   esteri: "Trasferimento estero",
   eventi: "Assistenza a evento",
