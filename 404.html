@@ -8,7 +8,7 @@
     />
     <meta
       name="theme-color"
-      content="#15584d"
+      content="#15242c"
     />
     <meta
       name="color-scheme"
@@ -17,27 +17,31 @@
     <title>Pagina non trovata | Abruzzo Assistenza</title>
     <meta
       name="description"
-      content="La pagina richiesta non è disponibile. Torna alla home di Abruzzo Assistenza o contatta l’associazione."
+      content="Il collegamento non corrisponde a una pagina. Torna alla home o consulta i servizi di Abruzzo Assistenza."
+    />
+    <link
+      rel="canonical"
+      href="https://abruzzoassistenza.com/404.html"
     />
     <link
       rel="icon"
-      href="assets/logo-associazione-small.jpg"
-      type="image/jpeg"
+      href="/assets/favicon.png"
+      type="image/png"
     />
     <link
       rel="preload"
-      href="assets/fonts/IBMPlexSans-Regular.woff2"
+      href="/assets/fonts/IBMPlexSans-Regular.woff2"
       as="font"
       type="font/woff2"
       crossorigin
     />
     <link
       rel="stylesheet"
-      href="assets/styles.css"
+      href="/assets/styles.css"
     />
     <script
       defer
-      src="assets/app.js"
+      src="/assets/app.js"
     ></script>
     <meta
       property="og:type"
@@ -57,10 +61,38 @@
     />
     <meta
       property="og:description"
-      content="La pagina richiesta non è disponibile. Torna alla home di Abruzzo Assistenza o contatta l’associazione."
+      content="Il collegamento non corrisponde a una pagina. Torna alla home o consulta i servizi di Abruzzo Assistenza."
+    />
+    <meta
+      property="og:url"
+      content="https://abruzzoassistenza.com/404.html"
+    />
+    <meta
+      property="og:image"
+      content="https://abruzzoassistenza.com/assets/social-preview.jpg"
+    />
+    <meta
+      property="og:image:width"
+      content="1200"
+    />
+    <meta
+      property="og:image:height"
+      content="630"
+    />
+    <meta
+      property="og:image:alt"
+      content="Fotografia autentica dei mezzi di Abruzzo Assistenza"
+    />
+    <meta
+      name="twitter:card"
+      content="summary_large_image"
+    />
+    <meta
+      name="robots"
+      content="noindex"
     />
   </head>
-  <body class="has-mobile-contact page-404">
+  <body class="page-404">
     <a
       class="skip-link"
       href="#main"
@@ -68,28 +100,15 @@
       Vai al contenuto
     </a>
     <!-- site-header:start -->
-    <div class="utility-bar">
-      <div class="container utility-inner">
-        <span>Trasporti sanitari programmati · Italia ed estero</span>
-        <a href="tel:+393336823324">
-          <span
-            class="availability-dot"
-            aria-hidden="true"
-          ></span>
-          <span>333 682 3324</span>
-          <small>Contatto H24</small>
-        </a>
-      </div>
-    </div>
     <header class="site-header">
       <div class="container nav-wrap">
         <a
           class="brand"
-          href="index.html"
+          href="/index.html"
           aria-label="Abruzzo Assistenza, home"
         >
           <img
-            src="assets/logo-associazione-small.jpg"
+            src="/assets/logo-associazione-96.webp"
             alt=""
             width="48"
             height="48"
@@ -107,13 +126,13 @@
           aria-controls="site-nav"
         >
           <span data-nav-label>Menu</span>
-          <span
-            class="menu-lines"
+          <svg
+            class="icon"
             aria-hidden="true"
+            focusable="false"
           >
-            <span></span>
-            <span></span>
-          </span>
+            <use href="/assets/icons.svg#menu"></use>
+          </svg>
         </button>
         <nav
           id="site-nav"
@@ -121,59 +140,18 @@
           data-nav
           aria-label="Navigazione principale"
         >
-          <span class="nav-caption">Altre informazioni</span>
           <a
             class="nav-link"
-            href="index.html"
+            href="/index.html"
           >
             Home
           </a>
-          <details
-            class="nav-group"
-            data-nav-group="services"
+          <a
+            class="nav-link"
+            href="/servizi.html"
           >
-            <summary>
-              Servizi
-              <svg
-                class="nav-chevron"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                aria-hidden="true"
-              >
-                <path d="m6 9 6 6 6-6" />
-              </svg>
-            </summary>
-            <div class="nav-panel nav-panel-services">
-              <div class="nav-panel-heading">
-                <span>Trasporto e assistenza</span>
-                <a href="servizi.html">Tutti i servizi ↗</a>
-              </div>
-              <div class="nav-panel-links">
-                <a href="servizi.html#trasporti">
-                  <strong>Visite e dimissioni</strong>
-                  <small>Da casa o tra strutture</small>
-                </a>
-                <a href="servizi.html#dialisi">
-                  <strong>Dialisi e terapie</strong>
-                  <small>Trasporti ricorrenti</small>
-                </a>
-                <a href="servizi.html#nazionali">
-                  <strong>Trasferimenti in Italia</strong>
-                  <small>Anche su lunghe distanze</small>
-                </a>
-                <a href="servizi.html#esteri">
-                  <strong>Trasferimenti all’estero</strong>
-                  <small>Partenze e rientri</small>
-                </a>
-                <a href="servizi.html#eventi">
-                  <strong>Assistenza a eventi</strong>
-                  <small>Per organizzatori e strutture</small>
-                </a>
-              </div>
-            </div>
-          </details>
+            Servizi
+          </a>
           <details
             class="nav-group"
             data-nav-group="association"
@@ -181,222 +159,162 @@
             <summary>
               Associazione
               <svg
-                class="nav-chevron"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
+                class="icon"
                 aria-hidden="true"
+                focusable="false"
               >
-                <path d="m6 9 6 6 6-6" />
+                <use href="/assets/icons.svg#chevron"></use>
               </svg>
             </summary>
-            <div class="nav-panel nav-panel-association">
-              <div class="nav-panel-links">
-                <a href="volontari.html">
-                  <strong>Volontariato</strong>
-                  <small>Entra in contatto con noi</small>
-                </a>
-                <a href="sostienici.html">
-                  <strong>Sostieni l’associazione</strong>
-                  <small>Come contribuire alle attività</small>
-                </a>
-                <a href="trasparenza.html">
-                  <strong>Dati e trasparenza</strong>
-                  <small>Informazioni sull’associazione</small>
-                </a>
-              </div>
+            <div class="nav-panel">
+              <a href="/volontari.html">Volontariato</a>
+              <a href="/sostienici.html">Sostienici</a>
+              <a href="/trasparenza.html">Dati e trasparenza</a>
+              <a href="/pescara.html">Partenze da Pescara</a>
             </div>
           </details>
           <a
-            class="button nav-contact"
-            href="contatti.html"
+            class="nav-link"
+            href="/contatti.html"
           >
-            Contattaci
-            <span aria-hidden="true">↗</span>
+            Contatti
           </a>
-          <div class="nav-mobile-secondary nav-panel-links">
-            <a href="volontari.html">
-              <strong>Volontariato</strong>
-              <small>Entra in contatto con noi</small>
-            </a>
-            <a href="sostienici.html">
-              <strong>Sostieni l’associazione</strong>
-              <small>Come contribuire alle attività</small>
-            </a>
-            <a href="trasparenza.html">
-              <strong>Dati e trasparenza</strong>
-              <small>Informazioni sull’associazione</small>
-            </a>
-          </div>
         </nav>
+        <a
+          class="button nav-contact"
+          href="/contatti.html#canali"
+        >
+          <svg
+            class="icon"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <use href="/assets/icons.svg#phone"></use>
+          </svg>
+          Contattaci
+        </a>
       </div>
-      <button
-        class="nav-backdrop"
-        type="button"
-        data-nav-backdrop
-        tabindex="-1"
-        aria-label="Chiudi menu"
-        hidden
-      ></button>
     </header>
     <!-- site-header:end -->
     <main
       id="main"
       tabindex="-1"
     >
-      <section class="section">
-        <div class="container error-page">
-          <span class="eyebrow">Errore 404</span>
-          <h1>Pagina non trovata.</h1>
-          <p class="lead">
-            Il collegamento potrebbe essere cambiato. Consulta i servizi o torna alla pagina
-            iniziale.
+      <section class="section error-page">
+        <div class="container">
+          <p
+            class="error-code"
+            aria-hidden="true"
+          >
+            404
           </p>
-          <div class="inline-actions">
+          <h1>
+            Questo percorso
+            <br />
+            non porta a una pagina.
+          </h1>
+          <p>
+            Il collegamento potrebbe essere cambiato. Puoi ripartire dalla home o consultare i
+            servizi.
+          </p>
+          <div class="actions">
             <a
               class="button"
-              href="index.html"
+              href="/index.html"
             >
-              Vai alla home
-              <svg
-                class="icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14m-6-6 6 6-6 6" />
-              </svg>
+              Torna alla home
             </a>
             <a
               class="button button-secondary"
-              href="servizi.html"
+              href="/servizi.html"
             >
               Consulta i servizi
-              <svg
-                class="icon"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                aria-hidden="true"
-              >
-                <path d="M5 12h14m-6-6 6 6-6 6" />
-              </svg>
             </a>
           </div>
         </div>
       </section>
     </main>
     <!-- site-footer:start -->
-    <div
-      class="emergency-bar"
-      role="note"
-    >
-      <div class="container">
-        <strong>Emergenza sanitaria?</strong>
-        <span>
-          Chiama
-          <a href="tel:112">112</a>
-          o
-          <a href="tel:118">118</a>
-          . I nostri servizi sono programmati.
-        </span>
-      </div>
-    </div>
     <footer class="site-footer">
       <div class="container footer-grid">
         <div class="footer-identity">
           <a
             class="brand"
-            href="index.html"
+            href="/index.html"
             aria-label="Abruzzo Assistenza, home"
           >
             <img
-              src="assets/logo-associazione-small.jpg"
+              src="/assets/logo-associazione-96.webp"
               alt=""
               width="40"
               height="40"
+              loading="lazy"
             />
             <strong>Abruzzo Assistenza</strong>
           </a>
-          <p>Trasporti sanitari da Sulmona e Pescara, in Italia e all’estero.</p>
-        </div>
-        <div class="footer-contacts">
-          <h2>Parla con noi</h2>
-          <a
-            class="footer-phone"
-            href="tel:+393336823324"
-          >
-            333 682 3324
-            <span aria-hidden="true">↗</span>
-          </a>
-          <a
-            class="footer-email"
-            href="mailto:abruzzoassistanzaodv@gmail.com"
-          >
-            abruzzoassistanzaodv@gmail.com
-          </a>
-          <a
-            class="footer-whatsapp"
-            href="https://wa.me/393336823324"
-            data-whatsapp
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Scrivi su WhatsApp
-            <span aria-hidden="true">↗</span>
-          </a>
-        </div>
-        <details
-          class="footer-disclosure"
-          data-footer-disclosure
-          open
-        >
-          <summary>
-            L’associazione
-            <span aria-hidden="true">+</span>
-          </summary>
-          <div class="footer-links">
-            <a href="volontari.html">Volontariato</a>
-            <a href="sostienici.html">Sostegno</a>
-            <a href="trasparenza.html">Dati e trasparenza</a>
-            <a href="contatti.html">Contatti</a>
-          </div>
-        </details>
-        <details
-          class="footer-disclosure"
-          data-footer-disclosure
-          open
-        >
-          <summary>
-            Sede e canali ufficiali
-            <span aria-hidden="true">+</span>
-          </summary>
-          <div class="footer-links">
-            <p>
-              Via Fonte d’Amore SNC
-              <br />
-              Sulmona (AQ)
-            </p>
+          <p>
+            Trasporto sanitario programmato.
+            <br />
+            Dall’Abruzzo, lungo il tuo percorso.
+          </p>
+          <div class="social-links">
             <a
               href="https://www.instagram.com/abruzzo.assistenza/"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Abruzzo Assistenza su Instagram"
             >
-              Instagram ↗
+              <svg
+                class="icon"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="/assets/icons.svg#instagram"></use>
+              </svg>
             </a>
             <a
               href="https://www.facebook.com/profile.php?id=100057216829022"
               target="_blank"
               rel="noopener noreferrer"
+              aria-label="Abruzzo Assistenza su Facebook"
             >
-              Facebook ↗
+              <svg
+                class="icon"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <use href="/assets/icons.svg#facebook"></use>
+              </svg>
             </a>
           </div>
-        </details>
+        </div>
+        <div class="footer-contact">
+          <h2>Contatti</h2>
+          <a href="tel:+393336823324">333 682 3324</a>
+          <a href="mailto:abruzzoassistenzaodv@gmail.com">abruzzoassistenzaodv@gmail.com</a>
+          <a
+            href="https://wa.me/393336823324"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </a>
+        </div>
+        <div class="footer-links">
+          <h2>Associazione</h2>
+          <a href="/volontari.html">Volontariato</a>
+          <a href="/sostienici.html">Sostienici</a>
+          <a href="/trasparenza.html">Dati e trasparenza</a>
+          <a href="/pescara.html">Partenze da Pescara</a>
+        </div>
+      </div>
+      <div
+        class="container emergency-note"
+        role="note"
+      >
+        Servizi programmati. In caso di emergenza sanitaria chiama il
+        <a href="tel:112">112</a>
+        .
       </div>
       <div class="container footer-bottom">
         <span>
@@ -404,104 +322,9 @@
           <span data-year>2026</span>
           Abruzzo Assistenza
         </span>
-        <span>C.F. / P.IVA 02227430663</span>
-        <a href="privacy.html">Privacy</a>
+        <a href="/privacy.html">Privacy</a>
       </div>
     </footer>
     <!-- site-footer:end -->
-    <nav
-      class="mobile-contact mobile-navigation"
-      aria-label="Navigazione mobile"
-    >
-      <a href="index.html">
-        <svg
-          class="icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m3 10 9-7 9 7v10H3V10Z" />
-          <path d="M9 20v-7h6v7" />
-        </svg>
-        <span>Home</span>
-      </a>
-      <a href="servizi.html">
-        <svg
-          class="icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <rect
-            x="3"
-            y="3"
-            width="7"
-            height="7"
-            rx="1"
-          />
-          <rect
-            x="14"
-            y="3"
-            width="7"
-            height="7"
-            rx="1"
-          />
-          <rect
-            x="3"
-            y="14"
-            width="7"
-            height="7"
-            rx="1"
-          />
-          <rect
-            x="14"
-            y="14"
-            width="7"
-            height="7"
-            rx="1"
-          />
-        </svg>
-        <span>Servizi</span>
-      </a>
-      <a href="contatti.html">
-        <svg
-          class="icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="M21 11a9 9 0 0 1-9 9 10 10 0 0 1-4-.8L3 21l1.8-5A9 9 0 1 1 21 11Z" />
-          <path d="M8 10h8m-8 4h5" />
-        </svg>
-        <span>Contatti</span>
-      </a>
-      <a href="tel:+393336823324">
-        <svg
-          class="icon"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          aria-hidden="true"
-        >
-          <path d="m8 3 3 5-3 3c2 3 3 4 6 6l3-3 4 3c1 1 0 4-2 4C10 21 3 14 3 6c0-2 4-4 5-3Z" />
-        </svg>
-        <span>Chiama</span>
-      </a>
-    </nav>
   </body>
 </html>

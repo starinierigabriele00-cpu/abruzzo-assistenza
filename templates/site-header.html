@@ -1,17 +1,4 @@
 <!-- site-header:start -->
-<div class="utility-bar">
-  <div class="container utility-inner">
-    <span>Trasporti sanitari programmati · Italia ed estero</span>
-    <a href="tel:+393336823324">
-      <span
-        class="availability-dot"
-        aria-hidden="true"
-      ></span>
-      <span>333 682 3324</span>
-      <small>Contatto H24</small>
-    </a>
-  </div>
-</div>
 <header class="site-header">
   <div class="container nav-wrap">
     <a
@@ -20,7 +7,7 @@
       aria-label="Abruzzo Assistenza, home"
     >
       <img
-        src="assets/logo-associazione-small.jpg"
+        src="assets/logo-associazione-96.webp"
         alt=""
         width="48"
         height="48"
@@ -38,13 +25,13 @@
       aria-controls="site-nav"
     >
       <span data-nav-label>Menu</span>
-      <span
-        class="menu-lines"
+      <svg
+        class="icon"
         aria-hidden="true"
+        focusable="false"
       >
-        <span></span>
-        <span></span>
-      </span>
+        <use href="assets/icons.svg#menu"></use>
+      </svg>
     </button>
     <nav
       id="site-nav"
@@ -52,59 +39,18 @@
       data-nav
       aria-label="Navigazione principale"
     >
-      <span class="nav-caption">Altre informazioni</span>
       <a
         class="nav-link"
         href="index.html"
       >
         Home
       </a>
-      <details
-        class="nav-group"
-        data-nav-group="services"
+      <a
+        class="nav-link"
+        href="servizi.html"
       >
-        <summary>
-          Servizi
-          <svg
-            class="nav-chevron"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            aria-hidden="true"
-          >
-            <path d="m6 9 6 6 6-6" />
-          </svg>
-        </summary>
-        <div class="nav-panel nav-panel-services">
-          <div class="nav-panel-heading">
-            <span>Trasporto e assistenza</span>
-            <a href="servizi.html">Tutti i servizi ↗</a>
-          </div>
-          <div class="nav-panel-links">
-            <a href="servizi.html#trasporti">
-              <strong>Visite e dimissioni</strong>
-              <small>Da casa o tra strutture</small>
-            </a>
-            <a href="servizi.html#dialisi">
-              <strong>Dialisi e terapie</strong>
-              <small>Trasporti ricorrenti</small>
-            </a>
-            <a href="servizi.html#nazionali">
-              <strong>Trasferimenti in Italia</strong>
-              <small>Anche su lunghe distanze</small>
-            </a>
-            <a href="servizi.html#esteri">
-              <strong>Trasferimenti all’estero</strong>
-              <small>Partenze e rientri</small>
-            </a>
-            <a href="servizi.html#eventi">
-              <strong>Assistenza a eventi</strong>
-              <small>Per organizzatori e strutture</small>
-            </a>
-          </div>
-        </div>
-      </details>
+        Servizi
+      </a>
       <details
         class="nav-group"
         data-nav-group="association"
@@ -112,63 +58,40 @@
         <summary>
           Associazione
           <svg
-            class="nav-chevron"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
+            class="icon"
             aria-hidden="true"
+            focusable="false"
           >
-            <path d="m6 9 6 6 6-6" />
+            <use href="assets/icons.svg#chevron"></use>
           </svg>
         </summary>
-        <div class="nav-panel nav-panel-association">
-          <div class="nav-panel-links">
-            <a href="volontari.html">
-              <strong>Volontariato</strong>
-              <small>Entra in contatto con noi</small>
-            </a>
-            <a href="sostienici.html">
-              <strong>Sostieni l’associazione</strong>
-              <small>Come contribuire alle attività</small>
-            </a>
-            <a href="trasparenza.html">
-              <strong>Dati e trasparenza</strong>
-              <small>Informazioni sull’associazione</small>
-            </a>
-          </div>
+        <div class="nav-panel">
+          <a href="volontari.html">Volontariato</a>
+          <a href="sostienici.html">Sostienici</a>
+          <a href="trasparenza.html">Dati e trasparenza</a>
+          <a href="pescara.html">Partenze da Pescara</a>
         </div>
       </details>
       <a
-        class="button nav-contact"
+        class="nav-link"
         href="contatti.html"
       >
-        Contattaci
-        <span aria-hidden="true">↗</span>
+        Contatti
       </a>
-      <div class="nav-mobile-secondary nav-panel-links">
-        <a href="volontari.html">
-          <strong>Volontariato</strong>
-          <small>Entra in contatto con noi</small>
-        </a>
-        <a href="sostienici.html">
-          <strong>Sostieni l’associazione</strong>
-          <small>Come contribuire alle attività</small>
-        </a>
-        <a href="trasparenza.html">
-          <strong>Dati e trasparenza</strong>
-          <small>Informazioni sull’associazione</small>
-        </a>
-      </div>
     </nav>
+    <a
+      class="button nav-contact"
+      href="contatti.html#canali"
+    >
+      <svg
+        class="icon"
+        aria-hidden="true"
+        focusable="false"
+      >
+        <use href="assets/icons.svg#phone"></use>
+      </svg>
+      Contattaci
+    </a>
   </div>
-  <button
-    class="nav-backdrop"
-    type="button"
-    data-nav-backdrop
-    tabindex="-1"
-    aria-label="Chiudi menu"
-    hidden
-  ></button>
 </header>
 <!-- site-header:end -->

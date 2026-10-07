@@ -1,19 +1,4 @@
 <!-- site-footer:start -->
-<div
-  class="emergency-bar"
-  role="note"
->
-  <div class="container">
-    <strong>Emergenza sanitaria?</strong>
-    <span>
-      Chiama
-      <a href="tel:112">112</a>
-      o
-      <a href="tel:118">118</a>
-      . I nostri servizi sono programmati.
-    </span>
-  </div>
-</div>
 <footer class="site-footer">
   <div class="container footer-grid">
     <div class="footer-identity">
@@ -23,88 +8,78 @@
         aria-label="Abruzzo Assistenza, home"
       >
         <img
-          src="assets/logo-associazione-small.jpg"
+          src="assets/logo-associazione-96.webp"
           alt=""
           width="40"
           height="40"
+          loading="lazy"
         />
         <strong>Abruzzo Assistenza</strong>
       </a>
-      <p>Trasporti sanitari da Sulmona e Pescara, in Italia e all’estero.</p>
+      <p>
+        Trasporto sanitario programmato.
+        <br />
+        Dall’Abruzzo, lungo il tuo percorso.
+      </p>
+      <div class="social-links">
+        <a
+          href="{{instagram}}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Abruzzo Assistenza su Instagram"
+        >
+          <svg
+            class="icon"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <use href="assets/icons.svg#instagram"></use>
+          </svg>
+        </a>
+        <a
+          href="{{facebook}}"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Abruzzo Assistenza su Facebook"
+        >
+          <svg
+            class="icon"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <use href="assets/icons.svg#facebook"></use>
+          </svg>
+        </a>
+      </div>
     </div>
-    <div class="footer-contacts">
-      <h2>Parla con noi</h2>
+    <div class="footer-contact">
+      <h2>Contatti</h2>
+      <a href="tel:{{phone}}">{{phoneDisplay}}</a>
+      <a href="mailto:{{email}}">{{email}}</a>
       <a
-        class="footer-phone"
-        href="tel:+393336823324"
-      >
-        333 682 3324
-        <span aria-hidden="true">↗</span>
-      </a>
-      <a
-        class="footer-email"
-        href="mailto:abruzzoassistanzaodv@gmail.com"
-      >
-        abruzzoassistanzaodv@gmail.com
-      </a>
-      <a
-        class="footer-whatsapp"
-        href="https://wa.me/393336823324"
-        data-whatsapp
+        href="https://wa.me/{{whatsapp}}"
         target="_blank"
         rel="noopener noreferrer"
       >
-        Scrivi su WhatsApp
-        <span aria-hidden="true">↗</span>
+        WhatsApp
       </a>
+      {{legalFooter}}
     </div>
-    <details
-      class="footer-disclosure"
-      data-footer-disclosure
-      open
-    >
-      <summary>
-        L’associazione
-        <span aria-hidden="true">+</span>
-      </summary>
-      <div class="footer-links">
-        <a href="volontari.html">Volontariato</a>
-        <a href="sostienici.html">Sostegno</a>
-        <a href="trasparenza.html">Dati e trasparenza</a>
-        <a href="contatti.html">Contatti</a>
-      </div>
-    </details>
-    <details
-      class="footer-disclosure"
-      data-footer-disclosure
-      open
-    >
-      <summary>
-        Sede e canali ufficiali
-        <span aria-hidden="true">+</span>
-      </summary>
-      <div class="footer-links">
-        <p>
-          Via Fonte d’Amore SNC
-          <br />
-          Sulmona (AQ)
-        </p>
-        <a
-          href="https://www.instagram.com/abruzzo.assistenza/"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Instagram ↗
-        </a>
-        <a
-          href="https://www.facebook.com/profile.php?id=100057216829022"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Facebook ↗
-        </a>
-      </div>
-    </details>
+    <div class="footer-links">
+      <h2>Associazione</h2>
+      <a href="volontari.html">Volontariato</a>
+      <a href="sostienici.html">Sostienici</a>
+      <a href="trasparenza.html">Dati e trasparenza</a>
+      <a href="pescara.html">Partenze da Pescara</a>
+    </div>
+  </div>
+  <div
+    class="container emergency-note"
+    role="note"
+  >
+    Servizi programmati. In caso di emergenza sanitaria chiama il
+    <a href="tel:112">112</a>
+    .
   </div>
   <div class="container footer-bottom">
     <span>
@@ -112,7 +87,6 @@
       <span data-year>2026</span>
       Abruzzo Assistenza
     </span>
-    <span>C.F. / P.IVA 02227430663</span>
     <a href="privacy.html">Privacy</a>
   </div>
 </footer>

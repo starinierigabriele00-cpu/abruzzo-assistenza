@@ -4,72 +4,100 @@ import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
 const source = readFileSync(new URL("../assets/app.js", import.meta.url), "utf8");
-function load() {
-  const context = vm.createContext({
-    document: { querySelector: () => null, querySelectorAll: () => [] },
-  });
-  vm.runInContext(source + "\nthis.api = { buildRequestMessage, whatsappUrl };", context);
-  return context.api;
-}
-const { buildRequestMessage, whatsappUrl } = load();
+const context = vm.createContext({
+  document: { querySelector: () => null, querySelectorAll: () => [] },
+});
+vm.runInContext(
+  source + "\nthis.api = { buildRequestMessage, whatsappUrl, SERVICE_LABELS };",
+  context,
+);
+const { buildRequestMessage, whatsappUrl, SERVICE_LABELS } = context.api;
 const form = (values) => new Map(Object.entries(values));
 
-test("a complete request contains the route, service and Italian date", () => {
+test("all nine service choices have meaningful request labels", () => {
+  assert.equal(Object.keys(SERVICE_LABELS).length, 9);
+  for (const [service, label] of Object.entries(SERVICE_LABELS)) {
+    assert.ok(buildRequestMessage(form({ service })).includes("Richiesta: " + label));
+  }
+});
+test("international request includes route and Italian date without identity requirements", () => {
   const message = buildRequestMessage(
-    form({
-      name: "  Prova locale  ",
-      phone: "0000000000",
-      service: "esteri",
-      from: "Sulmona",
-      to: "Lione",
-      date: "2026-10-25",
-      notes: "Orario da concordare",
-    }),
+    form({ service: "esteri", from: " Sulmona ", to: "Lione", date: "2026-10-25" }),
   );
-  assert.match(message, /Nome: Prova locale\n/);
   assert.match(
     message,
-    /Richiesta: Trasferimento estero\nPartenza: Sulmona\nDestinazione: Lione\nData: 25\/10\/2026/,
+    /Trasferimento internazionale\nPartenza: Sulmona\nDestinazione: Lione\nData indicativa: 25\/10\/2026/,
   );
-  assert.match(message, /Note: Orario da concordare$/);
+  assert.doesNotMatch(message, /Nome:|Telefono:/);
+  assert.match(message, /in attesa di una valutazione/);
 });
-
-test("optional details left blank do not produce empty fields", () => {
+test("empty optional details produce a useful short message without fabricated values", () => {
+  const message = buildRequestMessage(form({ service: "dialisi", from: " ", notes: " " }));
+  assert.match(message, /Dialisi o terapia ricorrente/);
+  assert.doesNotMatch(message, /Partenza:|Destinazione:|Note:|Data indicativa:/);
+});
+test("wheelchair requests include both relevant questions even when undecided", () => {
+  const undecided = buildRequestMessage(form({ service: "disabili" }));
+  assert.match(undecided, /Utilizzo di carrozzina: Da valutare/);
+  assert.match(undecided, /restare sulla carrozzina durante il viaggio: Da valutare/);
+  const specified = buildRequestMessage(
+    form({ service: "disabili", wheelchair: "si", stayWheelchair: "no" }),
+  );
+  assert.match(specified, /Utilizzo di carrozzina: Sì/);
+  assert.match(specified, /restare sulla carrozzina durante il viaggio: No/);
+});
+test("irrelevant route and wheelchair answers never leak into a volunteer request", () => {
   const message = buildRequestMessage(
     form({
-      name: "Prova",
-      phone: "0000000000",
-      service: "dialisi",
-      from: "  ",
-      notes: "  ",
+      service: "volontari",
+      from: "Hidden origin",
+      wheelchair: "si",
+      date: "2026-10-25",
+      zone: "Pescara",
+      availability: "Sabato",
+      skills: "Organizzazione",
     }),
   );
-  assert.match(message, /Richiesta: Dialisi \/ terapia ricorrente/);
-  assert.match(message, /Partenza: da definire\nDestinazione: da definire\nData: da definire/);
-  assert.match(message, /Note: nessuna$/);
+  assert.match(
+    message,
+    /Zona: Pescara\nDisponibilità indicativa: Sabato\nEventuali competenze: Organizzazione/,
+  );
+  assert.doesNotMatch(message, /Hidden origin|carrozzina|Data indicativa:/);
 });
-
-test("WhatsApp text preserves accents, ampersands, line breaks and literal markup", () => {
+test("event and recurring therapy requests contain their own organizational details", () => {
+  assert.match(
+    buildRequestMessage(
+      form({ service: "eventi", place: "Sulmona", duration: "3 ore", eventType: "Corsa" }),
+    ),
+    /Luogo: Sulmona\nDurata indicativa: 3 ore\nTipo di manifestazione: Corsa/,
+  );
+  assert.match(
+    buildRequestMessage(form({ service: "dialisi", frequency: "Martedì" })),
+    /Giorni o frequenza: Martedì/,
+  );
+  assert.match(
+    buildRequestMessage(form({ service: "sostegno", organization: "Associazione locale" })),
+    /Organizzazione: Associazione locale/,
+  );
+});
+test("WhatsApp encoding preserves accents, ampersands, newlines and literal markup", () => {
   const message = buildRequestMessage(
-    form({
-      name: "Prova & città",
-      service: "eventi",
-      notes: "<img src=x onerror=alert(1)>\nA & B? #test",
-    }),
+    form({ service: "altro", notes: "<img src=x onerror=alert(1)>\nCittà & B? #test 😀" }),
   );
   const url = new URL(whatsappUrl(message));
   assert.equal(url.origin, "https://wa.me");
   assert.equal(url.pathname, "/393336823324");
   assert.equal(url.searchParams.get("text"), message);
   assert.equal(url.hash, "");
-  assert.match(message, /<img src=x onerror=alert\(1\)>/);
 });
-
-test("unexpected service codes cannot inject their label into the request", () => {
+test("unexpected service codes and prototype keys cannot inject a label", () => {
   for (const service of ["unknown\nINJECTED", "__proto__", "constructor"]) {
     const message = buildRequestMessage(form({ service, date: "unexpected" }));
     assert.match(message, /Richiesta: Altro\n/);
-    assert.match(message, /Data: da definire/);
-    assert.equal(message.includes("INJECTED"), false);
+    assert.doesNotMatch(message, /INJECTED|Data indicativa:/);
   }
+});
+test("invalid UTF-16 input does not break the WhatsApp link", () => {
+  assert.doesNotThrow(() => whatsappUrl("test\uD800"));
+  assert.equal(new URL(whatsappUrl("test\uD800")).searchParams.get("text"), "test\uFFFD");
 });

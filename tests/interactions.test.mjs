@@ -4,12 +4,11 @@ import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 
-// Optional DOM integration checks; no development dependency is shipped to the site.
 const dependencies = createRequire(resolve(process.env.ABRUZZO_TEST_DEPS || ".", "package.json"));
 const { JSDOM } = dependencies("jsdom");
 const root = new URL("../", import.meta.url);
 const code = readFileSync(new URL("assets/app.js", root), "utf8");
-function page(t, file, query = "", width = 390, run = true) {
+function page(t, file = "contatti.html", query = "", width = 390, run = true) {
   const dom = new JSDOM(readFileSync(new URL(file, root), "utf8"), {
     url: `https://example.test/${file}${query}`,
     runScripts: "outside-only",
@@ -27,216 +26,245 @@ function page(t, file, query = "", width = 390, run = true) {
     }
     return media.get(query);
   };
-  const scrolls = [];
-  window.HTMLElement.prototype.scrollIntoView = function () {
-    scrolls.push(this.id);
-  };
   window.fetch = () => {
     throw new Error("UI submitted a network request");
   };
+  Object.defineProperty(window, "localStorage", {
+    get() {
+      throw new Error("UI persisted a request");
+    },
+  });
+  window.HTMLElement.prototype.scrollIntoView = function () {};
   if (run) window.eval(code);
   return {
     window,
     document: window.document,
-    scrolls,
     resize(next) {
       currentWidth = next;
       for (const [query, mq] of media) {
-        const nextMatches = next <= Number(query.match(/max-width:\s*(\d+)/)[1]);
-        if (nextMatches !== mq.matches) {
-          mq.matches = nextMatches;
+        const matches = next <= Number(query.match(/max-width:\s*(\d+)/)[1]);
+        if (matches !== mq.matches) {
+          mq.matches = matches;
           mq.dispatchEvent(new window.Event("change"));
         }
       }
     },
-    frame: () => new Promise((resolve) => window.requestAnimationFrame(resolve)),
+    tick: () => new Promise((resolve) => window.setTimeout(resolve, 10)),
   };
 }
+function select(p, value) {
+  p.document.querySelector(`input[name="service"][value="${value}"]`).click();
+}
+function input(p, name, value) {
+  const control = p.document.querySelector("form").elements.namedItem(name);
+  control.value = value;
+  control.dispatchEvent(new p.window.Event("input", { bubbles: true }));
+}
+const message = (p) => p.document.querySelector("[data-message-text]").textContent;
 
-test("mobile audience paths change their services and support arrow keys", (t) => {
-  const p = page(t, "index.html");
-  const tabs = [...p.document.querySelectorAll("[data-audience-tab]")];
-  const privatePanel = p.document.querySelector("#panel-private");
-  const organizationPanel = p.document.querySelector("#panel-organizations");
-  assert.equal(organizationPanel.hidden, true);
-  tabs[1].click();
-  assert.equal(privatePanel.hidden, true);
-  assert.equal(organizationPanel.hidden, false);
-  assert.match(organizationPanel.textContent, /Assistenza a eventi/);
-  tabs[1].dispatchEvent(new p.window.KeyboardEvent("keydown", { key: "ArrowLeft", bubbles: true }));
-  assert.equal(privatePanel.hidden, false);
-  assert.equal(p.document.activeElement, tabs[0]);
-});
-
-test("mobile upper menu complements the bottom bar without duplicating its destinations", (t) => {
-  const p = page(t, "index.html");
-  const primary = new Set(
-    [...p.document.querySelectorAll(".mobile-navigation a")].map((link) =>
-      link.getAttribute("href"),
-    ),
+test("service query preselects all valid services and unknown queries safely fall back", (t) => {
+  for (const service of [
+    "trasporti",
+    "dialisi",
+    "disabili",
+    "nazionali",
+    "esteri",
+    "eventi",
+    "volontari",
+    "sostegno",
+    "altro",
+  ]) {
+    const p = page(t, "contatti.html", `?servizio=${service}#richiesta`);
+    assert.equal(p.document.querySelector('input[name="service"]:checked').value, service);
+    assert.equal(p.document.querySelector("form").hidden, false);
+  }
+  assert.equal(
+    page(t, "contatti.html", "?servizio=__proto__").document.querySelector(
+      'input[name="service"]:checked',
+    ).value,
+    "trasporti",
   );
-  const secondary = [...p.document.querySelectorAll(".nav-mobile-secondary a")];
-  assert.equal(secondary.length, 3);
-  assert.ok(secondary.every((link) => !primary.has(link.getAttribute("href"))));
-  assert.deepEqual(
-    secondary.map((link) => link.getAttribute("href")),
-    ["volontari.html", "sostienici.html", "trasparenza.html"],
-  );
 });
-
-test("a linked mobile service opens and realigns after other services collapse", async (t) => {
-  const p = page(t, "servizi.html", "#esteri");
-  const body = p.document.querySelector("#detail-esteri");
-  assert.equal(body.hidden, false);
-  assert.equal(p.document.querySelector("#detail-trasporti").hidden, true);
-  await p.frame();
-  assert.ok(p.scrolls.includes("esteri"));
-  p.document.querySelector("#esteri button").click();
-  assert.equal(body.hidden, true);
-  p.document.querySelector('.service-index a[href="#esteri"]').click();
-  assert.equal(body.hidden, false);
-});
-
-test("desktop reads every service and mobile resets to its linked service on resize", (t) => {
-  const p = page(t, "servizi.html", "#dialisi", 1440);
-  assert.ok([...p.document.querySelectorAll("[data-service-body]")].every((body) => !body.hidden));
-  p.resize(390);
-  assert.equal(p.document.querySelector("#detail-dialisi").hidden, false);
-  assert.equal(p.document.querySelector("#detail-nazionali").hidden, true);
-  p.resize(1440);
-  assert.ok([...p.document.querySelectorAll("[data-service-body]")].every((body) => !body.hidden));
-});
-
-test("contact preparation stays local and editing clears an outdated preview", (t) => {
-  const p = page(t, "contatti.html", "?servizio=esteri#richiesta");
+test("each service shows only relevant fields and does not require name or telephone", (t) => {
+  const p = page(t);
   const form = p.document.querySelector("form");
-  assert.equal(form.elements.service.value, "esteri");
-  form.elements.name.value = "Prova locale";
-  form.elements.phone.value = "0000000000";
-  form.elements.consent.checked = true;
-  const originalUrl = p.window.location.href;
-  form.dispatchEvent(new p.window.Event("submit", { bubbles: true, cancelable: true }));
-  const preview = p.document.querySelector("[data-message-preview]");
-  assert.equal(preview.hidden, false);
-  assert.equal(p.document.activeElement.id, "preview-heading");
-  assert.ok(p.scrolls.includes("request-preview"));
-  assert.match(p.document.querySelector("[data-message-text]").textContent, /Trasferimento estero/);
-  assert.equal(p.window.location.href, originalUrl);
-  assert.match(
-    p.document.querySelector("[data-message-link]").href,
-    /^https:\/\/wa\.me\/393336823324\?text=/,
-  );
-  form.elements.to.value = "Milano";
-  form.elements.to.dispatchEvent(new p.window.Event("input", { bubbles: true }));
-  assert.equal(preview.hidden, true);
-  assert.equal(p.document.querySelector("[data-message-text]").textContent, "");
+  assert.equal(form.querySelectorAll("[required]").length, 0);
+  assert.equal(form.elements.namedItem("name"), null);
+  assert.equal(form.elements.namedItem("phone"), null);
+  select(p, "volontari");
+  assert.equal(form.elements.from.disabled, true);
+  assert.equal(form.elements.zone.disabled, false);
+  assert.equal(form.elements.zone.closest("[data-for]").hidden, false);
+  select(p, "eventi");
+  assert.equal(form.elements.zone.disabled, true);
+  assert.equal(form.elements.place.disabled, false);
+  assert.equal(form.elements.date.disabled, false);
+  select(p, "altro");
+  assert.equal(form.elements.date.disabled, true);
+  assert.equal(form.elements.notes.disabled, false);
 });
-
-test("Escape closes the mobile menu and restores its button focus", (t) => {
+test("wheelchair service shows both specific questions and serializes the answers", (t) => {
+  const p = page(t, "contatti.html", "?servizio=disabili");
+  const form = p.document.querySelector("form");
+  assert.equal(form.elements.wheelchair.disabled, false);
+  assert.equal(form.elements.stayWheelchair.disabled, false);
+  input(p, "wheelchair", "si");
+  input(p, "stayWheelchair", "si");
+  assert.match(message(p), /Utilizzo di carrozzina: Sì/);
+  assert.match(message(p), /restare sulla carrozzina durante il viaggio: Sì/);
+});
+test("live preview and encoded destination update locally without navigation", (t) => {
+  const p = page(t);
+  const originalUrl = p.window.location.href;
+  input(p, "from", "Sulmona");
+  input(p, "to", "Città & centro");
+  input(p, "date", "2026-11-20");
+  assert.match(
+    message(p),
+    /Partenza: Sulmona\nDestinazione: Città & centro\nData indicativa: 20\/11\/2026/,
+  );
+  const link = new URL(p.document.querySelector("[data-message-link]").href);
+  assert.equal(link.searchParams.get("text"), message(p));
+  assert.equal(p.window.location.href, originalUrl);
+  input(p, "to", "Roma");
+  assert.match(message(p), /Destinazione: Roma/);
+  assert.doesNotMatch(message(p), /Città/);
+});
+test("switching services omits hidden values and returning preserves editable details", (t) => {
+  const p = page(t);
+  input(p, "from", "Sulmona");
+  select(p, "volontari");
+  assert.doesNotMatch(message(p), /Sulmona/);
+  select(p, "trasporti");
+  assert.match(message(p), /Sulmona/);
+});
+test("reset clears all values and returns to the initial transport choice", async (t) => {
+  const p = page(t, "contatti.html", "?servizio=eventi");
+  input(p, "place", "Pescara");
+  select(p, "disabili");
+  input(p, "wheelchair", "si");
+  p.document.querySelector("form").reset();
+  await p.tick();
+  assert.equal(p.document.querySelector('input[name="service"]:checked').value, "trasporti");
+  assert.equal(p.document.querySelector("form").elements.place.value, "");
+  assert.equal(p.document.querySelector("form").elements.wheelchair.value, "");
+  assert.doesNotMatch(message(p), /Pescara|carrozzina/);
+});
+test("user text is never rendered as markup", (t) => {
+  const p = page(t);
+  input(p, "notes", '<img src=x onerror="alert(1)">');
+  assert.match(message(p), /<img/);
+  assert.equal(p.document.querySelector("[data-message-text] img"), null);
+});
+test("copy requires an explicit click and clipboard failure selects the visible message", async (t) => {
+  const p = page(t);
+  const copied = [];
+  p.window.navigator.clipboard = { writeText: async (value) => copied.push(value) };
+  input(p, "from", "Prova locale");
+  assert.equal(copied.length, 0);
+  p.document.querySelector("[data-copy-message]").click();
+  await p.tick();
+  assert.equal(copied[0], message(p));
+  assert.match(p.document.querySelector("[data-copy-status]").textContent, /Messaggio copiato/);
+  p.window.navigator.clipboard.writeText = async () => {
+    throw new Error("Denied");
+  };
+  p.document.querySelector("[data-copy-message]").click();
+  await p.tick();
+  assert.equal(p.window.getSelection().toString(), message(p));
+  assert.match(p.document.querySelector("[data-copy-status]").textContent, /testo è selezionato/);
+});
+test("missing clipboard API uses the same accessible manual copy fallback", async (t) => {
+  const p = page(t);
+  p.document.querySelector("[data-copy-message]").click();
+  await p.tick();
+  assert.equal(p.window.getSelection().toString(), message(p));
+});
+test("mobile menu opens, Escape closes it and restores button focus", (t) => {
   const p = page(t, "index.html");
   const toggle = p.document.querySelector("[data-nav-toggle]");
   toggle.click();
   assert.equal(toggle.getAttribute("aria-expanded"), "true");
-  assert.equal(p.document.body.classList.contains("nav-open"), true);
-  assert.equal(p.document.querySelector("[data-nav-backdrop]").hidden, false);
+  assert.ok(p.document.querySelector("[data-nav]").classList.contains("is-open"));
   p.document.dispatchEvent(new p.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
   assert.equal(toggle.getAttribute("aria-expanded"), "false");
   assert.equal(p.document.activeElement, toggle);
-  assert.equal(p.document.body.classList.contains("nav-open"), false);
-  assert.equal(p.document.querySelector("[data-nav-backdrop]").hidden, true);
 });
-
-test("desktop submenus are exclusive and Escape restores their summary focus", (t) => {
+test("dropdown supports native activation, Escape and outside click", (t) => {
   const p = page(t, "index.html", "", 1440);
-  const groups = [...p.document.querySelectorAll("[data-nav-group]")];
-  groups[0].querySelector("summary").click();
-  assert.equal(groups[0].open, true);
-  groups[1].querySelector("summary").click();
-  assert.equal(groups[0].open, false);
-  assert.equal(groups[1].open, true);
+  const group = p.document.querySelector("[data-nav-group]");
+  const summary = group.querySelector("summary");
+  summary.click();
+  assert.equal(group.open, true);
   p.document.dispatchEvent(new p.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-  assert.equal(groups[1].open, false);
-  assert.equal(p.document.activeElement, groups[1].querySelector("summary"));
-  groups[0].querySelector("summary").click();
+  assert.equal(group.open, false);
+  assert.equal(p.document.activeElement, summary);
+  summary.click();
   p.document.querySelector("main").click();
-  assert.equal(groups[0].open, false);
+  assert.equal(group.open, false);
 });
-
-test("mobile backdrop and desktop resizing dismiss the menu without retaining a scroll lock", (t) => {
+test("links, outside focus and viewport changes close navigation", (t) => {
   const p = page(t, "index.html");
   const toggle = p.document.querySelector("[data-nav-toggle]");
   toggle.click();
-  p.document.querySelector("[data-nav-backdrop]").click();
+  p.document.querySelector("main").click();
   assert.equal(toggle.getAttribute("aria-expanded"), "false");
-  assert.equal(p.document.activeElement, toggle);
   toggle.click();
-  p.document.querySelector("[data-nav-group] summary").click();
   p.resize(1440);
-  assert.equal(p.document.body.classList.contains("nav-open"), false);
-  assert.equal(p.document.querySelector("[data-nav-backdrop]").hidden, true);
+  assert.equal(toggle.getAttribute("aria-expanded"), "false");
   assert.equal(p.document.querySelector("[data-nav-group]").open, false);
+  toggle.click();
+  p.document.querySelector("[data-nav] a").click();
+  assert.equal(toggle.getAttribute("aria-expanded"), "false");
 });
-
-test("footer disclosures are compact on mobile and fully readable on desktop", (t) => {
-  const p = page(t, "index.html");
-  const sections = [...p.document.querySelectorAll("[data-footer-disclosure]")];
-  assert.ok(sections.every((section) => !section.open));
-  sections[0].querySelector("summary").click();
-  assert.equal(sections[0].open, true);
+test("service index collapses on mobile without hiding any service sections", (t) => {
+  const p = page(t, "servizi.html", "#esteri");
+  const index = p.document.querySelector("[data-service-index]");
+  assert.equal(index.open, false);
+  index.querySelector("summary").click();
+  assert.equal(index.open, true);
+  index.querySelector('a[href="#esteri"]').click();
+  assert.equal(index.open, false);
+  assert.equal(p.document.querySelectorAll(".service-detail[hidden]").length, 0);
   p.resize(1440);
-  assert.ok(sections.every((section) => section.open));
-  sections[0].querySelector("summary").click();
-  assert.equal(sections[0].open, true);
-  p.resize(390);
-  assert.ok(sections.every((section) => !section.open));
+  assert.equal(index.open, true);
+  index.querySelector("summary").click();
+  assert.equal(index.open, true);
 });
-
-test("copying the request requires an explicit click and reports unavailable clipboard access", async (t) => {
-  const p = page(t, "contatti.html");
-  const form = p.document.querySelector("form");
-  form.elements.name.value = "Prova locale";
-  form.elements.phone.value = "0000000000";
-  form.elements.service.value = "trasporti";
-  form.elements.consent.checked = true;
-  const copied = [];
-  p.window.navigator.clipboard = { writeText: async (value) => copied.push(value) };
-  form.dispatchEvent(new p.window.Event("submit", { bubbles: true, cancelable: true }));
-  assert.equal(copied.length, 0);
-  p.document.querySelector("[data-copy-message]").click();
-  await p.frame();
-  assert.match(copied[0], /Prova locale/);
-  assert.equal(p.document.querySelector("[data-copy-status]").textContent, "Messaggio copiato.");
-  p.window.navigator.clipboard.writeText = async () => {
-    throw new Error("Clipboard unavailable");
-  };
-  p.document.querySelector("[data-copy-message]").click();
-  await p.frame();
-  assert.match(p.document.querySelector("[data-copy-status]").textContent, /Copia non disponibile/);
+test("FAQ accordion uses native details and answers useful questions", (t) => {
+  const p = page(t, "index.html");
+  const faqs = [...p.document.querySelectorAll(".faq details")];
+  assert.equal(faqs.length, 6);
+  faqs[0].querySelector("summary").click();
+  assert.equal(faqs[0].open, true);
+  faqs[0].querySelector("summary").click();
+  assert.equal(faqs[0].open, false);
+  assert.match(faqs[5].textContent, /confermato solo dopo/);
 });
-
-test("without JavaScript the audience links, service information and direct contacts remain present", (t) => {
+test("unverified tax, donation and legal data are absent with and without JavaScript", (t) => {
+  for (const run of [true, false])
+    for (const file of ["index.html", "sostienici.html", "trasparenza.html", "contatti.html"]) {
+      const p = page(t, file, "", 390, run);
+      assert.equal(p.document.querySelector("[data-verified]"), null);
+      assert.doesNotMatch(p.document.body.textContent, /02227430663|Via Fonte|IBAN|PayPal/);
+    }
+});
+test("no-JavaScript pages retain navigation, all services, FAQs and direct channels", (t) => {
   const home = page(t, "index.html", "", 390, false);
-  assert.ok(
-    [...home.document.querySelectorAll("[data-audience-panel]")].every((panel) => !panel.hidden),
-  );
+  assert.equal(home.document.querySelectorAll(".directory-item").length, 6);
+  assert.equal(home.document.querySelector("[data-nav]").hidden, false);
   const services = page(t, "servizi.html", "", 390, false);
-  assert.ok(
-    [...services.document.querySelectorAll("[data-service-body]")].every((body) => !body.hidden),
-  );
-  const contacts = page(t, "contatti.html", "", 390, false);
-  assert.equal(contacts.document.querySelector("[data-preview-button]").disabled, true);
-  assert.ok(contacts.document.querySelector('a[href="tel:+393336823324"]'));
-  assert.ok(contacts.document.querySelector('a[href="https://wa.me/393336823324"]'));
-  assert.ok(
-    [...home.document.querySelectorAll("[data-footer-disclosure]")].every(
-      (section) => section.open,
-    ),
-  );
-  assert.equal(
-    home.document
-      .querySelector("[data-nav-group] summary")
-      .textContent.trim()
-      .startsWith("Servizi"),
-    true,
-  );
+  assert.equal(services.document.querySelectorAll(".service-detail[hidden]").length, 0);
+  const p = page(t, "contatti.html", "", 390, false);
+  assert.equal(p.document.querySelector("form").hidden, true);
+  assert.ok(p.document.querySelector('a[href="tel:+393336823324"]'));
+  assert.ok(p.document.querySelector('a[href="https://wa.me/393336823324"]'));
+  assert.ok(p.document.querySelector('a[href="mailto:abruzzoassistenzaodv@gmail.com"]'));
+});
+test("footer keeps institutional links and exactly one programmed-service emergency notice", (t) => {
+  const p = page(t, "index.html");
+  assert.equal(p.document.querySelectorAll('a[href="tel:112"]').length, 1);
+  assert.ok(p.document.querySelector('footer a[href="privacy.html"]'));
+  assert.ok(p.document.querySelector('footer a[href="pescara.html"]'));
+  assert.equal(p.document.querySelectorAll(".mobile-navigation").length, 0);
 });

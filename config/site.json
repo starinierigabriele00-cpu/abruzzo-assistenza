@@ -1,0 +1,32 @@
+{
+  "domain": "https://abruzzoassistenza.com",
+  "phone": "+393336823324",
+  "whatsapp": "393336823324",
+  "phoneDisplay": "333 682 3324",
+  "email": "abruzzoassistenzaodv@gmail.com",
+  "contactSource": "Email confermata dal committente il 7 ottobre 2026; telefono documentato in assets/SOURCES.md.",
+  "instagram": "https://www.instagram.com/abruzzo.assistenza/",
+  "facebook": "https://www.facebook.com/profile.php?id=100057216829022",
+  "legal": {
+    "verified": false,
+    "name": "",
+    "address": "Via Fonte d’Amore SNC, Sulmona (AQ)",
+    "taxId": "02227430663",
+    "qualification": "",
+    "source": ""
+  },
+  "fivePerMille": {
+    "verified": false,
+    "year": null,
+    "taxId": "",
+    "source": ""
+  },
+  "donation": {
+    "verified": false,
+    "iban": "",
+    "beneficiary": "",
+    "paymentUrl": "",
+    "source": ""
+  },
+  "documents": []
+}

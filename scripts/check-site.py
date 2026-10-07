@@ -1,15 +1,22 @@
 #!/usr/bin/env python3
-"""Validate the static site using only the Python standard library."""
-from collections import Counter
+"""Check links, publication gates, SEO and local assets using the standard library."""
 import argparse
+from collections import Counter
 from html.parser import HTMLParser
+import json
 from pathlib import Path
-from urllib.parse import unquote, urlsplit
+import re
 import sys
+from urllib.parse import unquote, urlsplit
+import xml.etree.ElementTree as ET
 
+SOURCE = Path(__file__).resolve().parents[1]
 parser = argparse.ArgumentParser(description=__doc__)
-parser.add_argument('--root', type=Path, default=Path(__file__).resolve().parents[1])
-ROOT = parser.parse_args().root.resolve()
+parser.add_argument('--root', type=Path, default=SOURCE)
+parser.add_argument('--base-path', default='/')
+args = parser.parse_args()
+ROOT = args.root.resolve()
+config = json.loads((SOURCE / 'config/site.json').read_text())
 
 class Page(HTMLParser):
     def __init__(self, path):
@@ -18,58 +25,97 @@ class Page(HTMLParser):
         self.ids = []
         self.links = []
         self.elements = []
-        self.feed(path.read_text())
+        self.text = path.read_text()
+        self.feed(self.text)
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
         self.elements.append((tag, attrs))
-        if 'id' in attrs:
-            self.ids.append(attrs['id'])
+        if 'id' in attrs: self.ids.append(attrs['id'])
         for key in ('href', 'src'):
+            if key in attrs: self.links.append(attrs[key])
+        for key in ['srcset', 'imagesrcset']:
             if key in attrs:
-                self.links.append(attrs[key])
+                self.links.extend(item.strip().split()[0] for item in attrs[key].split(','))
 
 pages = {p.name: Page(p) for p in sorted(ROOT.glob('*.html'))}
 errors = []
-checked_links = 0
-for name, page in pages.items():
-    for id_, count in Counter(page.ids).items():
-        if count > 1:
-            errors.append(f'{name}: duplicate id {id_}')
-    if sum(tag == 'h1' for tag, _ in page.elements) != 1:
-        errors.append(f'{name}: expected one h1')
-    if not any(tag == 'html' and attrs.get('lang') == 'it' for tag, attrs in page.elements):
-        errors.append(f'{name}: missing Italian language')
-    if not any(tag == 'meta' and attrs.get('name') == 'viewport' for tag, attrs in page.elements):
-        errors.append(f'{name}: missing viewport')
-    for tag, attrs in page.elements:
-        if tag == 'img' and 'alt' not in attrs:
-            errors.append(f'{name}: image without alt text')
-        if tag == 'a' and attrs.get('target') == '_blank' and 'noopener' not in attrs.get('rel', '').split():
-            errors.append(f'{name}: external tab without noopener')
-    for url in page.links:
-        parts = urlsplit(url)
-        if parts.scheme or parts.netloc:
-            continue
-        if url == '#':
-            # Configured donation-only links remain hidden until official data exists.
-            continue
-        path = unquote(parts.path) or name
-        target = ROOT / path
-        checked_links += 1
-        if not target.is_file():
-            errors.append(f'{name}: missing local file {url}')
-        elif parts.fragment and target.name in pages and unquote(parts.fragment) not in pages[target.name].ids:
-            errors.append(f'{name}: missing fragment {url}')
-    if name != '404.html':
-        if 'main' not in page.ids:
-            errors.append(f'{name}: missing main target')
-        if not any(tag == 'nav' and attrs.get('aria-label') == 'Navigazione principale' for tag, attrs in page.elements):
-            errors.append(f'{name}: missing labelled navigation')
-        if 'logo-officiale.png' in page.path.read_text():
-            errors.append(f'{name}: uses the incomplete PNG logo')
+count = 0
+if set(pages) != {'index.html','servizi.html','contatti.html','volontari.html','sostienici.html','trasparenza.html','privacy.html','pescara.html','404.html'}:
+    errors.append('Expected all nine static pages')
+titles = []
+def check_link(url, source):
+    global count
+    parts = urlsplit(url)
+    if parts.scheme or parts.netloc:
+        if parts.netloc == urlsplit(config['domain']).netloc:
+            path = parts.path.lstrip('/') or 'index.html'
+        else:
+            return
+    else:
+        path = unquote(parts.path).lstrip('/') or source.name
+        prefix = args.base_path.strip('/')
+        if prefix and path.startswith(prefix + '/'):
+            path = path[len(prefix) + 1:]
+    if url == '#':
+        errors.append(f'{source.name}: placeholder link')
+        return
+    target = ROOT / path
+    count += 1
+    if not target.is_file():
+        errors.append(f'{source.name}: missing local file {url}')
+    elif parts.fragment:
+        ids = pages[target.name].ids if target.name in pages else [el.attrib['id'] for el in ET.parse(target).iter() if 'id' in el.attrib] if target.suffix == '.svg' else None
+        if ids is not None and unquote(parts.fragment) not in ids:
+            errors.append(f'{source.name}: missing fragment {url}')
 
+for name, page in pages.items():
+    for id_, n in Counter(page.ids).items():
+        if n > 1: errors.append(f'{name}: duplicate id {id_}')
+    if sum(tag == 'h1' for tag, _ in page.elements) != 1: errors.append(f'{name}: expected one h1')
+    if not any(t == 'html' and a.get('lang') == 'it' for t,a in page.elements): errors.append(f'{name}: missing Italian language')
+    if not any(t == 'meta' and a.get('name') == 'viewport' for t,a in page.elements): errors.append(f'{name}: missing viewport')
+    if 'main' not in page.ids: errors.append(f'{name}: missing main target')
+    if not any(t == 'nav' and a.get('aria-label') == 'Navigazione principale' for t,a in page.elements): errors.append(f'{name}: missing labelled navigation')
+    title = re.search(r'<title>(.*?)</title>',page.text,re.S)
+    if not title or not title[1].strip(): errors.append(f'{name}: missing title')
+    else: titles.append(title[1].strip())
+    canonical = config['domain'] + ('/' if name == 'index.html' else '/' + name)
+    if not any(t == 'link' and a.get('rel') == 'canonical' and a.get('href') == canonical for t,a in page.elements): errors.append(f'{name}: invalid canonical')
+    for key in ['description']:
+        if not any(t == 'meta' and a.get('name') == key and a.get('content') for t,a in page.elements): errors.append(f'{name}: missing {key}')
+    for key in ['og:title','og:description','og:url','og:image']:
+        if not any(t == 'meta' and a.get('property') == key and a.get('content') for t,a in page.elements): errors.append(f'{name}: missing {key}')
+    previous_heading = 0
+    labels = {a['for'] for t,a in page.elements if t == 'label' and 'for' in a}
+    for tag, attrs in page.elements:
+        if re.fullmatch(r'h[1-6]',tag):
+            level = int(tag[1])
+            if previous_heading and level > previous_heading + 1: errors.append(f'{name}: skipped heading level at {attrs.get("id",tag)}')
+            previous_heading = level
+        if tag == 'img' and not all(k in attrs for k in ['alt','width','height']): errors.append(f'{name}: image lacks alt or dimensions')
+        if tag == 'a' and attrs.get('target') == '_blank' and 'noopener' not in attrs.get('rel','').split(): errors.append(f'{name}: external tab without noopener')
+        if tag in {'input','select','textarea'} and attrs.get('type') not in {'radio','hidden'} and attrs.get('id') not in labels: errors.append(f'{name}: input without explicit label')
+        if tag in {'input','select','textarea'} and 'required' in attrs: errors.append(f'{name}: unnecessary required composer field')
+        if 'aria-controls' in attrs and attrs['aria-controls'] not in page.ids: errors.append(f'{name}: missing controlled element')
+        if attrs.get('data-verified') and not config[attrs['data-verified']]['verified']: errors.append(f'{name}: unverified {attrs["data-verified"]} is published')
+    if re.search(r'\bH24\b|abruzzoassistanzaodv@|abruzzoassistenza@libero', page.text): errors.append(f'{name}: stale contact or unverified H24 claim')
+    if '{{' in page.text: errors.append(f'{name}: unresolved template value')
+    for url in page.links: check_link(url,page.path)
+    for t,a in page.elements:
+        if t == 'meta' and a.get('property') == 'og:image': check_link(a['content'],page.path)
+if len(titles) != len(set(titles)): errors.append('Page titles must be unique')
+for url in re.findall(r'url\(["\']?([^\)"\']+)', (ROOT/'assets/styles.css').read_text()):
+    # CSS URLs are relative to the stylesheet.
+    check_link('assets/'+url,ROOT/'assets/styles.css')
+for file in ['robots.txt','sitemap.xml','assets/icons.svg','assets/abruzzo-map.svg']:
+    if not (ROOT/file).is_file(): errors.append('Missing published asset '+file)
+if (ROOT/'sitemap.xml').is_file():
+    locs = [el.text for el in ET.parse(ROOT/'sitemap.xml').iter() if el.tag.endswith('}loc')]
+    expected = {config['domain']+('/' if n=='index.html' else '/'+n) for n in pages if n!='404.html'}
+    if set(locs) != expected: errors.append('Sitemap does not match indexable pages')
+    for url in locs: check_link(url,ROOT/'sitemap.xml')
 if errors:
-    print('\n'.join(errors), file=sys.stderr)
+    print('\n'.join(errors),file=sys.stderr)
     sys.exit(1)
-print(f'PASS: {len(pages)} pages, {checked_links} local links/assets and fragment targets.')
+print(f'PASS: {len(pages)} pages, {count} links/assets, headings, SEO and publication gates.')

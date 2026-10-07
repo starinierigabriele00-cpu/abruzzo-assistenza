@@ -1,111 +1,93 @@
-# Abruzzo Assistenza
+# Abruzzo Assistenza — AA.V2
 
-Sito istituzionale di **Abruzzo Assistenza**, associazione di assistenza e trasporto sanitario con trasferimenti in tutta Italia e all’estero.
+Sito istituzionale statico, con nove pagine HTML, CSS moderno e JavaScript vanilla. Nessuna dipendenza runtime, backend applicativo, tracker o libreria grafica. La versione AA.V2 conserva l’architettura esistente, la fotografia autentica, il logo e IBM Plex Sans locale.
 
-## Stack
+## Interfaccia e contenuti
 
-Sito statico in HTML/CSS/JavaScript, senza framework e senza dipendenze runtime.
+Grafite, superfici ghiaccio, accenti ciano e fotografia full-width con crop distinto per smartphone. La home presenta servizi, eventuale 5×1000 verificato, operatività, organizzazione del servizio, FAQ e contatto finale. Il catalogo mantiene l’indice sticky desktop; su mobile l’indice è un disclosure nativo e tutti i servizi restano leggibili. Le pagine associative hanno composizioni editoriali proprie.
 
-- responsive e mobile-first;
-- accessibile da tastiera;
-- nessun tracker o cookie di profilazione;
-- richiesta con anteprima locale e apertura volontaria su WhatsApp;
-- SEO di base e dati strutturati;
-- deploy pronto per GitHub Pages.
+Il composer nei Contatti consente di scegliere nove richieste. Mostra solo i campi pertinenti, tutti facoltativi, e aggiorna il testo e il link WhatsApp durante la compilazione. Le due domande sulla carrozzina sono distinte. Cambiare servizio esclude i dati non pertinenti dal messaggio; il reset li cancella. Nessuna navigazione o trasmissione avviene durante la compilazione. Il clic su “Continua su WhatsApp” apre `wa.me` con il testo; l’invio della conversazione richiede un’ulteriore azione dell’utente. La copia utilizza gli appunti solo dopo un clic e, in caso di indisponibilità, seleziona il testo per la copia manuale. Nessun salvataggio persistente.
 
-## Interfaccia
+Senza JavaScript restano disponibili navigazione, servizi, FAQ e contatti diretti; il composer è assente. La sola informazione sulle emergenze è nel footer e rimanda al 112. Nessuna promessa H24 o disponibilità garantita.
 
-Identità istituzionale: IBM Plex Sans ospitato localmente, verde profondo, bianco e grigio, logo autentico e fotografia dei mezzi recuperati dal canale ufficiale. Provenienza e licenze in [assets/SOURCES.md](assets/SOURCES.md).
+## Configurazione: un’unica fonte
 
-La homepage desktop presenta servizi, operatività e organizzazione. La home mobile usa una struttura propria: percorsi Privati/Strutture, selezione del servizio, richiesta diretta e navigazione fissa Home/Servizi/Contatti/Chiama. Il catalogo mobile apre una scheda alla volta e rispetta i collegamenti alle ancore; desktop mostra tutte le sezioni. Senza JavaScript i servizi restano leggibili e i due percorsi mobile sono entrambi disponibili.
-
-Nei Contatti, telefono, WhatsApp ed email precedono il modulo; sede e social seguono il modulo su mobile. I dettagli facoltativi della tratta si aprono su richiesta. L’anteprima rimane locale e non conferma una prenotazione; nessun dato viene salvato dal sito. Modificando un campo viene rimossa l’anteprima precedente.
-
-Il menu desktop raggruppa Servizi e Associazione in sottomenu nativi. Su mobile il pannello superiore contiene solo Partenze, Volontariato, Sostegno e Trasparenza; la barra inferiore contiene Home, Servizi, Contatti e Chiama. Escape, tocco esterno e cambio di viewport chiudono il pannello. Il footer mobile conserva i contatti in vista e raccoglie associazione e sede in sezioni apribili; sul desktop entrambe restano estese. Senza JavaScript le informazioni restano accessibili.
-
-Colori, font, spaziature e offset delle ancore sono definiti nelle variabili iniziali di `assets/styles.css`. Le regole tablet e mobile sono raccolte in un blocco per breakpoint. La formattazione HTML/CSS/JavaScript è definita in `.prettierrc.json`.
-
-Menu e footer sono mantenuti in `templates/site-header.html` e `templates/site-footer.html`. Dopo averli modificati, aggiornare le nove pagine statiche con `python3 scripts/sync-layout.py`, poi formattare con Prettier. `--check` verifica struttura e contenuti indipendentemente dalle interruzioni di riga.
-
-Il vecchio `assets/logo-officiale.png` è incompleto ed è conservato come sorgente storica. Le pagine usano il logo JPEG integro dal canale ufficiale.
-
-## Dati già configurati
-
-- Telefono: **333 682 3324**
-- Email: **abruzzoassistenza@libero.it**
-- Sede legale: **Via Fonte d'Amore SNC, Sulmona (AQ)**
-- Codice fiscale / P.IVA: **02227430663**
-- Instagram: **@abruzzo.assistenza**
-- Facebook: pagina condivisa dall'associazione
-- Operatività: trasporti locali, **nazionali e internazionali**. I mezzi sono disponibili in partenza da **Sulmona** e **Pescara**; il punto di partenza viene scelto in base al trasporto richiesto, alla zona e alla destinazione.
-
-## Canali ancora da configurare
-
-In `assets/app.js` sono presenti campi opzionali per:
-
-- PEC;
-- IBAN e intestatario;
-- link PayPal o altro provider di donazione;
-- 5×1000, da attivare solo dopo verifica dell'accreditamento.
-
-I blocchi relativi a dati non configurati rimangono nascosti automaticamente.
-
-## Avvio locale
-
-Non serve una build. È sufficiente servire la cartella con un web server statico.
-
-Esempio con Python:
+Modificare `config/site.json`, poi eseguire:
 
 ```bash
-python3 -m http.server 8080 --bind 127.0.0.1
+python3 scripts/sync-layout.py
+npx --yes prettier@3.6.2 --write '*.html' 'templates/*.html' assets/app.js config/site.json
+python3 scripts/sync-layout.py --check
 ```
 
-Poi aprire `http://localhost:8080`.
+Lo script sincronizza header/footer, recapiti nelle pagine, configurazione pubblica in `assets/app.js` e JSON-LD. I template sono `templates/site-header.html` e `templates/site-footer.html`; non modificare le copie delle pagine. I blocchi `verified:*` vengono generati dallo script: non aggiungere manualmente dati riservati alla verifica.
+
+Email approvata dal committente il 7 ottobre 2026: **abruzzoassistenzaodv@gmail.com**. Telefono: **333 682 3324**; WhatsApp usa lo stesso numero. La fonte storica dei recapiti e degli asset è in [assets/SOURCES.md](assets/SOURCES.md). La qualifica giuridica non viene dedotta dall’email.
+
+`legal`, `fivePerMille` e `donation` sono disattivati. Una sezione può essere pubblicata solo con `verified: true`, dati completi e `source` documentata. Il 5×1000 richiede anche l’anno di accreditamento; un codice fiscale o un vecchio flag non sono una prova. L’IBAN viene controllato anche con checksum. I documenti devono avere `verified`, `title`, `path` sotto `documents/` e `source`; devono esistere realmente. I dati non verificati sono esclusi dall’HTML, anche senza JavaScript, e dalla configurazione runtime pubblica. Il builder include solo documenti verificati.
+
+## Anteprima locale e iPhone
+
+```bash
+python3 scripts/preview-site.py --watch
+```
+
+Aprire `http://127.0.0.1:8080`. Il server di sviluppo disabilita la cache, ricarica la pagina quando cambiano gli asset e simula la 404 di Pages. Il polling viene inserito soltanto dal server con `--watch`: non modifica i file e non viene incluso nella build.
+
+Per una macchina già connessa a Tailscale, usare il suo indirizzo VPN:
+
+```bash
+python3 scripts/preview-site.py --bind INDIRIZZO_TAILSCALE --port 8080 --watch
+```
+
+Aprire quell’URL dall’iPhone nella stessa rete Tailscale. La modifica dei campi del composer non provoca reload: la versione cambia soltanto quando vengono modificati file sul disco.
 
 ## Verifiche
 
-Controlli senza dipendenze aggiuntive (Python 3 e Node.js 20 o successivo):
+Python 3 e Node.js 20 o successivo; in CI viene usato Node 24.
 
 ```bash
 python3 scripts/check-site.py
 python3 scripts/sync-layout.py --check
 node --check assets/app.js
 node --test tests/request.test.mjs
+python3 -m unittest discover -s tests -p 'test_*.py'
+python3 scripts/build-site.py
 git diff --check
 ```
 
-Il controllo statico verifica file collegati, ancore, identificatori, titoli principali e attributi essenziali di accessibilità. I test JavaScript verificano il testo delle richieste e la codifica del link WhatsApp. Per le modifiche grafiche controllare anche il sito nel browser, su desktop e mobile, e provare menu, percorsi Privati/Strutture, schede dei servizi, FAQ e modulo senza inviare richieste di prova.
-
-## Test delle interazioni
-
-I test DOM in `tests/interactions.test.mjs` verificano percorsi mobile, schede dei servizi, menu, footer, modulo e copia del messaggio. JSDOM è una dipendenza di verifica opzionale, non del sito. Per eseguirli senza aggiungere dipendenze runtime al progetto:
+Dipendenze di verifica isolate, non distribuite con il sito:
 
 ```bash
-npm install --prefix /tmp/abruzzo-ui-check jsdom@30.1.2 --no-audit --no-fund --ignore-scripts
+npm install --prefix /tmp/abruzzo-ui-check jsdom@30.1.2 prettier@3.6.2 playwright@1.58.2 @axe-core/playwright@4.11.1 --no-audit --no-fund --ignore-scripts
 ABRUZZO_TEST_DEPS=/tmp/abruzzo-ui-check node --test tests/interactions.test.mjs
+/tmp/abruzzo-ui-check/node_modules/.bin/prettier --check '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' '*.md' assets/SOURCES.md config/site.json .prettierrc.json .github/workflows/pages.yml
 ```
 
-I test DOM non sostituiscono la verifica visiva nel browser.
+Per la verifica nel browser, avviare il server senza `--watch`, poi:
 
-## Deploy su GitHub Pages
+```bash
+ABRUZZO_TEST_DEPS=/tmp/abruzzo-ui-check ABRUZZO_BROWSER=/usr/bin/chromium node tests/browser.test.mjs
+```
 
-È incluso il workflow `.github/workflows/pages.yml`.
+`ABRUZZO_BASE_URL` e `ABRUZZO_QA_OUTPUT` consentono di cambiare endpoint e cartella dei risultati. Sono controllate nove pagine a 1440, 1024, 768, 390 e 360 px; axe su desktop/smartphone, reflow a 320 CSS px, navigazione da tastiera, composer e assenza di JavaScript. Screenshot e JSON sono in `/tmp/abruzzo-qa`. Le prove automatiche non attestano conformità WCAG e non sostituiscono screen reader o dispositivi reali. In ambienti che limitano l’isolamento dei processi Node, il medesimo test runner può essere eseguito con `--test-isolation=none`.
 
-Il workflow esegue controlli statici, test delle interazioni e controllo della formattazione prima del deploy. `python3 scripts/build-site.py` prepara `_site/` con le nove pagine e i soli asset usati, poi controlla i collegamenti dell’artefatto. Sorgenti dei template, test e script di sviluppo non vengono pubblicati.
+## Build e deploy
 
-1. In GitHub aprire **Settings → Pages**.
-2. In **Build and deployment** scegliere **GitHub Actions**.
-3. Fare push su `main` oppure lanciare manualmente il workflow.
+`python3 scripts/build-site.py` genera `_site/`, con elenco esplicito degli asset e verifica finale dei collegamenti, inclusi SVG, `srcset`, font, sitemap e dati soggetti a verifica. Ogni nuovo asset deve essere aggiunto a `ASSETS` nello script. Sorgenti, configurazione di verifica, template e test non sono pubblicati.
 
-## Prima della pubblicazione definitiva
+Il workflow `.github/workflows/pages.yml` controlla formattazione, layout, JavaScript, interazioni, dati verificati e artefatto, poi esegue il QA nel browser sull’artefatto stesso. Non formatta, non crea commit e non fa push. I branch di lavoro e le PR eseguono soltanto la verifica; il deploy è consentito solo da `main`, dopo i controlli. Non eseguire merge o pubblicazione senza autorizzazione.
 
-Verificare con il responsabile dell'associazione:
+## Dominio e approvazioni richieste
 
-- elenco esatto dei servizi autorizzati/erogati;
-- eventuale email e PEC pubbliche;
-- coordinate per donazioni;
-- posizione 5×1000 e relativa comunicazione;
-- documenti da pubblicare in Trasparenza;
-- fotografie autorizzate dei mezzi/volontari.
+Canonici, sitemap, robots e Open Graph sono predisposti per `https://abruzzoassistenza.com`. La build predefinita non crea CNAME e non modifica DNS o impostazioni Pages. La 404 usa percorsi root, adatti anche a URL inesistenti annidati. Se si vuole verificare la versione sul path di progetto prima del dominio:
 
-Il sito distingue sempre i servizi programmati dall'emergenza pubblica: in caso di emergenza invita a contattare **112 / 118**.
+```bash
+python3 scripts/build-site.py --base-path /abruzzo-assistenza/
+```
+
+Dopo approvazione e configurazione del dominio, il flag `--custom-domain` include un CNAME nell’artefatto. Con GitHub Actions, l’impostazione effettiva del dominio rimane in **Settings → Pages**: il file non sostituisce quell’operazione. Nessun record DNS è scritto dal progetto. Consultare la [documentazione GitHub sui domini](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages) e verificare HTTPS/redirect dopo la configurazione. Le politiche di caching sono gestite da GitHub Pages, non dal CSS o da intestazioni inventate nel repository.
+
+Prima della pubblicazione il responsabile deve validare identità formale del titolare, sede e identificativi fiscali, natura giuridica e iscrizioni, elenco dei servizi effettivi, disponibilità e dotazioni dei mezzi, documenti e obblighi applicabili. Per privacy: basi giuridiche effettive, destinatari, ruoli dei provider, trasferimenti e criteri di conservazione dei messaggi/log. La pagina descrive il funzionamento reale, inclusi IP/log di GitHub Pages; la revisione tecnica non è una certificazione legale. L’assenza di 5×1000 o pagamenti verificati non impedisce tecnicamente il funzionamento del sito: quei canali restano assenti.
+
+Il risultato e i controlli della sessione sono documentati in [RELEASE-AA-V2.md](RELEASE-AA-V2.md).

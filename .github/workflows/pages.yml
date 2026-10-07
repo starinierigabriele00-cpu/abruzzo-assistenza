@@ -1,60 +1,79 @@
-name: Deploy static site to GitHub Pages
+name: Validate and deploy static site
 
 on:
   push:
-    branches: ["main"]
+    branches: [main, feat/abruzzo-assistenza-v2]
+  pull_request:
   workflow_dispatch:
 
 permissions:
-  contents: write
-  pages: write
-  id-token: write
+  contents: read
 
 concurrency:
-  group: pages
+  group: pages-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  validate:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Node
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: "24"
-      - name: Validate static pages and shared layout
+      - name: Install pinned test tools (never shipped)
+        run: npm install --prefix "$RUNNER_TEMP/abruzzo-ui-check" jsdom@30.1.2 prettier@3.6.2 playwright@1.58.2 @axe-core/playwright@4.11.1 --no-audit --no-fund --ignore-scripts
+      - name: Check pages, configuration, layout and JavaScript
         run: |
           python3 scripts/check-site.py
           python3 scripts/sync-layout.py --check
           node --check assets/app.js
           node --test tests/request.test.mjs
-      - name: Validate interactions
-        run: |
-          npm install --prefix "$RUNNER_TEMP/abruzzo-ui-check" jsdom@30.1.2 --no-audit --no-fund --ignore-scripts
           ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" node --test tests/interactions.test.mjs
-      - name: Format site
+          python3 -m unittest discover -s tests -p 'test_*.py'
+          git diff --check
+      - name: Check formatting
         run: |
-          npx --yes prettier@3.6.2 --write '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' README.md assets/SOURCES.md .prettierrc.json .github/workflows/pages.yml
-          if ! git diff --quiet; then
-            git config user.name "github-actions[bot]"
-            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-            git add .
-            git commit -m "style: format site"
-            git push
-          fi
-      - name: Build Pages artifact
+          "$RUNNER_TEMP/abruzzo-ui-check/node_modules/.bin/prettier" --check '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' '*.md' assets/SOURCES.md config/site.json .prettierrc.json .github/workflows/pages.yml
+      - name: Build and verify published artifact
         run: python3 scripts/build-site.py
-      - name: Configure Pages
-        uses: actions/configure-pages@v5
-      - name: Upload site
-        uses: actions/upload-pages-artifact@v3
+      - name: Install the pinned Playwright browser
+        run: '"$RUNNER_TEMP/abruzzo-ui-check/node_modules/.bin/playwright" install --with-deps chromium'
+      - name: Browser QA on the published artifact
+        run: |
+          python3 scripts/preview-site.py --port 8080 --directory _site &
+          preview_pid=$!
+          trap 'kill "$preview_pid"' EXIT
+          ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" ABRUZZO_QA_OUTPUT="$RUNNER_TEMP/abruzzo-qa" node tests/browser.test.mjs
+      - name: Upload QA captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: responsive-qa
+          path: ${{ runner.temp }}/abruzzo-qa
+      - uses: actions/upload-artifact@v4
+        with:
+          name: production-candidate
+          path: _site
+          include-hidden-files: true
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: validate
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: production-candidate
+          path: _site
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
         with:
           path: _site
-      - name: Deploy
-        id: deployment
+      - id: deployment
         uses: actions/deploy-pages@v4

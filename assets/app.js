@@ -1,86 +1,110 @@
 "use strict";
 
-const SITE_CONFIG = {
+// Generated from config/site.json by scripts/sync-layout.py; do not edit this block.
+const SITE_CONFIG = /* config:start */ {
   phone: "+393336823324",
   whatsapp: "393336823324",
-  email: "abruzzoassistanzaodv@gmail.com",
-  pec: "",
-  donation: { iban: "", beneficiary: "", paypalUrl: "" },
-  fivePerMille: { enabled: true, taxId: "02227430663" },
-};
+  email: "abruzzoassistenzaodv@gmail.com",
+}; /* config:end */
 
 const SERVICE_LABELS = {
-  trasporti: "Dimissione / ricovero / visita",
-  dialisi: "Dialisi / terapia ricorrente",
-  disabili: "Trasporto disabili / servizi sociali",
+  trasporti: "Trasporto sanitario",
+  dialisi: "Dialisi o terapia ricorrente",
+  disabili: "Trasporto con carrozzina",
   nazionali: "Trasferimento nazionale",
-  esteri: "Trasferimento estero",
+  esteri: "Trasferimento internazionale",
   eventi: "Assistenza a evento",
   volontari: "Volontariato",
-  sostegno: "Sostegno / donazione",
+  sostegno: "Sostegno o collaborazione",
   altro: "Altro",
 };
-
+const TRANSPORT_SERVICES = ["trasporti", "dialisi", "disabili", "nazionali", "esteri"];
 const qs = (selector, root = document) => root.querySelector(selector);
 const qsa = (selector, root = document) => [...root.querySelectorAll(selector)];
 
 function whatsappUrl(message) {
-  return "https://wa.me/" + SITE_CONFIG.whatsapp + "?text=" + encodeURIComponent(message);
+  // A lone surrogate pasted by a user must not prevent the link from updating.
+  const text = String(message).replace(
+    /[\uD800-\uDBFF][\uDC00-\uDFFF]|[\uD800-\uDFFF]/g,
+    (character) => (character.length === 2 ? character : "\uFFFD"),
+  );
+  return "https://wa.me/" + SITE_CONFIG.whatsapp + "?text=" + encodeURIComponent(text);
 }
 
 function buildRequestMessage(data) {
-  const value = (name, fallback = "") => String(data.get(name) || "").trim() || fallback;
-  const rawDate = value("date");
-  const date = /^\d{4}-\d{2}-\d{2}$/.test(rawDate)
-    ? rawDate.split("-").reverse().join("/")
-    : "da definire";
-  return [
-    "Ciao Abruzzo Assistenza, vorrei chiedere informazioni.",
+  const value = (name) => String(data.get(name) || "").trim();
+  const rawService = value("service");
+  const service = Object.hasOwn(SERVICE_LABELS, rawService) ? rawService : "altro";
+  const lines = [
+    "Buongiorno Abruzzo Assistenza, vorrei chiedere informazioni.",
     "",
-    "Nome: " + value("name"),
-    "Telefono: " + value("phone"),
-    "Richiesta: " +
-      (Object.hasOwn(SERVICE_LABELS, value("service"))
-        ? SERVICE_LABELS[value("service")]
-        : "Altro"),
-    "Partenza: " + value("from", "da definire"),
-    "Destinazione: " + value("to", "da definire"),
-    "Data: " + date,
-    "",
-    "Note: " + value("notes", "nessuna"),
-  ].join("\n");
+    "Richiesta: " + SERVICE_LABELS[service],
+  ];
+  const add = (key, label) => {
+    if (value(key)) lines.push(label + ": " + value(key));
+  };
+  if (TRANSPORT_SERVICES.includes(service)) {
+    add("from", "Partenza");
+    add("to", "Destinazione");
+  }
+  if (TRANSPORT_SERVICES.includes(service) || service === "eventi") {
+    const date = value("date");
+    if (/^\d{4}-\d{2}-\d{2}$/.test(date))
+      lines.push("Data indicativa: " + date.split("-").reverse().join("/"));
+  }
+  if (service === "dialisi") add("frequency", "Giorni o frequenza");
+  if (service === "disabili") {
+    for (const [key, label] of [
+      ["wheelchair", "Utilizzo di carrozzina"],
+      ["stayWheelchair", "Necessità di restare sulla carrozzina durante il viaggio"],
+    ]) {
+      const answer = { si: "Sì", no: "No" }[value(key)] || "Da valutare";
+      lines.push(label + ": " + answer);
+    }
+  }
+  if (service === "eventi") {
+    add("place", "Luogo");
+    add("duration", "Durata indicativa");
+    add("eventType", "Tipo di manifestazione");
+  }
+  if (service === "volontari") {
+    add("zone", "Zona");
+    add("availability", "Disponibilità indicativa");
+    add("skills", "Eventuali competenze");
+  }
+  if (service === "sostegno") add("organization", "Organizzazione");
+  add("notes", "Altre informazioni");
+  lines.push("", "Resto in attesa di una valutazione e della conferma dei dettagli.");
+  return lines.join("\n");
 }
 
 qsa("[data-year]").forEach((element) => {
   element.textContent = new Date().getFullYear();
 });
 
-// Native submenu disclosures and a compact mobile navigation panel.
+// Native disclosures preserve keyboard, mouse, touch and no-JavaScript navigation.
 const navToggle = qs("[data-nav-toggle]");
 const nav = qs("[data-nav]");
 const header = qs(".site-header");
 if (navToggle && nav && header) {
-  const navLabel = qs("[data-nav-label]", navToggle);
-  const backdrop = qs("[data-nav-backdrop]", header);
   const groups = qsa("[data-nav-group]", nav);
   const mobile = window.matchMedia("(max-width: 900px)");
   const closeGroups = () =>
     groups.forEach((group) => {
       group.open = false;
     });
-  const setNavOpen = (open, restoreFocus = false) => {
+  const setOpen = (open, focus = false) => {
     navToggle.setAttribute("aria-expanded", String(open));
     nav.classList.toggle("is-open", open);
-    document.body.classList.toggle("nav-open", open && mobile.matches);
-    if (backdrop) backdrop.hidden = !open || !mobile.matches;
-    if (navLabel) navLabel.textContent = open ? "Chiudi" : "Menu";
+    qs("[data-nav-label]", navToggle).textContent = open ? "Chiudi" : "Menu";
     if (!open) closeGroups();
-    if (restoreFocus) navToggle.focus();
+    if (focus) navToggle.focus();
   };
+  document.documentElement.classList.add("js");
   navToggle.addEventListener("click", () =>
-    setNavOpen(navToggle.getAttribute("aria-expanded") !== "true"),
+    setOpen(navToggle.getAttribute("aria-expanded") !== "true"),
   );
-  qsa("a", nav).forEach((link) => link.addEventListener("click", () => setNavOpen(false)));
+  qsa("a", nav).forEach((link) => link.addEventListener("click", () => setOpen(false)));
   groups.forEach((group) => {
     qs("summary", group).addEventListener("click", () => {
       if (!group.open)
@@ -89,231 +113,98 @@ if (navToggle && nav && header) {
         });
     });
   });
-  if (backdrop) backdrop.addEventListener("click", () => setNavOpen(false, true));
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
-    if (navToggle.getAttribute("aria-expanded") === "true") {
-      setNavOpen(false, true);
-    } else {
-      const openGroup = groups.find((group) => group.open);
-      if (openGroup) {
+    if (navToggle.getAttribute("aria-expanded") === "true") setOpen(false, true);
+    else {
+      const open = groups.find((group) => group.open);
+      if (open) {
         closeGroups();
-        qs("summary", openGroup).focus();
+        qs("summary", open).focus();
       }
     }
   });
   document.addEventListener("click", (event) => {
-    if (!header.contains(event.target)) setNavOpen(false);
+    if (!header.contains(event.target)) setOpen(false);
   });
   header.addEventListener("focusout", (event) => {
-    if (event.relatedTarget && !header.contains(event.relatedTarget)) setNavOpen(false);
+    if (event.relatedTarget && !header.contains(event.relatedTarget)) setOpen(false);
   });
-  mobile.addEventListener("change", () => {
-    const focusWasInsideNav = nav.contains(document.activeElement);
-    setNavOpen(false, mobile.matches && focusWasInsideNav);
-  });
-  document.documentElement.classList.add("js");
+  mobile.addEventListener("change", () =>
+    setOpen(false, mobile.matches && nav.contains(document.activeElement)),
+  );
 }
 
-// Footer sections stay open on desktop and become native disclosures on mobile.
-const footerSections = qsa("[data-footer-disclosure]");
-if (footerSections.length) {
-  const compactFooter = window.matchMedia("(max-width: 700px)");
-  const syncFooter = () =>
-    footerSections.forEach((section) => {
-      section.open = !compactFooter.matches;
-      qs("summary", section).tabIndex = compactFooter.matches ? 0 : -1;
-    });
-  footerSections.forEach((section) => {
-    qs("summary", section).addEventListener("click", (event) => {
-      if (!compactFooter.matches) event.preventDefault();
-    });
+// A compact service index never hides the actual service content.
+const serviceIndex = qs("[data-service-index]");
+if (serviceIndex) {
+  const compact = window.matchMedia("(max-width: 900px)");
+  const summary = qs("summary", serviceIndex);
+  const syncIndex = () => {
+    serviceIndex.open = !compact.matches;
+    summary.tabIndex = compact.matches ? 0 : -1;
+  };
+  summary.addEventListener("click", (event) => {
+    if (!compact.matches) event.preventDefault();
   });
-  compactFooter.addEventListener("change", syncFooter);
-  syncFooter();
+  qsa("a", serviceIndex).forEach((link) =>
+    link.addEventListener("click", () => {
+      if (compact.matches) serviceIndex.open = false;
+    }),
+  );
+  compact.addEventListener("change", syncIndex);
+  syncIndex();
 }
-
-qsa("[data-whatsapp]").forEach((link) => {
-  const message =
-    link.dataset.whatsappMessage ||
-    "Ciao Abruzzo Assistenza, vorrei chiedere informazioni su un servizio.";
-  link.href = whatsappUrl(message);
-  link.target = "_blank";
-  link.rel = "noopener noreferrer";
-});
 
 const requestForm = qs("[data-request-form]");
-
-// The mobile home is a service chooser with two real audience paths.
-const audienceTabs = qs("[data-audience-tabs]");
-if (audienceTabs) {
-  const tabs = qsa("[data-audience-tab]", audienceTabs);
-  const panels = qsa("[data-audience-panel]");
-  const selectAudience = (selected) => {
-    tabs.forEach((tab) => {
-      const active = tab === selected;
-      tab.setAttribute("aria-selected", String(active));
-      tab.tabIndex = active ? 0 : -1;
-    });
-    panels.forEach((panel) => {
-      panel.hidden = panel.dataset.audiencePanel !== selected.dataset.audienceTab;
-    });
-  };
-  tabs.forEach((tab, index) => {
-    tab.addEventListener("click", () => selectAudience(tab));
-    tab.addEventListener("keydown", (event) => {
-      const next =
-        event.key === "ArrowRight"
-          ? (index + 1) % tabs.length
-          : event.key === "ArrowLeft"
-            ? (index - 1 + tabs.length) % tabs.length
-            : event.key === "Home"
-              ? 0
-              : event.key === "End"
-                ? tabs.length - 1
-                : null;
-      if (next === null) return;
-      event.preventDefault();
-      selectAudience(tabs[next]);
-      tabs[next].focus();
-    });
-  });
-  audienceTabs.hidden = false;
-  audienceTabs.parentElement.classList.add("is-enhanced");
-  selectAudience(tabs[0]);
-}
-
-// Compact mobile service sheets; desktop keeps every service fully readable.
-const serviceSections = qsa(".service-detail").filter((section) =>
-  qs("[data-service-toggle]", section),
-);
-if (serviceSections.length) {
-  const compactServices = window.matchMedia("(max-width: 700px)");
-  const setServiceOpen = (section, open) => {
-    qs("[data-service-toggle]", section).setAttribute("aria-expanded", String(open));
-    qs("[data-service-body]", section).hidden = !open;
-  };
-  const hashSection = () =>
-    serviceSections.find((section) => "#" + section.id === window.location.hash);
-  const revealHashService = () => {
-    const target = hashSection();
-    if (!compactServices.matches || !target) return;
-    serviceSections.forEach((section) => setServiceOpen(section, section === target));
-    // The fragment must be aligned after collapsing the preceding sheets.
-    requestAnimationFrame(() => target.scrollIntoView({ block: "start", behavior: "instant" }));
-  };
-  const syncServices = () => {
-    const target = hashSection();
-    serviceSections.forEach((section) => {
-      qs("[data-service-toggle]", section).disabled = !compactServices.matches;
-      setServiceOpen(section, !compactServices.matches || section === target);
-    });
-  };
-  serviceSections.forEach((section) => {
-    qs("[data-service-toggle]", section).addEventListener("click", () => {
-      if (!compactServices.matches) return;
-      const open = qs("[data-service-body]", section).hidden;
-      serviceSections.forEach((item) => setServiceOpen(item, item === section && open));
-    });
-  });
-  window.addEventListener("hashchange", revealHashService);
-  window.addEventListener("load", revealHashService, { once: true });
-  qsa(".service-index a").forEach((link) => {
-    link.addEventListener("click", () => {
-      if (link.getAttribute("href") === window.location.hash) revealHashService();
-    });
-  });
-  compactServices.addEventListener("change", syncServices);
-  syncServices();
-  revealHashService();
-}
-
 if (requestForm) {
-  const preview = qs("[data-message-preview]", requestForm);
   const messageText = qs("[data-message-text]", requestForm);
   const messageLink = qs("[data-message-link]", requestForm);
-  const previewButton = qs("[data-preview-button]", requestForm);
   const copyStatus = qs("[data-copy-status]", requestForm);
-  const service = requestForm.elements.namedItem("service");
-  const requestedService = new URLSearchParams(window.location.search).get("servizio");
-  if (Object.hasOwn(SERVICE_LABELS, requestedService)) service.value = requestedService;
-
-  const dateInput = requestForm.elements.namedItem("date");
-  const now = new Date();
-  dateInput.min = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("-");
-
-  previewButton.hidden = false;
-  previewButton.disabled = false;
-  const clearPreview = () => {
-    preview.hidden = true;
-    messageText.textContent = "";
-    messageLink.href = "https://wa.me/" + SITE_CONFIG.whatsapp;
-    copyStatus.textContent = "";
-    previewButton.textContent = "Prepara l’anteprima →";
-  };
-  requestForm.addEventListener("input", clearPreview);
-  requestForm.addEventListener("change", clearPreview);
-  requestForm.addEventListener("reset", clearPreview);
-  requestForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    if (!requestForm.reportValidity()) return;
+  const radios = qsa('input[name="service"]', requestForm);
+  const requested = new URLSearchParams(window.location.search).get("servizio");
+  if (Object.hasOwn(SERVICE_LABELS, requested))
+    radios.find((radio) => radio.value === requested).checked = true;
+  const update = () => {
+    const selected = radios.find((radio) => radio.checked)?.value || "trasporti";
+    qsa("[data-for]", requestForm).forEach((field) => {
+      const relevant =
+        field.dataset.for === "all" || field.dataset.for.split(" ").includes(selected);
+      field.hidden = !relevant;
+      qsa("input, select, textarea", field).forEach((control) => {
+        control.disabled = !relevant;
+      });
+    });
     const message = buildRequestMessage(new FormData(requestForm));
-    // Never render user input as HTML or navigate to an external service on submit.
     messageText.textContent = message;
     messageLink.href = whatsappUrl(message);
-    preview.hidden = false;
-    previewButton.textContent = "Aggiorna il messaggio →";
-    qs("#preview-heading", requestForm).focus({ preventScroll: true });
-    preview.scrollIntoView({ block: "start", behavior: "instant" });
+    copyStatus.textContent = "";
+  };
+  requestForm.hidden = false;
+  update();
+  requestForm.addEventListener("input", update);
+  requestForm.addEventListener("change", update);
+  requestForm.addEventListener("submit", (event) => event.preventDefault());
+  requestForm.addEventListener("reset", () => {
+    // Reset defaults are applied after the reset event has completed.
+    setTimeout(update, 0);
   });
   qs("[data-copy-message]", requestForm).addEventListener("click", async () => {
+    const message = messageText.textContent;
     try {
-      await navigator.clipboard.writeText(messageText.textContent);
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(message);
       copyStatus.textContent = "Messaggio copiato.";
     } catch {
+      // Select the real, visible text so a manual copy is possible without permission.
+      const selection = window.getSelection();
+      const range = document.createRange();
+      range.selectNodeContents(messageText);
+      messageText.focus({ preventScroll: true });
+      selection.removeAllRanges();
+      selection.addRange(range);
       copyStatus.textContent =
-        "Copia non disponibile: seleziona il testo dell’anteprima oppure aprilo su WhatsApp.";
+        "Copia automatica non disponibile. Il testo è selezionato: usa Copia sul dispositivo oppure continua su WhatsApp.";
     }
   });
 }
-
-const donationBlock = qs("[data-donation-block]");
-const ibanRow = qs("[data-iban-row]");
-const paypalRow = qs("[data-paypal-row]");
-const ibanElement = qs("[data-iban]");
-const paypalElement = qs("[data-paypal]");
-if (SITE_CONFIG.donation.iban || SITE_CONFIG.donation.paypalUrl) {
-  if (donationBlock) donationBlock.hidden = false;
-  if (SITE_CONFIG.donation.iban && ibanRow && ibanElement) {
-    ibanRow.hidden = false;
-    ibanElement.textContent = SITE_CONFIG.donation.iban;
-    const beneficiary = qs("[data-beneficiary]");
-    if (beneficiary) beneficiary.textContent = SITE_CONFIG.donation.beneficiary;
-  }
-  if (SITE_CONFIG.donation.paypalUrl && paypalRow && paypalElement) {
-    paypalRow.hidden = false;
-    paypalElement.href = SITE_CONFIG.donation.paypalUrl;
-  }
-}
-const fiveBlock = qs("[data-fivepermille-block]");
-if (SITE_CONFIG.fivePerMille.enabled && fiveBlock) fiveBlock.hidden = false;
-
-qsa("[data-copy-target='iban']").forEach((button) => {
-  button.addEventListener("click", async () => {
-    if (!SITE_CONFIG.donation.iban) return;
-    try {
-      await navigator.clipboard.writeText(SITE_CONFIG.donation.iban);
-      const original = button.textContent;
-      button.textContent = "Copiato";
-      setTimeout(() => {
-        button.textContent = original;
-      }, 1600);
-    } catch {
-      button.textContent = "Seleziona e copia";
-    }
-  });
-});
