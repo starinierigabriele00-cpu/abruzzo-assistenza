@@ -3017,7 +3017,7 @@ select:focus {
 
   .brand img {
     background: #f5f7f8;
-    box-shadow: 0 0 0 1px rgba(255,255,255,.1);
+    box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.1);
   }
 
   .brand small {
@@ -3082,8 +3082,8 @@ select:focus {
   }
 
   .button-secondary {
-    background: rgba(255,255,255,.04);
-    border-color: rgba(255,255,255,.18);
+    background: rgba(255, 255, 255, 0.04);
+    border-color: rgba(255, 255, 255, 0.18);
   }
 
   .hero {
@@ -3120,7 +3120,7 @@ select:focus {
   }
 
   .hero-contact {
-    border-top-color: rgba(255,255,255,.13);
+    border-top-color: rgba(255, 255, 255, 0.13);
   }
 
   .hero-media {
@@ -3182,11 +3182,9 @@ select:focus {
   }
 
   .contact-callout {
-    background:
-      linear-gradient(135deg, rgba(63, 137, 149, .18), transparent 55%),
-      #182126;
+    background: linear-gradient(135deg, rgba(63, 137, 149, 0.18), transparent 55%), #182126;
     border: 1px solid #2d3940;
-    box-shadow: 0 18px 46px rgba(10, 16, 20, .16);
+    box-shadow: 0 18px 46px rgba(10, 16, 20, 0.16);
   }
 
   .contact-callout .eyebrow,
@@ -3202,8 +3200,7 @@ select:focus {
 
   .page-hero {
     background:
-      radial-gradient(circle at 76% 10%, rgba(73, 146, 159, .14), transparent 22rem),
-      #182126;
+      radial-gradient(circle at 76% 10%, rgba(73, 146, 159, 0.14), transparent 22rem), #182126;
     border-bottom-color: #2c363c;
     color: #f5f8f9;
   }
@@ -3230,9 +3227,7 @@ select:focus {
   }
 
   .contact-primary {
-    background:
-      linear-gradient(145deg, rgba(76, 157, 170, .18), transparent 60%),
-      #182126;
+    background: linear-gradient(145deg, rgba(76, 157, 170, 0.18), transparent 60%), #182126;
     color: #fff;
   }
 
@@ -3290,9 +3285,7 @@ select:focus {
   }
 
   .five-permille-promo .notice-card {
-    background:
-      linear-gradient(135deg, rgba(76, 157, 170, .18), transparent 55%),
-      #172126;
+    background: linear-gradient(135deg, rgba(76, 157, 170, 0.18), transparent 55%), #172126;
     border-color: #2d3a40;
     color: #f2f6f7;
     box-shadow: 0 20px 50px rgba(17, 28, 34, 0.16);
@@ -3374,8 +3367,7 @@ select:focus {
 
   body {
     background:
-      radial-gradient(circle at 50% -80px, rgba(72, 137, 148, .12), transparent 18rem),
-      #dfe4e7;
+      radial-gradient(circle at 50% -80px, rgba(72, 137, 148, 0.12), transparent 18rem), #dfe4e7;
   }
 
   .container {
@@ -3447,7 +3439,7 @@ select:focus {
     border-radius: 20px;
     overflow: hidden;
     background: #1d262b;
-    box-shadow: 0 18px 44px rgba(5, 10, 13, .28);
+    box-shadow: 0 18px 44px rgba(5, 10, 13, 0.28);
   }
 
   .page-index .hero-media img {
@@ -3514,7 +3506,7 @@ select:focus {
   .mobile-audience-tabs button[aria-selected="true"] {
     background: #1c272c;
     color: #eaf2f4;
-    box-shadow: 0 5px 14px rgba(20, 31, 36, .15);
+    box-shadow: 0 5px 14px rgba(20, 31, 36, 0.15);
   }
 
   .mobile-services {
@@ -3544,8 +3536,8 @@ select:focus {
     padding: 18px;
     border: 1px solid #c8d2d7;
     border-radius: 18px;
-    background: rgba(248, 250, 251, .9);
-    box-shadow: 0 12px 28px rgba(32, 47, 54, .08);
+    background: rgba(248, 250, 251, 0.9);
+    box-shadow: 0 12px 28px rgba(32, 47, 54, 0.08);
   }
 
   .mobile-service-icon {
@@ -3574,7 +3566,7 @@ select:focus {
     background: #1c272c;
     border-color: #1c272c;
     color: #eef4f5;
-    box-shadow: 0 10px 24px rgba(17, 30, 36, .12);
+    box-shadow: 0 10px 24px rgba(17, 30, 36, 0.12);
   }
 
   .mobile-help {
@@ -3585,8 +3577,7 @@ select:focus {
     margin: 0;
     padding: 28px 0 30px;
     background:
-      radial-gradient(circle at 90% 0%, rgba(77, 151, 163, .15), transparent 16rem),
-      #182126;
+      radial-gradient(circle at 90% 0%, rgba(77, 151, 163, 0.15), transparent 16rem), #182126;
   }
 
   .page-heading h1 {
@@ -3620,14 +3611,14 @@ select:focus {
     background: #edf1f3;
     border-color: #c8d1d6;
     min-height: 42px;
-    box-shadow: 0 5px 14px rgba(30, 44, 51, .04);
+    box-shadow: 0 5px 14px rgba(30, 44, 51, 0.04);
   }
 
   .page-servizi .service-detail {
     border-radius: 18px;
     border-color: #c8d1d6;
-    background: rgba(248, 250, 251, .9);
-    box-shadow: 0 12px 28px rgba(32, 47, 54, .06);
+    background: rgba(248, 250, 251, 0.9);
+    box-shadow: 0 12px 28px rgba(32, 47, 54, 0.06);
     overflow: hidden;
   }
 
@@ -3647,15 +3638,15 @@ select:focus {
 
   .contact-primary {
     border-radius: 18px;
-    box-shadow: 0 16px 36px rgba(15, 26, 31, .18);
+    box-shadow: 0 16px 36px rgba(15, 26, 31, 0.18);
   }
 
   .request-form {
     padding: 20px;
     border: 1px solid #c8d1d6;
     border-radius: 18px;
-    background: rgba(248,250,251,.88);
-    box-shadow: 0 12px 28px rgba(32,47,54,.06);
+    background: rgba(248, 250, 251, 0.88);
+    box-shadow: 0 12px 28px rgba(32, 47, 54, 0.06);
   }
 
   .contact-secondary {
@@ -3674,19 +3665,19 @@ select:focus {
 
 @media screen and (prefers-reduced-motion: no-preference) {
   .page-index .hero-copy > .eyebrow {
-    animation: medical-rise .5s cubic-bezier(.2,.8,.2,1) both;
+    animation: medical-rise 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .page-index .hero h1 {
-    animation: medical-rise .58s .04s cubic-bezier(.2,.8,.2,1) both;
+    animation: medical-rise 0.58s 0.04s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .page-index .hero .lead {
-    animation: medical-rise .62s .09s cubic-bezier(.2,.8,.2,1) both;
+    animation: medical-rise 0.62s 0.09s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .page-index .hero-media {
-    animation: medical-rise .68s .14s cubic-bezier(.2,.8,.2,1) both;
+    animation: medical-rise 0.68s 0.14s cubic-bezier(0.2, 0.8, 0.2, 1) both;
   }
 
   .mobile-service,
@@ -3694,13 +3685,13 @@ select:focus {
   .audience-panel,
   .page-servizi .service-detail {
     transition:
-      transform .22s cubic-bezier(.2,.8,.2,1),
-      box-shadow .22s cubic-bezier(.2,.8,.2,1),
-      border-color .22s ease;
+      transform 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+      box-shadow 0.22s cubic-bezier(0.2, 0.8, 0.2, 1),
+      border-color 0.22s ease;
   }
 
   .mobile-service:active {
-    transform: scale(.985);
+    transform: scale(0.985);
   }
 
   @keyframes medical-rise {
