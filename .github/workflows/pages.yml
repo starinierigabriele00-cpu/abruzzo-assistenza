@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -37,8 +37,16 @@ jobs:
         run: |
           npm install --prefix "$RUNNER_TEMP/abruzzo-ui-check" jsdom@30.1.2 --no-audit --no-fund --ignore-scripts
           ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" node --test tests/interactions.test.mjs
-      - name: Check formatting
-        run: npx --yes prettier@3.6.2 --check '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' README.md assets/SOURCES.md .prettierrc.json .github/workflows/pages.yml
+      - name: Format site
+        run: |
+          npx --yes prettier@3.6.2 --write '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' README.md assets/SOURCES.md .prettierrc.json .github/workflows/pages.yml
+          if ! git diff --quiet; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add .
+            git commit -m "style: format site"
+            git push
+          fi
       - name: Build Pages artifact
         run: python3 scripts/build-site.py
       - name: Configure Pages
