@@ -151,6 +151,8 @@ def sync_page(text, page, config):
     canonical = config['domain'] + ('/' if page == 'index.html' else '/' + page)
     def metadata(match):
         tag = match[0]
+        if 'name="viewport"' in tag:
+            return re.sub(r'content="[^"]*"', 'content="width=device-width,initial-scale=1,viewport-fit=cover"', tag)
         if re.search(r'rel="canonical"', tag):
             return re.sub(r'href="[^"]*"', 'href="' + canonical + '"', tag)
         for key, value in [('og:url', canonical), ('og:image', config['domain'] + '/assets/social-preview.jpg')]:

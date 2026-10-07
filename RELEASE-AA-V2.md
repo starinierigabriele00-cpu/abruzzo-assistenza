@@ -1,6 +1,6 @@
 # AA.V2 — candidato per la pubblicazione
 
-Verifica del 7 ottobre 2026. Redesign implementato nel repository esistente; nessun push, merge o deploy in produzione. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
+Verifica del 7 ottobre 2026. Questo rapporto registra il candidato iniziale, prima dell’autorizzazione alla pubblicazione: nessun push, merge o deploy era stato eseguito alla consegna. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
 
 ## Implementation summary
 
@@ -86,6 +86,8 @@ Il candidato tecnico è compilato e verificato. Prima del deploy restano questi 
 - **Dominio:** il controllo DNS locale del 7 ottobre ha restituito NXDOMAIN per A/AAAA di `abruzzoassistenza.com`; HTTPS non verificabile. DNS, dominio in Settings → Pages e certificato non sono stati configurati. Nessun record inventato o modificato.
 
 ## Git state e next action
+
+Successivamente il committente ha autorizzato il deploy GitHub, chiedendo prima la correzione della fascia chiara sotto il footer su Safari iPhone. Applicati fondo grafite della pagina, `viewport-fit=cover` e inset di sicurezza, con controllo browser della continuità del fondo e del limite inferiore del documento. La CI ora rileva il percorso effettivo di Pages e verifica il medesimo artefatto sul relativo path. Destinazione esistente verificata: `https://starinierigabriele00-cpu.github.io/abruzzo-assistenza/`, senza dominio personalizzato. L’esito effettivo del deploy è riportato nel messaggio di consegna; la fotografia di stato sotto si riferisce al candidato iniziale.
 
 Branch locale: `feat/abruzzo-assistenza-v2`, derivato da `main` a `fd22e37`. Le modifiche sono raccolte in un commit locale di consegna; hash e stato finale sono riportati nel messaggio di consegna. Nessun push, PR, merge o deploy.
 

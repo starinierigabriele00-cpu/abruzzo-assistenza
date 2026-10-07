@@ -78,6 +78,10 @@ ABRUZZO_TEST_DEPS=/tmp/abruzzo-ui-check ABRUZZO_BROWSER=/usr/bin/chromium node t
 
 Il workflow `.github/workflows/pages.yml` controlla formattazione, layout, JavaScript, interazioni, dati verificati e artefatto, poi esegue il QA nel browser sull’artefatto stesso. Non formatta, non crea commit e non fa push. I branch di lavoro e le PR eseguono soltanto la verifica; il deploy è consentito solo da `main`, dopo i controlli. Non eseguire merge o pubblicazione senza autorizzazione.
 
+La CI legge l’URL effettivo dalle impostazioni Pages con permessi di sola lettura e passa il relativo percorso alla build e al server di QA. La 404 funziona quindi anche sul path `/abruzzo-assistenza/`; un futuro dominio root viene riconosciuto dalle impostazioni senza attivarlo dal codice. Per riprodurre quel QA locale: `python3 scripts/preview-site.py --directory _site --base-path /abruzzo-assistenza/`, con `ABRUZZO_BASE_URL=http://127.0.0.1:8080/abruzzo-assistenza` nei test browser.
+
+Su iPhone, `viewport-fit=cover`, gli inset di sicurezza e lo sfondo grafite di `html`/`body` mantengono continuità sotto il footer. Il contenuto principale conserva il fondo chiaro. Il rendering delle barre native di Safari deve essere verificato sul dispositivo reale; le emulazioni controllano lo sfondo, i limiti del documento e i collegamenti.
+
 ## Dominio e approvazioni richieste
 
 Canonici, sitemap, robots e Open Graph sono predisposti per `https://abruzzoassistenza.com`. La build predefinita non crea CNAME e non modifica DNS o impostazioni Pages. La 404 usa percorsi root, adatti anche a URL inesistenti annidati. Se si vuole verificare la versione sul path di progetto prima del dominio:

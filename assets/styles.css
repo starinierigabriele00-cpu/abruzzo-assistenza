@@ -44,6 +44,7 @@
   --section-space: clamp(64px, 7vw, 104px);
   --container: 1200px;
   --header-height: 88px;
+  --sticky-offset: calc(var(--header-height) + env(safe-area-inset-top, 0px));
   --title: clamp(40px, 4.3vw, 64px);
   --title-section: clamp(30px, 3vw, 44px);
   --hero-position: 58% 48%;
@@ -54,17 +55,21 @@
   box-sizing: border-box;
 }
 html {
-  scroll-padding-top: calc(var(--header-height) + 24px);
+  background: var(--graphite);
+  scroll-padding-top: calc(var(--sticky-offset) + 24px);
 }
 body {
   margin: 0;
   color: var(--ink);
-  background: var(--paper);
+  background: var(--graphite);
   font:
     400 17px/1.65 "IBM Plex Sans",
     Arial,
     sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+main {
+  background: var(--paper);
 }
 [hidden] {
   display: none !important;
@@ -153,6 +158,8 @@ p a {
 .container {
   width: min(calc(100% - 96px), var(--container));
   margin-inline: auto;
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
 }
 .narrow {
   max-width: 800px;
@@ -249,6 +256,7 @@ p a {
   background: rgb(251 252 252 / 95%);
   border-bottom: 1px solid rgb(206 218 222 / 75%);
   backdrop-filter: blur(12px);
+  padding-top: env(safe-area-inset-top, 0px);
 }
 .nav-wrap {
   min-height: var(--header-height);
@@ -637,7 +645,7 @@ figcaption {
 }
 .service-index {
   position: sticky;
-  top: calc(var(--header-height) + 24px);
+  top: calc(var(--sticky-offset) + 24px);
 }
 .service-index summary {
   list-style: none;
@@ -872,7 +880,7 @@ figcaption {
 }
 .message-preview {
   position: sticky;
-  top: calc(var(--header-height) + 24px);
+  top: calc(var(--sticky-offset) + 24px);
   background: var(--glass);
   border: 1px solid rgb(174 196 205 / 70%);
   box-shadow: var(--shadow);
@@ -1144,7 +1152,7 @@ figcaption {
 .site-footer {
   background: var(--graphite);
   color: var(--white);
-  padding-block: 52px 24px;
+  padding-block: 52px calc(24px + env(safe-area-inset-bottom, 0px));
   font-size: 14px;
 }
 .footer-grid {
@@ -1328,10 +1336,12 @@ figcaption {
     left: 0;
     margin: 0;
     padding: 20px 32px 28px;
+    padding-left: calc(32px + env(safe-area-inset-left, 0px));
+    padding-right: calc(32px + env(safe-area-inset-right, 0px));
     background: var(--white);
     border-bottom: 1px solid var(--line);
     box-shadow: var(--shadow);
-    max-height: calc(100dvh - var(--header-height));
+    max-height: calc(100dvh - var(--sticky-offset));
     overflow-y: auto;
     flex-direction: column;
     align-items: stretch;
@@ -1504,7 +1514,8 @@ figcaption {
     height: 18px;
   }
   .js .site-nav.is-open {
-    padding-inline: 20px;
+    padding-left: calc(20px + env(safe-area-inset-left, 0px));
+    padding-right: calc(20px + env(safe-area-inset-right, 0px));
   }
   .hero {
     align-items: start;

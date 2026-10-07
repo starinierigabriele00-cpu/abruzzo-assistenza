@@ -62,6 +62,30 @@ try {
     for (const name of pages) {
       await page.goto(`${base}/${name}.html`, { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      const footerCanvas = await page.evaluate(() => {
+        const footer = document.querySelector(".site-footer");
+        return {
+          html: getComputedStyle(document.documentElement).backgroundColor,
+          body: getComputedStyle(document.body).backgroundColor,
+          footer: getComputedStyle(footer).backgroundColor,
+          bottomGap:
+            document.documentElement.scrollHeight -
+            (footer.getBoundingClientRect().bottom + scrollY),
+          viewport: document.querySelector('meta[name="viewport"]').content,
+        };
+      });
+      assert.equal(
+        footerCanvas.html,
+        footerCanvas.footer,
+        `${name}: canvas below footer must stay dark`,
+      );
+      assert.equal(
+        footerCanvas.body,
+        footerCanvas.footer,
+        `${name}: Safari page background must match footer`,
+      );
+      assert.ok(Math.abs(footerCanvas.bottomGap) <= 1, `${name}: blank area follows footer`);
+      assert.match(footerCanvas.viewport, /viewport-fit=cover/);
       if (name === "index" && width === 390)
         report.metrics = {
           context:

@@ -16,6 +16,9 @@ concurrency:
 jobs:
   validate:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -36,15 +39,23 @@ jobs:
         run: |
           "$RUNNER_TEMP/abruzzo-ui-check/node_modules/.bin/prettier" --check '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' '*.md' assets/SOURCES.md config/site.json .prettierrc.json .github/workflows/pages.yml
       - name: Build and verify published artifact
-        run: python3 scripts/build-site.py
+        id: build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          pages_url=$(gh api "repos/$GITHUB_REPOSITORY/pages" --jq .html_url)
+          pages_base_path=$(python3 -c 'from urllib.parse import urlsplit; import sys; print(urlsplit(sys.argv[1]).path or "/")' "$pages_url")
+          echo "base_path=$pages_base_path" >> "$GITHUB_OUTPUT"
+          python3 scripts/build-site.py --base-path "$pages_base_path"
       - name: Install the pinned Playwright browser
         run: '"$RUNNER_TEMP/abruzzo-ui-check/node_modules/.bin/playwright" install --with-deps chromium'
       - name: Browser QA on the published artifact
         run: |
-          python3 scripts/preview-site.py --port 8080 --directory _site &
+          site_path="${{ steps.build.outputs.base_path }}"
+          python3 scripts/preview-site.py --port 8080 --directory _site --base-path "$site_path" &
           preview_pid=$!
           trap 'kill "$preview_pid"' EXIT
-          ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" ABRUZZO_QA_OUTPUT="$RUNNER_TEMP/abruzzo-qa" node tests/browser.test.mjs
+          ABRUZZO_BASE_URL="http://127.0.0.1:8080${site_path%/}" ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" ABRUZZO_QA_OUTPUT="$RUNNER_TEMP/abruzzo-qa" node tests/browser.test.mjs
       - name: Upload QA captures
         if: always()
         uses: actions/upload-artifact@v4
