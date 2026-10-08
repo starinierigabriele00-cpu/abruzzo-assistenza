@@ -121,8 +121,7 @@ try {
       assert.match(footerCanvas.viewport, /viewport-fit=cover/);
       if (name === "index" && width === 390)
         report.metrics = {
-          context:
-            "Chromium locale, cache calda, nessun throttling; non misure sul dominio pubblico",
+          context: `Chromium, endpoint ${base}, cache calda, nessun throttling; non una misura Lighthouse`,
           ...(await page.evaluate(() => window.__observed)),
         };
       // Full-page capture alone does not load below-fold lazy images.
@@ -283,6 +282,7 @@ try {
     const booking = page.locator(`#${service} .service-start .button`);
     assert.match(await booking.innerText(), /^Prenota/);
     await booking.click();
+    await page.locator("[data-request-form]").waitFor({ state: "visible" });
     assert.equal(new URL(page.url()).pathname, new URL(siteURL("contatti.html")).pathname);
     assert.equal(new URL(page.url()).searchParams.get("servizio"), service);
     assert.equal(await page.locator('input[name="service"]:checked').inputValue(), service);
