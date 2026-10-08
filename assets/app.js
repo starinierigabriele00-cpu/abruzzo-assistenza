@@ -202,3 +202,28 @@ if (requestForm) {
     }
   });
 }
+// The 5×1000 tax ID stays readable even without JavaScript.
+qsa("[data-copy-tax-id]").forEach((button) => {
+  const card = button.closest(".five-card");
+  const code = card && qs("[data-tax-id]", card);
+  const status = card && qs("[data-tax-copy-status]", card);
+  if (!code || !status) return;
+  button.hidden = false;
+  button.addEventListener("click", async () => {
+    const value = code.textContent.trim();
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(value);
+      status.textContent = "Codice fiscale copiato.";
+    } catch {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      status.textContent = "Seleziona e copia il codice fiscale evidenziato.";
+    }
+  });
+});
