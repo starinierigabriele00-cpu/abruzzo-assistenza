@@ -158,6 +158,13 @@ if (serviceIndex) {
 
 const requestForm = qs("[data-request-form]");
 if (requestForm) {
+  const notesDisclosure = qs("[data-request-notes]", requestForm);
+  const smallScreen = window.matchMedia("(max-width: 700px)");
+  const syncNotes = () => {
+    notesDisclosure.open = !smallScreen.matches;
+  };
+  smallScreen.addEventListener("change", syncNotes);
+  syncNotes();
   const messageText = qs("[data-message-text]", requestForm);
   const messageLink = qs("[data-message-link]", requestForm);
   const copyStatus = qs("[data-copy-status]", requestForm);

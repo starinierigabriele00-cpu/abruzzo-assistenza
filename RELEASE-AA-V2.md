@@ -87,6 +87,20 @@ Il candidato tecnico è compilato e verificato. Prima del deploy restano questi 
 
 ## Git state e next action
 
+### Revisione smartphone — 8 ottobre 2026
+
+Acquisiti e rivisti screenshot di tutte le nove pagine a 390 × 700 e 360 × 640 px, più menu espanso, indice, campi e anteprima del composer e landscape a 844 × 390. Corretto il menu che si disponeva su più colonne nei viewport bassi; ora scorre verticalmente. I servizi della home hanno testi a tutta larghezza, l’indice dei servizi rimane disponibile durante lo scorrimento e le ancore non sono coperte dagli elementi sticky. Nel composer: note facoltative richiudibili, collegamenti tra dettagli e anteprima, valori conservati durante la modifica. Eliminato il collegamento di contatto duplicato nella topbar desktop; mantenuto nel menu mobile.
+
+| Misura osservata a 390 px                   | Prima   | Dopo    |
+| ------------------------------------------- | ------- | ------- |
+| Altezza footer                              | 753 px  | 530 px  |
+| Altezza hero                                | 728 px  | 648 px  |
+| Altezza pagina Contatti, richiesta iniziale | 3652 px | 3296 px |
+
+Verifica aggiornata: 9 test messaggi, 18 interazioni e 7 pubblicazione, **34 test superati**; 45 viste responsive, zero violazioni axe nelle 18 viste analizzate, reflow a 320 px e nove pagine senza JavaScript. Verificati anche menu landscape, passaggio dettagli/anteprima e indice sticky. Screenshot e misure del confronto: `/tmp/abruzzo-mobile-before/`, `/tmp/abruzzo-mobile-after/`; QA completo: `/tmp/abruzzo-mobile-final/`. I valori Lighthouse sopra rimangono le misure di laboratorio del candidato iniziale; non sono attribuiti a questa revisione. Le barre native di Safari richiedono il dispositivo reale.
+
+La versione con correzione safe area è già stata pubblicata con successo da GitHub Actions sul commit `7e4e991`, [run 37693225991](https://github.com/starinierigabriele00-cpu/abruzzo-assistenza/actions/runs/37693225991). L’esito della successiva revisione smartphone è riportato nel messaggio di consegna.
+
 Successivamente il committente ha autorizzato il deploy GitHub, chiedendo prima la correzione della fascia chiara sotto il footer su Safari iPhone. Applicati fondo grafite della pagina, `viewport-fit=cover` e inset di sicurezza, con controllo browser della continuità del fondo e del limite inferiore del documento. La CI ora rileva il percorso effettivo di Pages e verifica il medesimo artefatto sul relativo path. Destinazione esistente verificata: `https://starinierigabriele00-cpu.github.io/abruzzo-assistenza/`, senza dominio personalizzato. L’esito effettivo del deploy è riportato nel messaggio di consegna; la fotografia di stato sotto si riferisce al candidato iniziale.
 
 Branch locale: `feat/abruzzo-assistenza-v2`, derivato da `main` a `fd22e37`. Le modifiche sono raccolte in un commit locale di consegna; hash e stato finale sono riportati nel messaggio di consegna. Nessun push, PR, merge o deploy.

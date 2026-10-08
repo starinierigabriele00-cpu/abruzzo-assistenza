@@ -150,6 +150,24 @@ test("reset clears all values and returns to the initial transport choice", asyn
   assert.equal(p.document.querySelector("form").elements.wheelchair.value, "");
   assert.doesNotMatch(message(p), /Pescara|carrozzina/);
 });
+
+test("optional notes collapse on phones without losing editable request details", async (t) => {
+  const p = page(t);
+  const notes = p.document.querySelector("[data-request-notes]");
+  assert.equal(notes.open, false);
+  notes.querySelector("summary").click();
+  assert.equal(notes.open, true);
+  input(p, "notes", "Ingresso dal cortile");
+  assert.match(message(p), /Ingresso dal cortile/);
+  p.resize(1440);
+  assert.equal(notes.open, true);
+  p.resize(390);
+  assert.equal(notes.open, false);
+  assert.match(message(p), /Ingresso dal cortile/);
+  p.document.querySelector('button[type="reset"]').click();
+  await p.tick();
+  assert.doesNotMatch(message(p), /Ingresso dal cortile/);
+});
 test("user text is never rendered as markup", (t) => {
   const p = page(t);
   input(p, "notes", '<img src=x onerror="alert(1)">');

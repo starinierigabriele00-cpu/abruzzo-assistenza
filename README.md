@@ -8,6 +8,8 @@ Grafite, superfici ghiaccio, accenti ciano e fotografia full-width con crop dist
 
 Il composer nei Contatti consente di scegliere nove richieste. Mostra solo i campi pertinenti, tutti facoltativi, e aggiorna il testo e il link WhatsApp durante la compilazione. Le due domande sulla carrozzina sono distinte. Cambiare servizio esclude i dati non pertinenti dal messaggio; il reset li cancella. Nessuna navigazione o trasmissione avviene durante la compilazione. Il clic su “Continua su WhatsApp” apre `wa.me` con il testo; l’invio della conversazione richiede un’ulteriore azione dell’utente. La copia utilizza gli appunti solo dopo un clic e, in caso di indisponibilità, seleziona il testo per la copia manuale. Nessun salvataggio persistente.
 
+Su smartphone il catalogo della home usa righe a tutta larghezza, l’indice dei servizi rimane disponibile durante lo scorrimento e il menu aperto scorre verticalmente anche in landscape. Il footer conserva contatti, social e collegamenti con una composizione più compatta. Nel composer le note facoltative sono richiudibili; “Controlla il messaggio” e “Modifica i dettagli” consentono di passare tra i due punti senza perdere dati. Sul desktop le note rimangono visibili e la composizione delle pagine è conservata. Nell’header desktop resta una sola azione di contatto, “Contattaci”; il menu mobile mantiene “Contatti”.
+
 Senza JavaScript restano disponibili navigazione, servizi, FAQ e contatti diretti; il composer è assente. La sola informazione sulle emergenze è nel footer e rimanda al 112. Nessuna promessa H24 o disponibilità garantita.
 
 ## Configurazione: un’unica fonte

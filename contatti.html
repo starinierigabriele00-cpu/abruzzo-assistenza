@@ -170,7 +170,7 @@
             </div>
           </details>
           <a
-            class="nav-link"
+            class="nav-link nav-mobile-contact"
             href="contatti.html"
             aria-current="page"
           >
@@ -365,8 +365,10 @@
                 </label>
               </fieldset>
               <section
+                id="dettagli"
                 class="request-details"
                 aria-labelledby="details-title"
+                tabindex="-1"
               >
                 <h3 id="details-title">Aggiungi pochi dettagli.</h3>
                 <p class="hint">
@@ -545,35 +547,61 @@
                     class="field field-wide"
                     data-for="all"
                   >
-                    <label for="request-notes">Altre informazioni utili, facoltative</label>
-                    <textarea
-                      id="request-notes"
-                      name="notes"
-                      rows="3"
-                      maxlength="600"
-                      aria-describedby="notes-hint"
-                    ></textarea>
-                    <p
-                      class="hint"
-                      id="notes-hint"
+                    <details
+                      class="request-notes"
+                      data-request-notes
+                      open
                     >
-                      Solo dettagli organizzativi. Non servono nome, telefono o informazioni mediche
-                      per preparare il messaggio.
-                    </p>
+                      <summary>
+                        Altre informazioni, facoltative
+                        <svg
+                          class="icon"
+                          aria-hidden="true"
+                          focusable="false"
+                        >
+                          <use href="assets/icons.svg#chevron"></use>
+                        </svg>
+                      </summary>
+                      <label for="request-notes">Altre informazioni utili, facoltative</label>
+                      <textarea
+                        id="request-notes"
+                        name="notes"
+                        rows="3"
+                        maxlength="600"
+                        aria-describedby="notes-hint"
+                      ></textarea>
+                      <p
+                        class="hint"
+                        id="notes-hint"
+                      >
+                        Solo dettagli organizzativi. Non servono nome, telefono o informazioni
+                        mediche per preparare il messaggio.
+                      </p>
+                    </details>
                   </div>
                 </div>
               </section>
-              <button
-                class="text-button"
-                type="reset"
-              >
-                Azzera la richiesta
-              </button>
+              <div class="request-actions">
+                <a
+                  class="button request-review"
+                  href="#anteprima"
+                >
+                  Controlla il messaggio
+                </a>
+                <button
+                  class="text-button"
+                  type="reset"
+                >
+                  Azzera la richiesta
+                </button>
+              </div>
             </div>
             <section
+              id="anteprima"
               class="message-preview"
               data-message-preview
               aria-labelledby="preview-heading"
+              tabindex="-1"
             >
               <h2 id="preview-heading">Controlla il messaggio.</h2>
               <p>L’anteprima si aggiorna quando cambi i dettagli.</p>
@@ -582,6 +610,12 @@
                 tabindex="0"
                 aria-label="Anteprima completa del messaggio WhatsApp"
               ></pre>
+              <a
+                class="text-link request-edit"
+                href="#dettagli"
+              >
+                Modifica i dettagli
+              </a>
               <div class="preview-actions">
                 <a
                   class="button"

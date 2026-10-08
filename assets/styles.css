@@ -313,6 +313,9 @@ p a {
   text-decoration-thickness: 2px;
   text-underline-offset: 7px;
 }
+.nav-mobile-contact {
+  display: none;
+}
 .nav-group {
   position: relative;
 }
@@ -878,6 +881,11 @@ figcaption {
   font-size: 15px;
   color: var(--cyan-ink);
 }
+.request-notes > summary,
+.request-review,
+.request-edit {
+  display: none;
+}
 .message-preview {
   position: sticky;
   top: calc(var(--sticky-offset) + 24px);
@@ -1309,6 +1317,9 @@ figcaption {
   .nav-contact {
     display: none;
   }
+  .nav-mobile-contact {
+    display: flex;
+  }
   .site-nav {
     width: 100%;
     margin: 10px 0 0;
@@ -1341,11 +1352,16 @@ figcaption {
     background: var(--white);
     border-bottom: 1px solid var(--line);
     box-shadow: var(--shadow);
-    max-height: calc(100dvh - var(--sticky-offset));
+    max-height: calc(100dvh - var(--sticky-offset) - env(safe-area-inset-bottom, 0px));
     overflow-y: auto;
+    overscroll-behavior-y: contain;
     flex-direction: column;
+    flex-wrap: nowrap;
     align-items: stretch;
     gap: 4px;
+  }
+  .js .site-nav.is-open > * {
+    flex-shrink: 0;
   }
   .nav-link,
   .nav-group > summary {
@@ -1393,14 +1409,21 @@ figcaption {
     gap: 36px;
   }
   .catalogue-grid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 40px;
+    display: block;
+  }
+  html:has(.service-index) {
+    scroll-padding-top: calc(var(--sticky-offset) + 100px);
   }
   .service-index {
-    position: static;
+    top: calc(var(--sticky-offset) + 8px);
+    z-index: 10;
+    max-height: calc(100dvh - var(--sticky-offset) - 24px - env(safe-area-inset-bottom, 0px));
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
     background: var(--ice);
     border: 1px solid var(--line);
-    padding: 18px 24px;
+    padding: 8px 24px;
+    margin-bottom: 40px;
   }
   .service-index summary {
     display: flex;
@@ -1482,7 +1505,7 @@ figcaption {
   :root {
     --header-height: 72px;
     --section-space: 56px;
-    --title: 39px;
+    --title: clamp(32px, 9vw, 38px);
     --title-section: 32px;
     --hero-position: 50% 50%;
   }
@@ -1519,10 +1542,10 @@ figcaption {
   }
   .hero {
     align-items: start;
-    min-height: 720px;
+    min-height: 640px;
   }
   .hero-content {
-    padding-block: 46px 300px;
+    padding-block: 46px 220px;
   }
   .hero h1 {
     font-size: clamp(36px, 7.5vw, 46px);
@@ -1566,7 +1589,8 @@ figcaption {
     margin-top: 20px;
   }
   .service-directory {
-    gap: 0 24px;
+    grid-template-columns: 1fr;
+    gap: 0;
   }
   .directory-item {
     padding: 24px 0;
@@ -1576,6 +1600,7 @@ figcaption {
   }
   .directory-item p {
     font-size: 15px;
+    margin-top: 8px;
   }
   .territory-grid,
   .process-layout,
@@ -1614,21 +1639,20 @@ figcaption {
     padding-block: 48px;
   }
   .page-intro {
-    padding-block: 24px 44px;
+    padding-block: 20px 32px;
   }
   .breadcrumb {
-    margin-bottom: 28px;
+    margin-bottom: 20px;
     font-size: 13px;
   }
   .page-intro .lead {
-    font-size: 19px;
-    margin-top: 22px;
-  }
-  .catalogue-grid {
-    gap: 36px;
+    font-size: 18px;
+    line-height: 1.55;
+    margin-top: 18px;
   }
   .service-index {
-    padding: 12px 18px;
+    padding: 8px 18px;
+    margin-bottom: 32px;
   }
   .service-index nav {
     grid-template-columns: 1fr;
@@ -1682,6 +1706,48 @@ figcaption {
     padding: 12px 10px;
     font-size: 14px;
     min-height: 60px;
+  }
+  .request-notes > summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 48px;
+    padding-block: 12px;
+    border-top: 1px solid var(--line);
+    font-size: 15px;
+    font-weight: 500;
+    list-style: none;
+  }
+  .request-notes > summary::-webkit-details-marker {
+    display: none;
+  }
+  .request-notes[open] > summary {
+    margin-bottom: 16px;
+  }
+  .request-notes[open] > summary .icon {
+    transform: rotate(180deg);
+  }
+  .request-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px 20px;
+    margin-top: 24px;
+  }
+  .request-actions .text-button {
+    margin-top: 0;
+  }
+  .request-review {
+    display: inline-flex;
+    font-size: 15px;
+    padding-inline: 16px;
+  }
+  .request-edit {
+    display: inline-flex;
+    min-height: 44px;
+    margin-bottom: 12px;
+    font-size: 15px;
   }
   .field-grid {
     gap: 18px;
@@ -1749,18 +1815,58 @@ figcaption {
     overflow-wrap: anywhere;
   }
   .site-footer {
-    padding-top: 36px;
+    padding-top: 28px;
   }
   .footer-grid {
     grid-template-columns: 1fr;
-    gap: 28px;
+    gap: 20px;
+  }
+  .footer-identity {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+  }
+  .footer-identity .brand {
+    margin: 0;
+    min-width: 0;
+  }
+  .footer-identity .brand strong {
+    font-size: 15px;
+  }
+  .footer-identity .social-links {
+    margin: 0;
   }
   .footer-identity p {
-    font-size: 13px;
+    display: none;
+  }
+  .site-footer h2 {
+    font-size: 15px;
+    margin-bottom: 6px;
   }
   .footer-contact {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas: "heading heading" "phone whatsapp" "email email";
     border-top: 1px solid rgb(255 255 255 / 18%);
-    padding-top: 24px;
+    padding-top: 16px;
+    column-gap: 20px;
+  }
+  .footer-contact h2 {
+    grid-area: heading;
+  }
+  .footer-contact > a[href^="tel:"] {
+    grid-area: phone;
+  }
+  .footer-contact > a[href^="mailto:"] {
+    grid-area: email;
+  }
+  .footer-contact > a[href^="https://wa.me/"]
+  {
+    grid-area: whatsapp;
+  }
+  .footer-contact > p {
+    grid-column: 1 / -1;
   }
   .footer-contact > a {
     min-height: 44px;
@@ -1776,13 +1882,14 @@ figcaption {
     margin-bottom: 8px;
   }
   .emergency-note {
-    margin-top: 28px;
+    margin-top: 20px;
+    padding-top: 16px;
     font-size: 13px;
   }
   .footer-bottom {
     gap: 12px;
     align-items: center;
-    font-size: 11px;
+    font-size: 12px;
   }
 }
 @media (max-width: 420px) {
@@ -1793,20 +1900,8 @@ figcaption {
     max-width: 140px;
     font-size: 16px;
   }
-  .service-directory {
-    grid-template-columns: 1fr;
-  }
-  .directory-item {
-    display: grid;
-    grid-template-columns: 1.2fr 1fr;
-    gap: 22px;
-  }
   .directory-item h3 {
-    font-size: 19px;
-  }
-  .directory-item p {
-    margin-top: 0;
-    font-size: 14px;
+    font-size: 20px;
   }
   .hero-content {
     padding-top: 36px;
@@ -1820,7 +1915,7 @@ figcaption {
     max-width: 300px;
   }
   .service-choice {
-    font-size: 13px;
+    font-size: 14px;
   }
   .service-choice input {
     width: 16px;

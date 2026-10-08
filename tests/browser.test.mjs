@@ -156,6 +156,22 @@ try {
   const url = new URL(await page.locator("[data-message-link]").getAttribute("href"));
   assert.equal(url.searchParams.get("text"), text);
   assert.equal(page.url(), `${base}/contatti.html?servizio=disabili#richiesta`);
+  assert.equal(await page.locator("[data-request-notes]").evaluate((el) => el.open), false);
+  await page.locator(".request-review").click();
+  assert.equal(new URL(page.url()).hash, "#anteprima");
+  assert.ok(
+    await page.evaluate(
+      () =>
+        document.querySelector("#anteprima").getBoundingClientRect().top >=
+        document.querySelector(".site-header").getBoundingClientRect().bottom,
+    ),
+  );
+  await page.locator(".request-edit").click();
+  assert.equal(new URL(page.url()).hash, "#dettagli");
+  assert.equal(await page.locator("#request-from").inputValue(), "Sulmona");
+  await page.locator("[data-request-notes] summary").click();
+  await page.locator("#request-notes").fill("Ingresso dal cortile");
+  assert.match(await page.locator("[data-message-text]").innerText(), /Ingresso dal cortile/);
   await page.locator("[data-copy-message]").click();
   await page.waitForFunction(
     () => document.querySelector("[data-copy-status]").textContent.length > 0,
@@ -173,6 +189,38 @@ try {
   await page.locator('button[type="reset"]').click();
   await page.waitForFunction(() => document.querySelector('input[value="trasporti"]').checked);
   assert.equal(await page.locator("#request-from").inputValue(), "");
+  // Short landscape screens must scroll the menu vertically, preserving touch targets.
+  await page.setViewportSize({ width: 844, height: 390 });
+  await page.goto(`${base}/index.html`);
+  await page.locator("[data-nav-toggle]").click();
+  await page.locator("[data-nav-group] summary").click();
+  const menuGeometry = await page.locator("[data-nav]").evaluate((nav) => ({
+    x: [...nav.children]
+      .filter((el) => getComputedStyle(el).display !== "none")
+      .map((el) => el.getBoundingClientRect().x),
+    height: nav.getBoundingClientRect().height,
+    space: innerHeight - nav.getBoundingClientRect().top,
+  }));
+  assert.ok(menuGeometry.x.every((x) => Math.abs(x - menuGeometry.x[0]) <= 1));
+  assert.ok(menuGeometry.height <= menuGeometry.space);
+  await page.locator(".nav-mobile-contact").scrollIntoViewIfNeeded();
+  assert.ok(
+    await page
+      .locator(".nav-mobile-contact")
+      .evaluate((el) => el.getBoundingClientRect().bottom <= innerHeight),
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(`${base}/servizi.html`);
+  await page.locator("[data-service-index] summary").click();
+  await page.locator('[data-service-index] a[href="#esteri"]').click();
+  assert.equal(await page.locator("[data-service-index]").evaluate((el) => el.open), false);
+  assert.ok(
+    await page.evaluate(
+      () =>
+        document.querySelector("#title-esteri").getBoundingClientRect().top >=
+        document.querySelector(".service-index").getBoundingClientRect().bottom,
+    ),
+  );
   await page.goto(`${base}/index.html`);
   await page.keyboard.press("Tab");
   assert.equal(
