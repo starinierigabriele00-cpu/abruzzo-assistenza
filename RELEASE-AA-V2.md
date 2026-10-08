@@ -2,7 +2,19 @@
 
 Rapporto iniziale del 7 ottobre 2026, aggiornato con le revisioni dell’8 ottobre. Le sezioni successive conservano le misure e la fotografia di stato del candidato iniziale; la revisione corrente è descritta qui sotto. Il committente ha successivamente autorizzato la pubblicazione su GitHub Pages. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
 
-## Revisione corrente — navigazione, Servizi e footer
+## Revisione corrente — homepage e Volontariato
+
+La homepage segue la sequenza hero, servizi, “Dalla richiesta alla conferma”, “Operativi dall’Abruzzo”, FAQ e contatto finale. La cartografia autentica è preservata. Il committente ha successivamente richiesto di non pubblicare il 5×1000 per l’anno corrente: il flag rimane disattivato, senza fascia o codice fiscale nel sito. La proposta grafica elaborata durante la prova locale non fa parte di questa revisione.
+
+`volontari.html` torna una pagina effettiva, indicizzabile, con metadata distinti, partecipazione territoriale e temporale, competenze facoltative, valutazione del referente, CTA al composer precompilato e link a `associazione.html#volontariato`. L’header condiviso aggiunge un pulsante Volontariato tra Servizi e Associazione. Associazione conserva un rimando breve per evitare duplicazioni. Sitemap, checker e test includono la pagina; solo Sostienici e Trasparenza restano rimandi statici. Nessun nuovo asset o dipendenza runtime.
+
+Verifiche: **39 test** (10 messaggi, 20 interazioni, 9 pubblicazione), sintassi JS, checker e sincronizzazione, build root e sul path di progetto, formattazione e whitespace. Chromium: **40 screenshot**, otto pagine a 1440, 1024, 768, 390 e 360 px; zero violazioni axe nelle **16 viste** analizzate, nessun overflow, reflow a 320 px, tastiera, menu landscape, prenotazione servizi e volontariato, otto pagine senza JavaScript, due rimandi legacy e 404 annidata.
+
+Screenshot e risultati: `/tmp/abruzzo-volunteer-qa/`. Revisione visuale effettiva di Volontariato e homepage desktop/mobile. Le prove non attestano conformità WCAG o legale. Dati legali, pagamenti e documenti non verificati restano esclusi. Questa revisione mantiene GitHub Pages; migrazione Cloudflare, dominio ufficiale e aggiornamento dei riferimenti privacy al nuovo hosting appartengono alla fase successiva richiesta dal committente, quando sarà disponibile l’account corretto.
+
+File modificati: homepage e pagine con layout comune, `volontari.html`, `associazione.html`, `templates/site-header.html`, `assets/styles.css`, `config/site.json`, `sitemap.xml`, `scripts/check-site.py`, test di interazioni/pubblicazione/browser, README e questo rapporto. Il lavoro prosegue su `main`, come richiesto dopo l’eliminazione del precedente branch dedicato; commit e deploy effettivi sono riportati nella consegna.
+
+## Revisione precedente — navigazione, Servizi e footer
 
 La navigazione è Home, Servizi e Associazione, più una sola azione di contatto: nessun dropdown. `associazione.html` riunisce volontariato, sostegno e collaborazioni. I dati istituzionali, gli eventuali documenti e le informazioni verificate confluiscono nella sezione `contatti.html#associazione`; la sede verificata viene mostrata una sola volta in quella pagina. `volontari.html`, `sostienici.html` e `trasparenza.html` sono esclusivamente rimandi statici immediati alle nuove sezioni, con canonical di destinazione, noindex e link di riserva. Non sono redirect HTTP 301. La sitemap contiene soltanto le sei pagine principali, esclusa anche la 404.
 

@@ -219,6 +219,20 @@ test("association is a direct active page link without a dropdown", (t) => {
     assert.ok(p.document.querySelector("#sostegno"));
   }
 });
+test("volunteering is a highlighted active page between services and association", (t) => {
+  const p = page(t, "volontari.html");
+  const navigation = p.document.querySelector("[data-nav]");
+  assert.deepEqual(
+    [...navigation.querySelectorAll("a")].map((link) => link.getAttribute("href")),
+    ["index.html", "servizi.html", "volontari.html", "associazione.html", "contatti.html"],
+  );
+  assert.equal(navigation.querySelector(".nav-volunteer").getAttribute("aria-current"), "page");
+  assert.equal(p.document.querySelector('meta[http-equiv="refresh"]'), null);
+  assert.ok(p.document.querySelector('main a[href="associazione.html#volontariato"]'));
+  const url = new URL(p.document.querySelector('main a[href*="servizio=volontari"]').href);
+  assert.equal(url.searchParams.get("servizio"), "volontari");
+  assert.equal(url.hash, "#richiesta");
+});
 test("links, outside focus and viewport changes close navigation", (t) => {
   const p = page(t, "index.html");
   const toggle = p.document.querySelector("[data-nav-toggle]");
@@ -259,7 +273,7 @@ test("FAQ accordion uses native details and answers useful questions", (t) => {
 });
 test("unverified tax, donation and legal data are absent with and without JavaScript", (t) => {
   for (const run of [true, false])
-    for (const file of ["index.html", "associazione.html", "contatti.html"]) {
+    for (const file of ["index.html", "volontari.html", "associazione.html", "contatti.html"]) {
       const p = page(t, file, "", 390, run);
       assert.equal(p.document.querySelector("[data-verified]"), null);
       assert.doesNotMatch(p.document.body.textContent, /02227430663|Via Fonte|IBAN|PayPal/);
@@ -289,7 +303,6 @@ test("footer keeps institutional links and exactly one programmed-service emerge
 });
 test("legacy pages redirect to the consolidated sections with a no-JavaScript link", (t) => {
   for (const [file, destination] of [
-    ["volontari.html", "associazione.html#volontariato"],
     ["sostienici.html", "associazione.html#sostegno"],
     ["trasparenza.html", "contatti.html#associazione"],
   ]) {

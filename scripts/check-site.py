@@ -42,7 +42,7 @@ pages = {p.name: Page(p) for p in sorted(ROOT.glob('*.html'))}
 errors = []
 count = 0
 redirects = config.get('redirects', {})
-active_pages = {'index.html','servizi.html','associazione.html','contatti.html','privacy.html','pescara.html','404.html'}
+active_pages = {'index.html','servizi.html','volontari.html','associazione.html','contatti.html','privacy.html','pescara.html','404.html'}
 if set(pages) != active_pages | set(redirects):
     errors.append('Expected all active pages and legacy redirects')
 titles = []

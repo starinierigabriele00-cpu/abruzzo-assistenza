@@ -11,7 +11,16 @@ const { AxeBuilder } = require("@axe-core/playwright");
 const base = process.env.ABRUZZO_BASE_URL || "http://127.0.0.1:8080";
 const output = process.env.ABRUZZO_QA_OUTPUT || "/tmp/abruzzo-qa";
 mkdirSync(output, { recursive: true });
-const pages = ["index", "servizi", "associazione", "contatti", "privacy", "pescara", "404"];
+const pages = [
+  "index",
+  "servizi",
+  "volontari",
+  "associazione",
+  "contatti",
+  "privacy",
+  "pescara",
+  "404",
+];
 const report = {
   viewports: [1440, 1024, 768, 390, 360],
   pages,
@@ -247,6 +256,23 @@ try {
     assert.equal(await page.locator("[data-request-form]").isVisible(), true);
   }
   await page.goto(`${base}/index.html`);
+  assert.deepEqual(
+    await page
+      .locator("main > section")
+      .evaluateAll((sections) =>
+        sections.map((section) => section.getAttribute("aria-labelledby")),
+      ),
+    ["hero-title", "servizi-title", "process-title", "territory-title", "faq-title", "cta-title"],
+  );
+  await page.locator("[data-nav-toggle]").click();
+  await page.locator(".nav-volunteer").click();
+  await page.waitForURL(`${base}/volontari.html`);
+  assert.equal(await page.locator(".nav-volunteer").getAttribute("aria-current"), "page");
+  await page.locator('main a[href="contatti.html?servizio=volontari#richiesta"]').first().click();
+  await page.waitForURL(`${base}/contatti.html?servizio=volontari#richiesta`);
+  assert.equal(await page.locator('input[name="service"]:checked').inputValue(), "volontari");
+  assert.equal(await page.locator("#request-zone").isVisible(), true);
+  await page.goto(`${base}/index.html`);
   await page.keyboard.press("Tab");
   assert.equal(
     await page.locator(".skip-link").evaluate((el) => el === document.activeElement),
@@ -310,7 +336,6 @@ try {
     report.noJavaScript.push(name);
   }
   for (const [legacy, destination] of [
-    ["volontari.html", "associazione.html#volontariato"],
     ["sostienici.html", "associazione.html#sostegno"],
     ["trasparenza.html", "contatti.html#associazione"],
   ]) {
@@ -340,7 +365,7 @@ try {
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2));
   assert.equal(failures.length, 0, JSON.stringify(failures, null, 2));
   console.log(
-    `PASS: ${pages.length * report.viewports.length} responsive captures, axe on ${pages.length * 2} views, booking/navigation, 320px reflow, ${pages.length} no-JS pages and three legacy redirects.`,
+    `PASS: ${pages.length * report.viewports.length} responsive captures, axe on ${pages.length * 2} views, booking/navigation, 320px reflow, ${pages.length} no-JS pages and two legacy redirects.`,
   );
 } finally {
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2));

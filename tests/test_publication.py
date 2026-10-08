@@ -41,7 +41,9 @@ class PublicationTests(unittest.TestCase):
         self.assertIn('TEST-CODE',rendered)
         source = (ROOT/'index.html').read_text()
         self.assertLess(source.index('service-directory'),source.index('verified:five-home:start'))
-        self.assertLess(source.index('verified:five-home:end'),source.index('id="operativita"'))
+        self.assertLess(source.index('verified:five-home:end'),source.index('id="process-title"'))
+        self.assertLess(source.index('id="process-title"'),source.index('id="operativita"'))
+        self.assertLess(source.index('id="operativita"'),source.index('id="faq-title"'))
 
     def test_incomplete_donation_does_not_render(self):
         self.config['donation']['iban'] = 'DO NOT PUBLISH'
@@ -71,17 +73,18 @@ class PublicationTests(unittest.TestCase):
         for private in ['config','templates','tests','scripts','README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
 
-    def test_sitemap_excludes_legacy_routes_and_includes_association(self):
+    def test_sitemap_excludes_legacy_routes_and_includes_association_and_volunteers(self):
         import xml.etree.ElementTree as ET
         urls = {item.text for item in ET.parse(ROOT/'sitemap.xml').iter() if item.tag.endswith('}loc')}
         self.assertIn(self.config['domain']+'/associazione.html',urls)
+        self.assertIn(self.config['domain']+'/volontari.html',urls)
         for legacy in self.config['redirects']:
             self.assertNotIn(self.config['domain']+'/'+legacy,urls)
 
     def test_redirect_configuration_rejects_external_destinations_and_chains(self):
         for destination in ['https://example.test/', 'sostienici.html', '../contatti.html']:
             config = deepcopy(self.config)
-            config['redirects']['volontari.html'] = destination
+            config['redirects']['trasparenza.html'] = destination
             with tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
                 (root/'config').mkdir()
