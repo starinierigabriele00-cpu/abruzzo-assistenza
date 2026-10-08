@@ -219,14 +219,19 @@ test("association is a direct active page link without a dropdown", (t) => {
     assert.ok(p.document.querySelector("#sostegno"));
   }
 });
-test("volunteering is a highlighted active page between services and association", (t) => {
+test("volunteering uses the standard navigation style between services and association", (t) => {
   const p = page(t, "volontari.html");
   const navigation = p.document.querySelector("[data-nav]");
   assert.deepEqual(
     [...navigation.querySelectorAll("a")].map((link) => link.getAttribute("href")),
     ["index.html", "servizi.html", "volontari.html", "associazione.html", "contatti.html"],
   );
-  assert.equal(navigation.querySelector(".nav-volunteer").getAttribute("aria-current"), "page");
+  const volunteerLink = navigation.querySelector('a[href="volontari.html"]');
+  assert.equal(volunteerLink.getAttribute("aria-current"), "page");
+  assert.equal(
+    volunteerLink.className,
+    navigation.querySelector('a[href="servizi.html"]').className,
+  );
   assert.equal(p.document.querySelector('meta[http-equiv="refresh"]'), null);
   assert.ok(p.document.querySelector('main a[href="associazione.html#volontariato"]'));
   const url = new URL(p.document.querySelector('main a[href*="servizio=volontari"]').href);

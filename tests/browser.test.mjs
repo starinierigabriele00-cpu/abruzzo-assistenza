@@ -62,6 +62,32 @@ try {
     for (const name of pages) {
       await page.goto(`${base}/${name}.html`, { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      if (name === "index") {
+        const navigationStyles = await page.evaluate(() => {
+          const keys = [
+            "backgroundColor",
+            "borderWidth",
+            "borderRadius",
+            "paddingLeft",
+            "paddingRight",
+            "fontSize",
+          ];
+          return ["servizi.html", "volontari.html", "associazione.html"].map((href) => {
+            const style = getComputedStyle(document.querySelector(`[data-nav] a[href="${href}"]`));
+            return Object.fromEntries(keys.map((key) => [key, style[key]]));
+          });
+        });
+        assert.deepEqual(
+          navigationStyles[1],
+          navigationStyles[0],
+          `Volunteering shares Services styling at ${width}px`,
+        );
+        assert.deepEqual(
+          navigationStyles[1],
+          navigationStyles[2],
+          `Volunteering shares Association styling at ${width}px`,
+        );
+      }
       const footerCanvas = await page.evaluate(() => {
         const footer = document.querySelector(".site-footer");
         return {
@@ -265,9 +291,12 @@ try {
     ["hero-title", "servizi-title", "process-title", "territory-title", "faq-title", "cta-title"],
   );
   await page.locator("[data-nav-toggle]").click();
-  await page.locator(".nav-volunteer").click();
+  await page.locator('[data-nav] a[href="volontari.html"]').click();
   await page.waitForURL(`${base}/volontari.html`);
-  assert.equal(await page.locator(".nav-volunteer").getAttribute("aria-current"), "page");
+  assert.equal(
+    await page.locator('[data-nav] a[href="volontari.html"]').getAttribute("aria-current"),
+    "page",
+  );
   await page.locator('main a[href="contatti.html?servizio=volontari#richiesta"]').first().click();
   await page.waitForURL(`${base}/contatti.html?servizio=volontari#richiesta`);
   assert.equal(await page.locator('input[name="service"]:checked').inputValue(), "volontari");

@@ -311,18 +311,6 @@ p a {
   text-decoration-thickness: 2px;
   text-underline-offset: 7px;
 }
-.nav-volunteer {
-  padding-inline: 14px;
-  border: 1px solid #a9c7ce;
-  border-radius: var(--radius-sm);
-  background: rgb(134 218 226 / 9%);
-  color: var(--cyan-ink);
-}
-.nav-volunteer:hover,
-.nav-volunteer[aria-current] {
-  background: #dceff1;
-  border-color: var(--cyan-ink);
-}
 .nav-mobile-contact {
   display: none;
 }
