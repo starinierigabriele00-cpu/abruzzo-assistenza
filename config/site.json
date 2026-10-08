@@ -8,18 +8,20 @@
   "instagram": "https://www.instagram.com/abruzzo.assistenza/",
   "facebook": "https://www.facebook.com/profile.php?id=100057216829022",
   "legal": {
-    "verified": false,
-    "name": "",
-    "address": "Via Fonte d’Amore SNC, Sulmona (AQ)",
+    "verified": true,
+    "name": "Abruzzo Assistenza – Organizzazione di Volontariato – Ente del Terzo Settore",
+    "address": "Via Fonte d'Amore SNC, Sulmona (AQ), Italia",
     "taxId": "02227430663",
-    "qualification": "",
-    "source": ""
+    "qualification": "ODV / ETS",
+    "runtsRegistered": true,
+    "source": "Conferma esplicita del committente nella wave Institutional, Privacy & Production Finalization dell'8 ottobre 2026: denominazione statutaria, qualifica, iscrizione RUNTS, codice fiscale e sede trasferita già comunicata agli enti."
   },
   "fivePerMille": {
-    "verified": false,
+    "verified": true,
     "year": null,
-    "taxId": "",
-    "source": ""
+    "yearSource": "",
+    "taxId": "02227430663",
+    "source": "Accreditamento generale e comunicazione del 5×1000 confermati e autorizzati dal committente nella wave dell'8 ottobre 2026. Nessuna ammissione a uno specifico riparto annuale documentata."
   },
   "donation": {
     "verified": false,

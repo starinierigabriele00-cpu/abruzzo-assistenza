@@ -43,14 +43,18 @@ function buildRequestMessage(data) {
         sostegno: "vorrei proporre un sostegno o una collaborazione.",
         altro: "vorrei mettermi in contatto con un referente.",
       }[service];
-  const lines = [
-    "Buongiorno Abruzzo Assistenza, " + intention,
-    "",
-    "Richiesta: " + SERVICE_LABELS[service],
-  ];
+  const lines = ["Buongiorno Abruzzo Assistenza, " + intention, ""];
   const add = (key, label) => {
     if (value(key)) lines.push(label + ": " + value(key));
   };
+  for (const [key, label] of [
+    ["firstName", "Nome"],
+    ["lastName", "Cognome"],
+    ["phone", "Telefono"],
+  ])
+    add(key, label);
+  if (lines.length > 2) lines.push("");
+  lines.push("Richiesta: " + SERVICE_LABELS[service]);
   if (TRANSPORT_SERVICES.includes(service)) {
     add("from", "Partenza");
     add("to", "Destinazione");
@@ -84,6 +88,27 @@ function buildRequestMessage(data) {
   add("notes", "Altre informazioni");
   lines.push("", "Resto in attesa di una valutazione e della conferma dei dettagli.");
   return lines.join("\n");
+}
+
+function requestContactErrors(data) {
+  const value = (name) => String(data.get(name) || "").trim();
+  const required = TRANSPORT_SERVICES.includes(value("service"));
+  const errors = {};
+  if (required && !value("firstName"))
+    errors.firstName = "Inserisci il nome di chi richiede il servizio.";
+  if (required && !value("lastName"))
+    errors.lastName = "Inserisci il cognome di chi richiede il servizio.";
+  const phone = value("phone");
+  if (required && !phone) errors.phone = "Inserisci un numero di telefono per essere ricontattato.";
+  else if (phone) {
+    // Check plausibility, not assignment: support international prefixes and common separators.
+    const number = phone.replace(/[\s().\/-]/g, "");
+    const digits = number.replace(/^\+/, "").replace(/^00/, "");
+    if (!/^\+?\d+$/.test(number) || digits.length < 6 || digits.length > 15)
+      errors.phone =
+        "Controlla il numero: usa un numero italiano o internazionale completo, anche con prefisso, spazi o trattini.";
+  }
+  return errors;
 }
 
 qsa("[data-year]").forEach((element) => {
@@ -155,6 +180,11 @@ if (requestForm) {
   const messageText = qs("[data-message-text]", requestForm);
   const messageLink = qs("[data-message-link]", requestForm);
   const copyStatus = qs("[data-copy-status]", requestForm);
+  const validation = qs("[data-request-validation]", requestForm);
+  const contactControls = qsa("[data-required-for]", requestForm);
+  const touched = new Set();
+  let completionAttempted = false;
+  let contactErrors = {};
   const radios = qsa('input[name="service"]', requestForm);
   const requested = new URLSearchParams(window.location.search).get("servizio");
   if (Object.hasOwn(SERVICE_LABELS, requested))
@@ -167,11 +197,43 @@ if (requestForm) {
       field.hidden = !relevant;
       qsa("input, select, textarea", field).forEach((control) => {
         control.disabled = !relevant;
+        if (control.dataset.requiredFor)
+          control.required = relevant && control.dataset.requiredFor.split(" ").includes(selected);
       });
     });
-    const message = buildRequestMessage(new FormData(requestForm));
+    const data = new FormData(requestForm);
+    contactErrors = requestContactErrors(data);
+    const required = TRANSPORT_SERVICES.includes(selected);
+    qs("[data-contact-hint]", requestForm).textContent = required
+      ? "Per i trasporti sono necessari nome, cognome e telefono di chi ci contatta. Gli altri dettagli sono facoltativi."
+      : "Nome, cognome, telefono e gli altri dettagli sono facoltativi per questa richiesta.";
+    qsa("[data-contact-optional]", requestForm).forEach((label) => {
+      label.hidden = required;
+    });
+    contactControls.forEach((control) => {
+      const error = qs(`#request-${control.name}-error`, requestForm);
+      const visible = Boolean(
+        contactErrors[control.name] && (completionAttempted || touched.has(control.name)),
+      );
+      error.textContent = visible ? contactErrors[control.name] : "";
+      error.hidden = !visible;
+      if (visible) control.setAttribute("aria-invalid", "true");
+      else control.removeAttribute("aria-invalid");
+    });
+    const invalid = Object.keys(contactErrors).length > 0;
+    validation.hidden = !completionAttempted || !invalid;
+    validation.textContent = validation.hidden
+      ? ""
+      : "Controlla i dati del richiedente indicati sotto i campi prima di continuare su WhatsApp.";
+    const message = buildRequestMessage(data);
     messageText.textContent = message;
-    messageLink.href = whatsappUrl(message);
+    if (invalid) {
+      messageLink.removeAttribute("href");
+      messageLink.setAttribute("aria-disabled", "true");
+    } else {
+      messageLink.href = whatsappUrl(message);
+      messageLink.removeAttribute("aria-disabled");
+    }
     copyStatus.textContent = "";
   };
   requestForm.hidden = false;
@@ -179,8 +241,38 @@ if (requestForm) {
   requestForm.addEventListener("input", update);
   requestForm.addEventListener("change", update);
   requestForm.addEventListener("submit", (event) => event.preventDefault());
+  contactControls.forEach((control) =>
+    control.addEventListener("blur", () => {
+      touched.add(control.name);
+      update();
+    }),
+  );
+  messageLink.addEventListener("click", (event) => {
+    completionAttempted = true;
+    update();
+    const firstInvalid = contactControls.find((control) => contactErrors[control.name]);
+    if (firstInvalid) {
+      event.preventDefault();
+      firstInvalid.focus({ preventScroll: true });
+      firstInvalid.scrollIntoView({ block: "center", behavior: "auto" });
+    }
+  });
+  messageLink.addEventListener("keydown", (event) => {
+    if (event.key === "Enter" && !messageLink.hasAttribute("href")) {
+      event.preventDefault();
+      messageLink.click();
+    }
+  });
   requestForm.addEventListener("reset", () => {
-    // Reset defaults are applied after the reset event has completed.
+    completionAttempted = false;
+    touched.clear();
+    // Clear personal data immediately; browsers apply native reset defaults after this event.
+    messageText.textContent = "";
+    messageLink.removeAttribute("href");
+    messageLink.setAttribute("aria-disabled", "true");
+    validation.hidden = true;
+    validation.textContent = "";
+    copyStatus.textContent = "";
     setTimeout(update, 0);
   });
   qs("[data-copy-message]", requestForm).addEventListener("click", async () => {
@@ -202,3 +294,31 @@ if (requestForm) {
     }
   });
 }
+// The 5×1000 tax ID stays readable even without JavaScript.
+qsa("[data-copy-tax-id]").forEach((button) => {
+  const card = button.closest(".five-card");
+  const code = card && qs("[data-tax-id]", card);
+  const status = card && qs("[data-tax-copy-status]", card);
+  if (!code || !status) return;
+  button.hidden = false;
+  button.addEventListener("click", async () => {
+    const value = code.textContent.trim();
+    try {
+      if (!navigator.clipboard?.writeText) throw new Error("Clipboard unavailable");
+      await navigator.clipboard.writeText(value);
+      status.textContent = "Codice fiscale copiato.";
+    } catch {
+      const selection = window.getSelection();
+      if (selection) {
+        const range = document.createRange();
+        range.selectNodeContents(code);
+        code.focus({ preventScroll: true });
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+      status.textContent = selection
+        ? "Copia automatica non disponibile. Il codice è selezionato: usa Copia sul dispositivo."
+        : "Copia automatica non disponibile. Seleziona il codice fiscale e usa Copia sul dispositivo.";
+    }
+  });
+});

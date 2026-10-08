@@ -2,7 +2,117 @@
 
 Rapporto iniziale del 7 ottobre 2026, aggiornato con le revisioni dell’8 ottobre. Le sezioni successive conservano le misure e la fotografia di stato del candidato iniziale; la revisione corrente è descritta qui sotto. Il committente ha successivamente autorizzato la pubblicazione su GitHub Pages. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
 
-## Revisione corrente — homepage e Volontariato
+## Autorizzazione alla pubblicazione — 8 ottobre 2026
+
+Il committente ha autorizzato la pubblicazione su **https://abruzzoassistenzaodv.com**, servito da Cloudflare Pages, e il completamento delle attività SEO/Google accessibili. La [PR #2](https://github.com/starinierigabriele00-cpu/abruzzo-assistenza/pull/2) raccoglie la wave istituzionale e il composer con dati del richiedente. Il merge deve seguire i controlli GitHub e Cloudflare verdi sull’ultimo commit; la PR e i check di `main` documentano l’esito effettivo del deploy. Le sezioni sotto descrivono i risultati e lo stato Git **al momento delle rispettive consegne, prima di questa autorizzazione**.
+
+I 62 test e il browser QA del composer descritti sotto riguardano il codice incluso in questa pubblicazione. Nessun tracker viene attivato; le proposte organizzative/privacy non diventano automaticamente procedure adottate. Le verifiche Google richiedono l’effettivo accesso a Search Console o il codice fornito da Google, senza valori di verifica inventati.
+
+## Request composer — dati del richiedente — 8 ottobre 2026
+
+Revisione circoscritta al composer, all’informativa pertinente e ai relativi controlli. La wave istituzionale sotto è conservata: il suo commit `93b6c44` è nella PR #2 in bozza, con GitHub Actions e preview Cloudflare riusciti. **Le nuove modifiche al richiedente sono soltanto locali**, perché il committente non ha autorizzato deploy; un push sul branch avvierebbe una nuova anteprima Cloudflare. Nessun merge, push, deploy o cambiamento infrastrutturale per questa revisione.
+
+### Comportamento
+
+Nome (`firstName`, `given-name`), Cognome (`lastName`, `family-name`) e Telefono (`phone`, `tel`, `inputmode=tel`) sono integrati dopo la scelta del servizio e prima della tratta. Identificano chi richiede il servizio, anche se il viaggio riguarda un’altra persona. Nome e Cognome condividono una riga desktop; su smartphone i campi occupano tutta la larghezza.
+
+Sono necessari per continuare su WhatsApp nelle richieste di trasporto sanitario, dialisi, carrozzina e trasferimenti nazionali/internazionali; facoltativi per evento, volontariato, sostegno e altro. Partenza, destinazione, data e gli altri campi mantengono il requisito precedente. Il telefono accetta prefissi `+` o `00`, numeri italiani e internazionali, spazi, parentesi, punti, trattini e separatori comuni; la verifica riguarda il formato plausibile, non la titolarità o l’esistenza del numero.
+
+L’anteprima rimane disponibile durante una compilazione incompleta e include i dati del richiedente prima del servizio. Errori sotto i campi dopo l’uscita dal controllo o al tentativo di continuare, `aria-invalid`, descrizioni collegate, riepilogo accessibile e focus sul primo dato da correggere. Il link WhatsApp del composer viene reso disponibile soltanto con dati necessari validi. Contatti diretti sempre utilizzabili. Nessun dato personale aggiunto agli URL interni, trasmesso durante la compilazione o salvato nello storage. Privacy aggiornata senza nuove checkbox o banner.
+
+Il cambio del servizio conserva i contatti modificabili ed esclude i dettagli operativi non pertinenti. Reset: campi, errori, anteprima e URL vengono puliti. Il browser QA ha individuato un problema di sincronizzazione nel primo tentativo di aggiornamento del reset: corretto mantenendo il reset nativo, svuotando subito anteprima/link e rigenerando il contenuto dopo l’applicazione dei valori predefiniti. Test simulati e browser reale ora passano.
+
+### File modificati
+
+`contatti.html`, `assets/app.js`, `assets/styles.css`, `privacy.html`, `scripts/check-site.py`, `tests/request.test.mjs`, `tests/interactions.test.mjs`, `tests/browser.test.mjs`, `README.md` e questo rapporto. Nessun file introdotto o rimosso. Il checker consente soltanto i tre nuovi campi necessari nell’ambito previsto e continua a rifiutare requisiti aggiuntivi non richiesti. Homepage, altre pagine, dati ufficiali, infrastruttura e configurazione Cloudflare invariati rispetto al candidato istituzionale.
+
+### Verifica effettiva
+
+- Checker del sito, sincronizzazione template, sintassi JS, build locale, Prettier e `git diff --check`: superati.
+- `node --test tests/request.test.mjs`: **15 test** superati. `ABRUZZO_TEST_DEPS=/tmp/abruzzo-ui-check node --test tests/interactions.test.mjs`: **29 test** superati. Test Python di pubblicazione: **18 test** superati. Totale **62**, con casi nazionali/internazionali, dati mancanti/non validi, encoding, modifica, precompilazione, cambio del servizio, reset e assenza di persistenza.
+- Chromium sull’artefatto: **40 viste** delle otto pagine a 1440, 1024, 768, 390 e 360 px; nessun overflow e zero violazioni axe nelle 16 viste standard analizzate. Verificato inoltre lo stato di errore del composer con axe, senza violazioni. Passano tastiera, sei richieste da Servizi, carrozzina, reset, reflow a 320 px, menu landscape, otto pagine senza JS, rimandi legacy e 404 annidata. Nessuna richiesta a terze parti, cookie o storage aggiunto durante la compilazione.
+- Revisionati realmente screenshot di campi e anteprima a 1440, 390 e 360 px; acquisiti anche a 768 px. Risultati in `/tmp/abruzzo-requester-qa/`, inclusi `requester-fields-390.png`, `requester-message-390.png` e `composer-errors-390.png`. Safari fisico e screen reader non disponibili; nessuna certificazione WCAG dichiarata.
+
+### Esempio generato
+
+```text
+Buongiorno Abruzzo Assistenza, vorrei prenotare un trasporto.
+
+Nome: Mario
+Cognome: Rossi
+Telefono: +39 333 123 4567
+
+Richiesta: Trasporto sanitario
+Partenza: Sulmona
+Destinazione: Pescara
+Data indicativa: 15/10/2026
+
+Resto in attesa di una valutazione e della conferma dei dettagli.
+```
+
+### Git e pubblicazione
+
+Branch riutilizzato: `feat/five-per-mille-verified-card`. Revisione conservata in un commit locale, con hash finale nel messaggio di consegna; la PR remota resta al precedente `93b6c44`. La CI verde della PR riguarda quel commit precedente, **non le nuove modifiche locali**. `main` resta `24a3ab7`. Il server Tailscale mostra invece il composer aggiornato su `http://100.114.161.87:8080/contatti.html`. Nessun deploy eseguito; autorizzazione esplicita necessaria prima di procedere.
+
+## Wave finale istituzionale, privacy e produzione — 8 ottobre 2026
+
+Questa è la revisione istituzionale precedente al miglioramento del composer sopra. Le sezioni successive sono un archivio delle revisioni precedenti: disattivazione del 5×1000, dati legali mancanti e hosting GitHub Pages descritti in quelle sezioni non rappresentano la configurazione del candidato attuale. La migrazione Cloudflare è già pubblicata su `main` al commit `24a3ab7`; questa wave **non viene pubblicata in produzione senza nuova autorizzazione**.
+
+### A. Implementazione
+
+- Dati confermati centralizzati: denominazione statutaria completa, ODV/ETS, iscrizione RUNTS, codice fiscale 02227430663, sede Via Fonte d’Amore SNC, Sulmona (AQ), Italia e recapiti coerenti. Nessuna nuova verifica della sede o del RUNTS. Contatti, Associazione, Privacy, footer e JSON-LD attingono alla stessa configurazione.
+- Integrata e corretta la proposta della PR #2, senza merge automatico. Card 5×1000 compatta subito dopo i servizi; codice fiscale leggibile senza JavaScript, copia su azione esplicita con feedback accessibile e selezione manuale di riserva. Associazione contiene un approfondimento editoriale distinto dalla card e dalle donazioni private. Accreditamento generale attivo; nessun riparto 2026 dichiarato. Un anno richiede una prova separata `yearSource`, oltre alla conferma generale.
+- Privacy aggiornata al modello dichiarato: titolare giuridico, accessi interni autorizzati, WhatsApp affidato a una persona alla volta, possibili informazioni sanitarie ricevute nei contatti successivi, trattamento dei provider distinto e conservazione attualmente non formalizzata. Nessuna base art. 9, procedura o cancellazione automatica inventata. Avviso del composer più chiaro sulla trasmissione del testo all’apertura di WhatsApp; nessuna diagnosi, referto, checkbox o persistenza aggiunta.
+- Predisposta la posizione per uno statuto approvato e privo di dati personali non necessari, senza PDF fittizi o link mancanti. Procedura proposta per gestione, conservazione e sicurezza, decisioni GDPR e istruzioni Search Console in `OPERATIONS-PRIVACY.md`; tutto escluso dall’artefatto pubblico.
+- Design AA.V2, servizi, fotografia, mappa, font locali e architettura statica preservati. Footer con dati legali compatti e link ai dati istituzionali; corretto il contrasto dei nuovi paragrafi individuato da axe. Nessun tracker, analytics, cookie banner, backend o dipendenza runtime introdotto.
+
+### B. File
+
+Modificati in questa wave: `config/site.json`, `scripts/sync-layout.py`, `templates/site-footer.html`, `assets/app.js`, `assets/styles.css`; otto pagine attive `index.html`, `servizi.html`, `volontari.html`, `associazione.html`, `contatti.html`, `privacy.html`, `pescara.html`, `404.html`; `tests/interactions.test.mjs`, `tests/browser.test.mjs`, `tests/test_publication.py`; `.github/workflows/pages.yml`, `README.md` e questo rapporto. Introdotti `OPERATIONS-PRIVACY.md` e `documents/README.md`. Nessuna rimozione. La PR conserva anche gli interventi precedenti corretti sul 5×1000; la provenienza dei dati è stata sostituita con la conferma effettiva del committente.
+
+### C. Verifica
+
+| Controllo                                                                         | Risultato locale osservato                                                                                                            |
+| --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `python3 scripts/check-site.py`                                                   | 8 pagine, 2 rimandi legacy, 313 link/asset, metadata e gate corretti.                                                                 |
+| `python3 scripts/sync-layout.py --check`                                          | 10 indirizzi HTML sincronizzati.                                                                                                      |
+| `node --check assets/app.js`                                                      | Sintassi valida.                                                                                                                      |
+| `node --test tests/request.test.mjs`                                              | 10 test superati.                                                                                                                     |
+| `ABRUZZO_TEST_DEPS=/tmp/abruzzo-ui-check node --test tests/interactions.test.mjs` | 23 test superati, inclusi copia del codice fiscale, API negata/assente, assenza di selezione e comportamento senza JS.                |
+| `python3 -m unittest discover -s tests -p 'test_*.py'`                            | 18 test superati, inclusi annualità con prova separata, coerenza fiscale, dati ufficiali, PDF mancante e dati non verificati esclusi. |
+| `python3 scripts/build-site.py`                                                   | Artefatto Cloudflare completo; documentazione, configurazione e istruzioni organizzative escluse. Nessun CNAME creato.                |
+| Prettier 3.6.2 e `git diff --check`                                               | Superati; CI include anche il README dei documenti.                                                                                   |
+| Chromium sull’artefatto                                                           | 40 screenshot: tutte le 8 pagine a 1440, 1024, 768, 390 e 360 px. Nessun overflow; zero violazioni axe nelle 16 viste analizzate.     |
+
+Totale **51 test**, oltre al browser QA. Il primo passaggio browser aveva rilevato contrasto insufficiente nei due paragrafi legali del footer; corretto il colore e ripetuto il controllo completo, ora senza errori. Le prime due nuove asserzioni sulla copia contenevano un’attesa errata per gli spazi inseriti dal formatter: aggiornate a confrontare il testo significativo; tutti i casi passano. Nessun errore residuo sostituito da una dichiarazione generica di successo.
+
+Verificati anche reflow a 320 CSS px, menu a 844 × 390, tastiera, copia fiscale con Clipboard API simulata e fallback manuale, composer carrozzina/reset/encoding, sei prenotazioni contestuali, volontariato, otto pagine senza JavaScript, due rimandi legacy e 404 annidata. Controllo separato dei nuovi link 5×1000/dati istituzionali su mobile con reduced motion: i titoli rimangono sotto l’header. Storage locale/sessione vuoto e nessun cookie nell’artefatto. Revisionati realmente screenshot delle otto pagine su smartphone, footer e dettagli 5×1000/Associazione/Contatti a desktop e mobile. Screenshot e risultati: `/tmp/abruzzo-institutional-qa/`.
+
+Verifica conclusiva **in sola lettura sul dominio già pubblicato**, separata dal candidato: otto pagine HTTP 200 con canonical e Open Graph coerenti; 15 normalizzazioni/redirect verificati, inclusi `.html`, legacy e HTTP/`www` verso HTTPS apex con query conservata; sitemap con sette URL effettivi, robots e 404 annidata corretti. Su Home, Servizi, Contatti e Privacy: nessuna richiesta a terze parti, cookie o storage persistente rilevati; il solo script è `assets/app.js`. Il 5×1000 nuovo è ancora assente da quella produzione, come previsto. Risultati: `/tmp/abruzzo-institutional-live-http.json` e `/tmp/abruzzo-institutional-live-audit.json`.
+
+Nessuna nuova misura Lighthouse/Core Web Vitals attribuita a questa wave. Nessuna nuova libreria, fotografia o font; le misure precedenti rimangono storiche. Axe e Chromium non certificano WCAG né sostituiscono screen reader, Safari fisico o valutazione legale.
+
+### D. Decisioni legali e organizzative
+
+Il responsabile deve approvare basi giuridiche per finalità, condizione art. 9 per dati sanitari, informazione quando i dati arrivano dai familiari, ruoli/contratti/trasferimenti dei fornitori e criteri concreti di conservazione/cancellazione, inclusi backup e inoltri. La proposta e la checklist accessi/MFA/passaggi di consegne/revoche sono in `OPERATIONS-PRIVACY.md`. Nessuna di queste misure è presentata come già adottata. Gmail consumer non va automaticamente qualificato come servizio con DPA: occorre accertare l’edizione effettiva dell’account, come indicato dalla fonte Google nel documento.
+
+Statuto pubblicabile, eventuali rendiconti, annualità 5×1000 e canali bancari non risultano documentati: restano assenti. Identità, sede, qualifica e accreditamento generale già confermati **non vengono richiesti nuovamente**.
+
+### E. Stato del candidato
+
+Candidato tecnico completo e verificato per review. L’informativa descrive i fatti disponibili; approvazione organizzativa/giuridica ancora necessaria prima di considerarla definitiva. Search Console: nessuna evidenza di configurazione nel repository; procedura pronta e sitemap disponibile, nessun TXT inventato o account Google modificato. Cloudflare Web Analytics resta disattivato.
+
+Il collegamento Cloudflare della sessione identifica ancora l’account Mothx; la lettura del progetto nell’account titolare restituisce `Authentication error`. La configurazione interna non è quindi attestata da API in questa wave; dominio, redirect e controlli Cloudflare della PR sono verificabili attraverso HTTP e GitHub. Nessuna impostazione Cloudflare, DNS, password o permesso esterno è stata modificata.
+
+### F. Git
+
+Lavoro sul branch esistente `feat/five-per-mille-verified-card`, conservando i commit della [PR #2](https://github.com/starinierigabriele00-cpu/abruzzo-assistenza/pull/2). La CI iniziale di quella PR falliva per un test che pretendeva l’assenza di tutti i blocchi verificati: aggiornato alle conferme attuali, preservando i test dei gate disattivati. Commit di consegna e stato effettivo dei check remoti sono riportati nella PR e nel messaggio finale. `main` resta `24a3ab7`; nessun merge o deploy produttivo eseguito per questa wave.
+
+### G. Approvazioni
+
+Prima di procedere: approvazione del responsabile sui punti D e autorizzazione esplicita al merge su `main`, che avvia automaticamente il deploy Cloudflare. Eventuali interventi su account Google/DNS, pubblicazione dello statuto o futura attivazione di statistiche richiedono una richiesta separata e i dati effettivi necessari. Il server locale Tailscale rimane disponibile per la revisione del candidato.
+
+## Revisione precedente — homepage e Volontariato
 
 La homepage segue la sequenza hero, servizi, “Dalla richiesta alla conferma”, “Operativi dall’Abruzzo”, FAQ e contatto finale. La cartografia autentica è preservata. Il committente ha successivamente richiesto di non pubblicare il 5×1000 per l’anno corrente: il flag rimane disattivato, senza fascia o codice fiscale nel sito. La proposta grafica elaborata durante la prova locale non fa parte di questa revisione.
 

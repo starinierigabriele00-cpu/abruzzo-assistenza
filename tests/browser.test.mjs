@@ -35,6 +35,7 @@ const report = {
   errors: [],
   noJavaScript: [],
   legacyRedirects: [],
+  taxCodeCopy: [],
   metrics: null,
 };
 const browser = await chromium.launch({
@@ -69,6 +70,11 @@ try {
     for (const name of pages) {
       await page.goto(`${base}/${name}.html`, { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      assert.deepEqual(
+        await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+        { local: 0, session: 0 },
+        `${name}: the website must not persist visitor data`,
+      );
       if (name === "index") {
         const navigationStyles = await page.evaluate(() => {
           const keys = [
@@ -203,15 +209,58 @@ try {
   // Actual keyboard and touch-like interactions, including the composer.
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(`${base}/contatti.html?servizio=disabili#richiesta`);
+  const originalRequestURL = page.url();
+  assert.equal(await page.locator("[data-message-link]").getAttribute("href"), null);
+  await page.locator("[data-message-link]").focus();
+  await page.keyboard.press("Enter");
+  assert.equal(
+    await page.locator("#request-firstName").evaluate((el) => el === document.activeElement),
+    true,
+  );
+  assert.equal(await page.locator('[aria-invalid="true"]').count(), 3);
+  assert.equal(await page.locator("[data-request-validation]").isVisible(), true);
+  const validationAxe = await new AxeBuilder({ page })
+    .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+    .analyze();
+  assert.deepEqual(
+    validationAxe.violations.map((v) => v.id),
+    [],
+  );
+  await page.screenshot({ path: `${output}/composer-errors-390.png`, fullPage: true });
+  await page.locator("#request-firstName").fill("Mario");
+  await page.keyboard.press("Tab");
+  assert.equal(
+    await page.locator("#request-lastName").evaluate((el) => el === document.activeElement),
+    true,
+  );
+  await page.keyboard.type("Rossi");
+  await page.keyboard.press("Tab");
+  assert.equal(
+    await page.locator("#request-phone").evaluate((el) => el === document.activeElement),
+    true,
+  );
+  await page.keyboard.type("123");
+  await page.keyboard.press("Tab");
+  assert.equal(await page.locator("#request-phone").getAttribute("aria-invalid"), "true");
+  await page.locator("#request-phone").fill("+39 333 123 4567");
+  assert.equal(await page.locator('[aria-invalid="true"]').count(), 0);
+  assert.equal(await page.locator("[data-request-validation]").isVisible(), false);
+  assert.equal(page.url(), originalRequestURL, "Contact details must not enter internal URLs");
   await page.locator("#request-from").fill("Sulmona");
   await page.locator("#request-to").fill("Città & centro");
   await page.locator("#request-wheelchair").selectOption("si");
   await page.locator("#request-stayWheelchair").selectOption("si");
   const text = await page.locator("[data-message-text]").innerText();
+  assert.match(text, /Nome: Mario\nCognome: Rossi\nTelefono: \+39 333 123 4567/);
   assert.match(text, /restare sulla carrozzina durante il viaggio: Sì/);
   const url = new URL(await page.locator("[data-message-link]").getAttribute("href"));
   assert.equal(url.searchParams.get("text"), text);
   assert.equal(page.url(), siteURL("contatti.html?servizio=disabili#richiesta"));
+  assert.deepEqual(
+    await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+    { local: 0, session: 0 },
+    "Composer input stays out of persistent browser storage",
+  );
   assert.equal(await page.locator("[data-request-notes]").evaluate((el) => el.open), false);
   await page.locator(".request-review").click();
   assert.equal(new URL(page.url()).hash, "#anteprima");
@@ -240,11 +289,23 @@ try {
   });
   await page.screenshot({ path: `${output}/composer-filled-390.png`, fullPage: true });
   await page.locator('input[value="volontari"]').check();
+  assert.equal(await page.locator("#request-firstName").getAttribute("required"), null);
+  assert.match(await page.locator("[data-message-text]").innerText(), /Nome: Mario/);
   assert.equal(await page.locator("#request-from").isVisible(), false);
   assert.equal(await page.locator("#request-zone").isVisible(), true);
   await page.locator('button[type="reset"]').click();
-  await page.waitForFunction(() => document.querySelector('input[value="trasporti"]').checked);
+  await page.waitForFunction(
+    () =>
+      document.querySelector('input[value="trasporti"]').checked &&
+      document.querySelector("[data-message-link]").getAttribute("aria-disabled") === "true" &&
+      document
+        .querySelector("[data-message-text]")
+        .textContent.includes("Richiesta: Trasporto sanitario"),
+  );
   assert.equal(await page.locator("#request-from").inputValue(), "");
+  for (const name of ["firstName", "lastName", "phone"])
+    assert.equal(await page.locator(`#request-${name}`).inputValue(), "");
+  assert.equal(await page.locator("[data-message-link]").getAttribute("href"), null);
   // Short landscape screens must scroll the menu vertically, preserving touch targets.
   await page.setViewportSize({ width: 844, height: 390 });
   await page.goto(`${base}/index.html`);
@@ -287,6 +348,23 @@ try {
     assert.equal(new URL(page.url()).searchParams.get("servizio"), service);
     assert.equal(await page.locator('input[name="service"]:checked').inputValue(), service);
     assert.equal(await page.locator("[data-request-form]").isVisible(), true);
+    assert.equal(
+      await page.locator("#request-firstName").getAttribute("required"),
+      service === "eventi" ? null : "",
+    );
+    assert.equal(
+      (await page.locator("[data-message-link]").getAttribute("href")) === null,
+      service !== "eventi",
+    );
+    await page.locator("#request-firstName").fill("Élodie");
+    await page.locator("#request-lastName").fill("D’Amico");
+    await page.locator("#request-phone").fill("+44 (20) 7946-0958");
+    const link = new URL(await page.locator("[data-message-link]").getAttribute("href"));
+    assert.equal(
+      link.searchParams.get("text"),
+      await page.locator("[data-message-text]").innerText(),
+    );
+    assert.match(link.searchParams.get("text"), /Telefono: \+44 \(20\) 7946-0958/);
   }
   await page.goto(`${base}/index.html`);
   assert.deepEqual(
@@ -295,8 +373,42 @@ try {
       .evaluateAll((sections) =>
         sections.map((section) => section.getAttribute("aria-labelledby")),
       ),
-    ["hero-title", "servizi-title", "process-title", "territory-title", "faq-title", "cta-title"],
+    [
+      "hero-title",
+      "servizi-title",
+      "five-home-title",
+      "process-title",
+      "territory-title",
+      "faq-title",
+      "cta-title",
+    ],
   );
+  // Clipboard success and fallback are both exercised with a keyboard action.
+  await page.evaluate(() => {
+    window.__taxCopied = [];
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async (value) => window.__taxCopied.push(value) },
+    });
+  });
+  await page.locator("[data-copy-tax-id]").focus();
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() =>
+    document.querySelector("[data-tax-copy-status]").textContent.includes("copiato"),
+  );
+  assert.deepEqual(await page.evaluate(() => window.__taxCopied), ["02227430663"]);
+  report.taxCodeCopy.push("clipboard after keyboard activation");
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined });
+  });
+  await page.locator("[data-copy-tax-id]").click();
+  await page.waitForFunction(() => window.getSelection().toString().trim() === "02227430663");
+  assert.equal(
+    await page.locator("[data-tax-id]").evaluate((el) => el === document.activeElement),
+    true,
+  );
+  report.taxCodeCopy.push("manual selection fallback after touch-like click");
+  await page.goto(`${base}/index.html`);
   await page.locator("[data-nav-toggle]").click();
   await page.locator('[data-nav] a[href="volontari.html"]').click();
   await page.waitForURL(siteURL("volontari.html"));
@@ -364,7 +476,13 @@ try {
       await fallback.locator('nav[aria-label="Navigazione principale"]').isVisible(),
       true,
     );
-    assert.equal(await fallback.locator("[data-verified]").count(), 0);
+    assert.ok((await fallback.locator('[data-verified="legal"]').count()) > 0);
+    assert.equal(await fallback.locator('[data-verified="donation"]').count(), 0);
+    assert.match(await fallback.locator("footer").innerText(), /Via Fonte d'Amore SNC/);
+    if (name === "index") {
+      assert.equal(await fallback.locator("[data-tax-id]").innerText(), "02227430663");
+      assert.equal(await fallback.locator("[data-copy-tax-id]").isVisible(), false);
+    }
     assert.equal(
       (await fallback.locator('a[href="mailto:abruzzoassistenzaodv@gmail.com"]').count()) > 0,
       true,
@@ -401,6 +519,8 @@ try {
   );
   await page.screenshot({ path: `${output}/404-nested-320.png`, fullPage: true });
   report.nested404 = true;
+  report.cookies = await context.cookies();
+  assert.deepEqual(report.cookies, [], "The local artifact must not install cookies");
   assert.deepEqual(report.errors, []);
   const failures = report.observations.filter((o) => o.violations.length);
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2));
