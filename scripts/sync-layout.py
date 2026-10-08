@@ -62,7 +62,7 @@ def load_config():
             raise ValueError(f"{section}: verification needs complete data and a source")
     five = config["fivePerMille"]
     if five["verified"]:
-        if not re.fullmatch(r"\\d{11}", five["taxId"]):
+        if not re.fullmatch(r"\d{11}", five["taxId"]):
             raise ValueError("fivePerMille: tax ID must contain 11 digits")
         if five.get("year") is not None and (not isinstance(five["year"], int) or not 2000 <= five["year"] <= 2100):
             raise ValueError("fivePerMille: invalid documented fiscal year")
