@@ -71,5 +71,24 @@ class PublicationTests(unittest.TestCase):
         for private in ['config','templates','tests','scripts','README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
 
+    def test_sitemap_excludes_legacy_routes_and_includes_association(self):
+        import xml.etree.ElementTree as ET
+        urls = {item.text for item in ET.parse(ROOT/'sitemap.xml').iter() if item.tag.endswith('}loc')}
+        self.assertIn(self.config['domain']+'/associazione.html',urls)
+        for legacy in self.config['redirects']:
+            self.assertNotIn(self.config['domain']+'/'+legacy,urls)
+
+    def test_redirect_configuration_rejects_external_destinations_and_chains(self):
+        for destination in ['https://example.test/', 'sostienici.html', '../contatti.html']:
+            config = deepcopy(self.config)
+            config['redirects']['volontari.html'] = destination
+            with tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                (root/'config').mkdir()
+                (root/'config/site.json').write_text(json.dumps(config))
+                with patch.object(layout,'ROOT',root):
+                    with self.assertRaisesRegex(ValueError,'Redirect'):
+                        layout.load_config()
+
 if __name__ == '__main__':
     unittest.main()

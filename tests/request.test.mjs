@@ -20,6 +20,15 @@ test("all nine service choices have meaningful request labels", () => {
     assert.ok(buildRequestMessage(form({ service })).includes("Richiesta: " + label));
   }
 });
+test("booking intent stays an explicit request awaiting confirmation", () => {
+  for (const service of ["trasporti", "dialisi", "disabili", "nazionali", "esteri"]) {
+    const message = buildRequestMessage(form({ service }));
+    assert.match(message, /vorrei prenotare un trasporto/);
+    assert.match(message, /in attesa di una valutazione e della conferma/);
+  }
+  assert.match(buildRequestMessage(form({ service: "volontari" })), /propormi per il volontariato/);
+  assert.match(buildRequestMessage(form({ service: "sostegno" })), /proporre un sostegno/);
+});
 test("international request includes route and Italian date without identity requirements", () => {
   const message = buildRequestMessage(
     form({ service: "esteri", from: " Sulmona ", to: "Lione", date: "2026-10-25" }),

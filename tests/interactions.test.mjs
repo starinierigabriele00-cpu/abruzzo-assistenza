@@ -208,18 +208,16 @@ test("mobile menu opens, Escape closes it and restores button focus", (t) => {
   assert.equal(toggle.getAttribute("aria-expanded"), "false");
   assert.equal(p.document.activeElement, toggle);
 });
-test("dropdown supports native activation, Escape and outside click", (t) => {
-  const p = page(t, "index.html", "", 1440);
-  const group = p.document.querySelector("[data-nav-group]");
-  const summary = group.querySelector("summary");
-  summary.click();
-  assert.equal(group.open, true);
-  p.document.dispatchEvent(new p.window.KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
-  assert.equal(group.open, false);
-  assert.equal(p.document.activeElement, summary);
-  summary.click();
-  p.document.querySelector("main").click();
-  assert.equal(group.open, false);
+test("association is a direct active page link without a dropdown", (t) => {
+  for (const width of [390, 1440]) {
+    const p = page(t, "associazione.html", "", width);
+    const link = p.document.querySelector('[data-nav] a[href="associazione.html"]');
+    assert.equal(link.getAttribute("aria-current"), "page");
+    assert.equal(p.document.querySelector("[data-nav] details"), null);
+    assert.equal(p.document.querySelector("[data-nav-group]"), null);
+    assert.ok(p.document.querySelector("#volontariato"));
+    assert.ok(p.document.querySelector("#sostegno"));
+  }
 });
 test("links, outside focus and viewport changes close navigation", (t) => {
   const p = page(t, "index.html");
@@ -230,7 +228,7 @@ test("links, outside focus and viewport changes close navigation", (t) => {
   toggle.click();
   p.resize(1440);
   assert.equal(toggle.getAttribute("aria-expanded"), "false");
-  assert.equal(p.document.querySelector("[data-nav-group]").open, false);
+  assert.equal(p.document.querySelector("[data-nav]").classList.contains("is-open"), false);
   toggle.click();
   p.document.querySelector("[data-nav] a").click();
   assert.equal(toggle.getAttribute("aria-expanded"), "false");
@@ -261,7 +259,7 @@ test("FAQ accordion uses native details and answers useful questions", (t) => {
 });
 test("unverified tax, donation and legal data are absent with and without JavaScript", (t) => {
   for (const run of [true, false])
-    for (const file of ["index.html", "sostienici.html", "trasparenza.html", "contatti.html"]) {
+    for (const file of ["index.html", "associazione.html", "contatti.html"]) {
       const p = page(t, file, "", 390, run);
       assert.equal(p.document.querySelector("[data-verified]"), null);
       assert.doesNotMatch(p.document.body.textContent, /02227430663|Via Fonte|IBAN|PayPal/);
@@ -284,5 +282,23 @@ test("footer keeps institutional links and exactly one programmed-service emerge
   assert.equal(p.document.querySelectorAll('a[href="tel:112"]').length, 1);
   assert.ok(p.document.querySelector('footer a[href="privacy.html"]'));
   assert.ok(p.document.querySelector('footer a[href="pescara.html"]'));
+  assert.ok(p.document.querySelector('footer a[href="associazione.html"]'));
+  assert.equal(p.document.querySelectorAll("footer .footer-channel").length, 3);
+  assert.equal(p.document.querySelector('footer a[href="trasparenza.html"]'), null);
   assert.equal(p.document.querySelectorAll(".mobile-navigation").length, 0);
+});
+test("legacy pages redirect to the consolidated sections with a no-JavaScript link", (t) => {
+  for (const [file, destination] of [
+    ["volontari.html", "associazione.html#volontariato"],
+    ["sostienici.html", "associazione.html#sostegno"],
+    ["trasparenza.html", "contatti.html#associazione"],
+  ]) {
+    const p = page(t, file, "", 390, false);
+    assert.equal(
+      p.document.querySelector('meta[http-equiv="refresh"]').content,
+      "0;url=" + destination,
+    );
+    assert.equal(p.document.querySelector('meta[name="robots"]').content, "noindex,follow");
+    assert.ok(p.document.querySelector(`main a[href="${destination}"]`));
+  }
 });

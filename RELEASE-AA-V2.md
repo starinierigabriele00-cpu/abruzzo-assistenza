@@ -1,6 +1,18 @@
-# AA.V2 — candidato per la pubblicazione
+# AA.V2 — implementazione e verifiche
 
-Verifica del 7 ottobre 2026. Questo rapporto registra il candidato iniziale, prima dell’autorizzazione alla pubblicazione: nessun push, merge o deploy era stato eseguito alla consegna. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
+Rapporto iniziale del 7 ottobre 2026, aggiornato con le revisioni dell’8 ottobre. Le sezioni successive conservano le misure e la fotografia di stato del candidato iniziale; la revisione corrente è descritta qui sotto. Il committente ha successivamente autorizzato la pubblicazione su GitHub Pages. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
+
+## Revisione corrente — navigazione, Servizi e footer
+
+La navigazione è Home, Servizi e Associazione, più una sola azione di contatto: nessun dropdown. `associazione.html` riunisce volontariato, sostegno e collaborazioni. I dati istituzionali, gli eventuali documenti e le informazioni verificate confluiscono nella sezione `contatti.html#associazione`; la sede verificata viene mostrata una sola volta in quella pagina. `volontari.html`, `sostienici.html` e `trasparenza.html` sono esclusivamente rimandi statici immediati alle nuove sezioni, con canonical di destinazione, noindex e link di riserva. Non sono redirect HTTP 301. La sitemap contiene soltanto le sei pagine principali, esclusa anche la 404.
+
+Servizi conserva sei sezioni e l’indice sticky/disclosure, ma elimina sei coppie di sottotitoli ripetuti e sei riquadri. Descrizioni brevi, dettagli iniziali e pulsanti “Prenota…” collegati al composer sul servizio scelto. Il messaggio esprime l’intenzione di prenotare; disponibilità e dettagli richiedono ancora una conferma dell’associazione. Le informazioni sui mezzi e sulle dotazioni per la carrozzina restano condizionate alla disponibilità reale. Sullo smartphone a 390 px la pagina Servizi passa da 5.833 a 3.948 px di altezza; il footer passa da circa 530 a 480 px, raggruppando telefono, WhatsApp ed email con icone, collegamenti in due colonne e un solo avviso sulle emergenze.
+
+File coinvolti: nuova `associazione.html`; pagine attive e tre vecchi indirizzi; template comuni; `assets/styles.css`, `assets/app.js`, `config/site.json`, `sitemap.xml`, `scripts/sync-layout.py`, `scripts/check-site.py`; test di messaggi, interazioni, pubblicazione e browser; README e questo rapporto. Eliminati CSS e JavaScript del dropdown e dei layout delle pagine ritirate. Nessuna dipendenza runtime o nuovo servizio esterno.
+
+Verifica: 10 test messaggi, 19 interazioni e 9 pubblicazione, **38 test**; checker delle sette pagine effettive e tre rimandi, 262 riferimenti interni/asset; sincronizzazione, sintassi JS, Prettier, build root e sul percorso di progetto, whitespace Git. Chromium: **35 screenshot** a 1440, 1024, 768, 390 e 360 px; nessun overflow, zero violazioni axe nelle **14 viste** analizzate, reflow a 320 px, tutti i sei pulsanti di prenotazione e navigazione da tastiera. Le sette pagine sono utilizzabili senza JavaScript; i tre vecchi indirizzi raggiungono le nuove sezioni anche con JavaScript disabilitato. Screenshot dettagliati in `/tmp/abruzzo-consolidation-review/`; QA completo in `/tmp/abruzzo-consolidation-qa/`. Nessuna nuova misura Lighthouse o certificazione WCAG/legale.
+
+5×1000, dati legali, pagamenti e documenti non verificati restano esclusi dall’HTML e dalla build pubblica. Le verifiche del titolare e del dominio personalizzato mantengono lo stato documentato sotto. Il deploy autorizzato usa la destinazione Pages esistente; commit ed esito effettivo del workflow sono riportati nella consegna.
 
 ## Implementation summary
 

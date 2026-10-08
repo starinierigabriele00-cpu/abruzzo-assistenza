@@ -35,8 +35,16 @@ function buildRequestMessage(data) {
   const value = (name) => String(data.get(name) || "").trim();
   const rawService = value("service");
   const service = Object.hasOwn(SERVICE_LABELS, rawService) ? rawService : "altro";
+  const intention = TRANSPORT_SERVICES.includes(service)
+    ? "vorrei prenotare un trasporto."
+    : {
+        eventi: "vorrei richiedere assistenza per un evento.",
+        volontari: "vorrei propormi per il volontariato.",
+        sostegno: "vorrei proporre un sostegno o una collaborazione.",
+        altro: "vorrei mettermi in contatto con un referente.",
+      }[service];
   const lines = [
-    "Buongiorno Abruzzo Assistenza, vorrei chiedere informazioni.",
+    "Buongiorno Abruzzo Assistenza, " + intention,
     "",
     "Richiesta: " + SERVICE_LABELS[service],
   ];
@@ -82,22 +90,16 @@ qsa("[data-year]").forEach((element) => {
   element.textContent = new Date().getFullYear();
 });
 
-// Native disclosures preserve keyboard, mouse, touch and no-JavaScript navigation.
+// Simple page links stay available without JavaScript; mobile uses one menu toggle.
 const navToggle = qs("[data-nav-toggle]");
 const nav = qs("[data-nav]");
 const header = qs(".site-header");
 if (navToggle && nav && header) {
-  const groups = qsa("[data-nav-group]", nav);
   const mobile = window.matchMedia("(max-width: 900px)");
-  const closeGroups = () =>
-    groups.forEach((group) => {
-      group.open = false;
-    });
   const setOpen = (open, focus = false) => {
     navToggle.setAttribute("aria-expanded", String(open));
     nav.classList.toggle("is-open", open);
     qs("[data-nav-label]", navToggle).textContent = open ? "Chiudi" : "Menu";
-    if (!open) closeGroups();
     if (focus) navToggle.focus();
   };
   document.documentElement.classList.add("js");
@@ -105,24 +107,9 @@ if (navToggle && nav && header) {
     setOpen(navToggle.getAttribute("aria-expanded") !== "true"),
   );
   qsa("a", nav).forEach((link) => link.addEventListener("click", () => setOpen(false)));
-  groups.forEach((group) => {
-    qs("summary", group).addEventListener("click", () => {
-      if (!group.open)
-        groups.forEach((other) => {
-          if (other !== group) other.open = false;
-        });
-    });
-  });
   document.addEventListener("keydown", (event) => {
     if (event.key !== "Escape") return;
     if (navToggle.getAttribute("aria-expanded") === "true") setOpen(false, true);
-    else {
-      const open = groups.find((group) => group.open);
-      if (open) {
-        closeGroups();
-        qs("summary", open).focus();
-      }
-    }
   });
   document.addEventListener("click", (event) => {
     if (!header.contains(event.target)) setOpen(false);

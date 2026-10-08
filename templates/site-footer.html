@@ -54,23 +54,56 @@
     </div>
     <div class="footer-contact">
       <h2>Contatti</h2>
-      <a href="tel:{{phone}}">{{phoneDisplay}}</a>
-      <a href="mailto:{{email}}">{{email}}</a>
       <a
+        class="footer-channel"
+        href="tel:{{phone}}"
+        aria-label="Chiama {{phoneDisplay}}"
+      >
+        <svg
+          class="icon"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <use href="assets/icons.svg#phone"></use>
+        </svg>
+        <span>{{phoneDisplay}}</span>
+      </a>
+      <a
+        class="footer-channel"
+        href="mailto:{{email}}"
+      >
+        <svg
+          class="icon"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <use href="assets/icons.svg#mail"></use>
+        </svg>
+        <span>{{email}}</span>
+      </a>
+      <a
+        class="footer-channel"
         href="https://wa.me/{{whatsapp}}"
         target="_blank"
         rel="noopener noreferrer"
       >
-        WhatsApp
+        <svg
+          class="icon"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <use href="assets/icons.svg#whatsapp"></use>
+        </svg>
+        <span>WhatsApp</span>
       </a>
       {{legalFooter}}
     </div>
     <div class="footer-links">
-      <h2>Associazione</h2>
-      <a href="volontari.html">Volontariato</a>
-      <a href="sostienici.html">Sostienici</a>
-      <a href="trasparenza.html">Dati e trasparenza</a>
+      <h2>Link utili</h2>
+      <a href="servizi.html">Servizi</a>
+      <a href="associazione.html">Associazione</a>
       <a href="pescara.html">Partenze da Pescara</a>
+      <a href="privacy.html">Privacy</a>
     </div>
   </div>
   <div
@@ -87,7 +120,6 @@
       <span data-year>2026</span>
       Abruzzo Assistenza
     </span>
-    <a href="privacy.html">Privacy</a>
   </div>
 </footer>
 <!-- site-footer:end -->

@@ -11,23 +11,14 @@ const { AxeBuilder } = require("@axe-core/playwright");
 const base = process.env.ABRUZZO_BASE_URL || "http://127.0.0.1:8080";
 const output = process.env.ABRUZZO_QA_OUTPUT || "/tmp/abruzzo-qa";
 mkdirSync(output, { recursive: true });
-const pages = [
-  "index",
-  "servizi",
-  "contatti",
-  "volontari",
-  "sostienici",
-  "trasparenza",
-  "privacy",
-  "pescara",
-  "404",
-];
+const pages = ["index", "servizi", "associazione", "contatti", "privacy", "pescara", "404"];
 const report = {
   viewports: [1440, 1024, 768, 390, 360],
   pages,
   observations: [],
   errors: [],
   noJavaScript: [],
+  legacyRedirects: [],
   metrics: null,
 };
 const browser = await chromium.launch({
@@ -217,7 +208,6 @@ try {
   await page.setViewportSize({ width: 844, height: 390 });
   await page.goto(`${base}/index.html`);
   await page.locator("[data-nav-toggle]").click();
-  await page.locator("[data-nav-group] summary").click();
   const menuGeometry = await page.locator("[data-nav]").evaluate((nav) => ({
     x: [...nav.children]
       .filter((el) => getComputedStyle(el).display !== "none")
@@ -245,6 +235,17 @@ try {
         document.querySelector(".service-index").getBoundingClientRect().bottom,
     ),
   );
+  // Every booking action opens the correct local composer, without opening WhatsApp.
+  for (const service of ["trasporti", "dialisi", "disabili", "nazionali", "esteri", "eventi"]) {
+    await page.goto(`${base}/servizi.html`);
+    const booking = page.locator(`#${service} .service-start .button`);
+    assert.match(await booking.innerText(), /^Prenota/);
+    await booking.click();
+    assert.equal(new URL(page.url()).pathname, new URL(base + "/contatti.html").pathname);
+    assert.equal(new URL(page.url()).searchParams.get("servizio"), service);
+    assert.equal(await page.locator('input[name="service"]:checked').inputValue(), service);
+    assert.equal(await page.locator("[data-request-form]").isVisible(), true);
+  }
   await page.goto(`${base}/index.html`);
   await page.keyboard.press("Tab");
   assert.equal(
@@ -255,15 +256,22 @@ try {
   assert.equal(await page.locator("#main").evaluate((el) => el === document.activeElement), true);
   await page.locator("[data-nav-toggle]").click();
   assert.equal(await page.locator("[data-nav-toggle]").getAttribute("aria-expanded"), "true");
-  await page.locator("[data-nav-group] summary").focus();
-  await page.keyboard.press("Enter");
-  assert.equal(await page.locator("[data-nav-group]").evaluate((el) => el.open), true);
   await page.keyboard.press("Escape");
   assert.equal(await page.locator("[data-nav-toggle]").getAttribute("aria-expanded"), "false");
   assert.equal(
     await page.locator("[data-nav-toggle]").evaluate((el) => el === document.activeElement),
     true,
   );
+  await page.locator("[data-nav-toggle]").click();
+  await page.locator('[data-nav] a[href="associazione.html"]').focus();
+  await page.keyboard.press("Enter");
+  await page.waitForURL(`${base}/associazione.html`);
+  assert.equal(await page.locator("[data-nav] details").count(), 0);
+  assert.equal(
+    await page.locator('[data-nav] a[aria-current="page"]').getAttribute("href"),
+    "associazione.html",
+  );
+  await page.goto(`${base}/index.html`);
   await page.locator(".faq summary").first().focus();
   await page.keyboard.press("Enter");
   assert.equal(
@@ -301,6 +309,19 @@ try {
     }
     report.noJavaScript.push(name);
   }
+  for (const [legacy, destination] of [
+    ["volontari.html", "associazione.html#volontariato"],
+    ["sostienici.html", "associazione.html#sostegno"],
+    ["trasparenza.html", "contatti.html#associazione"],
+  ]) {
+    for (const targetPage of [page, fallback]) {
+      await targetPage.goto(`${base}/${legacy}`);
+      await targetPage.waitForURL(`${base}/${destination}`);
+      const anchor = new URL(targetPage.url()).hash;
+      assert.equal(await targetPage.locator(anchor).isVisible(), true);
+    }
+    report.legacyRedirects.push({ legacy, destination, withoutJavaScript: true });
+  }
   await nojs.close();
   const missing = await page.goto(`${base}/__qa_missing/nested/path`);
   assert.equal(missing.status(), 404);
@@ -319,7 +340,7 @@ try {
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2));
   assert.equal(failures.length, 0, JSON.stringify(failures, null, 2));
   console.log(
-    "PASS: 45 responsive captures, axe on 18 views, keyboard/composer, 320px reflow and nine no-JS pages.",
+    `PASS: ${pages.length * report.viewports.length} responsive captures, axe on ${pages.length * 2} views, booking/navigation, 320px reflow, ${pages.length} no-JS pages and three legacy redirects.`,
   );
 } finally {
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2));

@@ -79,6 +79,12 @@ def load_config():
             path = document.get("path", "")
             if not document.get("source") or not document.get("title") or not path.startswith("documents/") or ".." in Path(path).parts or not (ROOT / path).is_file():
                 raise ValueError("Document needs a source, title and existing local documents/ file")
+    for source, destination in config.get('redirects', {}).items():
+        if not re.fullmatch(r'[a-z0-9-]+\.html', source) or not re.fullmatch(r'[a-z0-9-]+\.html(?:#[a-z0-9-]+)?', destination):
+            raise ValueError('Redirects must use local HTML filenames and optional anchors')
+        target = destination.split('#')[0]
+        if target in config['redirects'] or not (ROOT / target).is_file():
+            raise ValueError('Redirect must point to an existing active page, without a chain')
     return config
 
 
@@ -91,8 +97,6 @@ def render(template, page, config):
     text = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m[1]] if m[1] == "legalFooter" else escape(str(values[m[1]]), quote=True), text)
     if template.stem == "site-header":
         text = text.replace(f'href="{page}"', f'href="{page}" aria-current="page"')
-        if page in {"volontari.html", "sostienici.html", "trasparenza.html", "pescara.html"}:
-            text = text.replace('data-nav-group="association"', 'data-nav-group="association" data-active')
     if page == "404.html":
         text = root_paths(text)
     return "\n".join("    " + line if line else "" for line in text.splitlines())
@@ -107,7 +111,7 @@ def verified_content(slot, config):
     five = config["fivePerMille"]
     donation = config["donation"]
     if slot.startswith("five-") and five["verified"]:
-        card = f'<div class="five-card"><div><h2>Il tuo 5×1000 per il territorio.</h2><p>Accreditamento verificato per l’anno {escape(str(five["year"]))}. Firma nel riquadro previsto dall’accreditamento dell’associazione e indica il codice fiscale.</p></div><div><p>Codice fiscale</p><strong class="tax-id">{escape(five["taxId"])}</strong><a class="text-link" href="sostienici.html">Informazioni sul sostegno</a></div></div>'
+        card = f'<div class="five-card"><div><h2>Il tuo 5×1000 per il territorio.</h2><p>Accreditamento verificato per l’anno {escape(str(five["year"]))}. Firma nel riquadro previsto dall’accreditamento dell’associazione e indica il codice fiscale.</p></div><div><p>Codice fiscale</p><strong class="tax-id">{escape(five["taxId"])}</strong><a class="text-link" href="associazione.html#sostegno">Informazioni sul sostegno</a></div></div>'
         return f'<section class="section verified-promo" data-verified="fivePerMille"><div class="container">{card}</div></section>' if slot != "five-transparency" else f'<div data-verified="fivePerMille"><h3>5×1000 — {escape(str(five["year"]))}</h3><p>Accreditamento documentato. Codice fiscale {escape(five["taxId"])}.</p></div>'
     if slot == "donation" and donation["verified"]:
         parts = ['<div class="notice" data-verified="donation">', f'<p>Intestatario: {escape(donation["beneficiary"])}</p>']
@@ -122,14 +126,39 @@ def verified_content(slot, config):
         if slot == "legal-privacy":
             return f'<p data-verified="legal">Titolare: {escape(legal["name"])}. Sede: {escape(legal["address"])}. Codice fiscale: {escape(legal["taxId"])}.</p>'
         rows = ''.join(f'<div><dt>{label}</dt><dd>{escape(legal[key])}</dd></div>' for key, label in [('name','Denominazione legale'),('address','Sede legale'),('taxId','Codice fiscale'),('qualification','Qualifiche documentate')] if legal.get(key))
-        return f'<dl class="data-list" data-verified="legal">{rows}</dl>'
+        return f'<div data-verified="legal"><dl class="data-list">{rows}</dl><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query={quote(legal["address"])}" target="_blank" rel="noopener noreferrer">Indicazioni per la sede legale</a></div>'
     if slot == "documents":
         documents = [d for d in config["documents"] if d.get("verified")]
         return '<ul class="document-list">' + ''.join(f'<li><a href="{escape(d["path"], quote=True)}">{escape(d["title"])}</a></li>' for d in documents) + '</ul>' if documents else ''
     return ""
 
 
+def redirect_page(page, destination, config):
+    canonical = config['domain'] + '/' + destination.split('#')[0]
+    title = 'Questa pagina è stata spostata | Abruzzo Assistenza — ' + page.removesuffix('.html').capitalize()
+    return f'''<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="robots" content="noindex,follow" />
+    <meta http-equiv="refresh" content="0;url={escape(destination, quote=True)}" />
+    <link rel="canonical" href="{escape(canonical, quote=True)}" />
+    <title>{escape(title)}</title>
+  </head>
+  <body>
+    <main id="main">
+      <h1>Questa pagina è stata spostata.</h1>
+      <p><a href="{escape(destination, quote=True)}">Continua alla nuova pagina</a>.</p>
+    </main>
+  </body>
+</html>
+'''
+
+
 def sync_page(text, page, config):
+    if page in config.get('redirects', {}):
+        return redirect_page(page, config['redirects'][page], config)
     for part in ["site-header", "site-footer"]:
         pattern = rf"    <!-- {part}:start -->.*?<!-- {part}:end -->"
         text, count = re.subn(pattern, lambda _: render(ROOT / "templates" / f"{part}.html", page, config), text, count=1, flags=re.S)
@@ -195,7 +224,7 @@ def main():
         if not args.check: app.write_text(after)
     generated = {
         'robots.txt': 'User-agent: *\nAllow: /\nSitemap: ' + config['domain'] + '/sitemap.xml\n',
-        'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + config['domain'] + ('/' if p.name == 'index.html' else '/' + p.name) + '</loc></url>' for p in sorted(ROOT.glob('*.html')) if p.name != '404.html') + '</urlset>\n',
+        'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + config['domain'] + ('/' if p.name == 'index.html' else '/' + p.name) + '</loc></url>' for p in sorted(ROOT.glob('*.html')) if p.name != '404.html' and p.name not in config.get('redirects', {})) + '</urlset>\n',
     }
     for name, content in generated.items():
         file = ROOT / name
@@ -203,7 +232,7 @@ def main():
             changed.append(name)
             if not args.check: file.write_text(content)
     if args.check and changed: raise SystemExit('Run python3 scripts/sync-layout.py, then format: '+', '.join(changed))
-    print(f'{"PASS" if args.check else "Synced"}: 9 layouts, contacts, configuration and verified publication gates.')
+    print(f'{"PASS" if args.check else "Synced"}: {len(list(ROOT.glob("*.html")))} HTML routes, contacts, configuration and verified publication gates.')
 
 
 if __name__ == '__main__':

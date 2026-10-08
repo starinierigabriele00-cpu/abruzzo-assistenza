@@ -41,8 +41,10 @@ class Page(HTMLParser):
 pages = {p.name: Page(p) for p in sorted(ROOT.glob('*.html'))}
 errors = []
 count = 0
-if set(pages) != {'index.html','servizi.html','contatti.html','volontari.html','sostienici.html','trasparenza.html','privacy.html','pescara.html','404.html'}:
-    errors.append('Expected all nine static pages')
+redirects = config.get('redirects', {})
+active_pages = {'index.html','servizi.html','associazione.html','contatti.html','privacy.html','pescara.html','404.html'}
+if set(pages) != active_pages | set(redirects):
+    errors.append('Expected all active pages and legacy redirects')
 titles = []
 def check_link(url, source):
     global count
@@ -62,6 +64,8 @@ def check_link(url, source):
         return
     target = ROOT / path
     count += 1
+    if source.name in active_pages and target.name in redirects:
+        errors.append(f'{source.name}: link directly to {redirects[target.name]} instead of the legacy route')
     if not target.is_file():
         errors.append(f'{source.name}: missing local file {url}')
     elif parts.fragment:
@@ -70,6 +74,17 @@ def check_link(url, source):
             errors.append(f'{source.name}: missing fragment {url}')
 
 for name, page in pages.items():
+    if name in redirects:
+        destination = redirects[name]
+        if not any(t == 'meta' and a.get('http-equiv') == 'refresh' and a.get('content') == '0;url=' + destination for t,a in page.elements):
+            errors.append(f'{name}: missing immediate legacy redirect')
+        if not any(t == 'meta' and a.get('name') == 'robots' and a.get('content') == 'noindex,follow' for t,a in page.elements):
+            errors.append(f'{name}: redirect must not be indexed')
+        canonical = config['domain'] + '/' + destination.split('#')[0]
+        if not any(t == 'link' and a.get('rel') == 'canonical' and a.get('href') == canonical for t,a in page.elements):
+            errors.append(f'{name}: redirect canonical must identify the destination')
+        check_link(destination, page.path)
+        continue
     for id_, n in Counter(page.ids).items():
         if n > 1: errors.append(f'{name}: duplicate id {id_}')
     if sum(tag == 'h1' for tag, _ in page.elements) != 1: errors.append(f'{name}: expected one h1')
@@ -112,10 +127,10 @@ for file in ['robots.txt','sitemap.xml','assets/icons.svg','assets/abruzzo-map.s
     if not (ROOT/file).is_file(): errors.append('Missing published asset '+file)
 if (ROOT/'sitemap.xml').is_file():
     locs = [el.text for el in ET.parse(ROOT/'sitemap.xml').iter() if el.tag.endswith('}loc')]
-    expected = {config['domain']+('/' if n=='index.html' else '/'+n) for n in pages if n!='404.html'}
+    expected = {config['domain']+('/' if n=='index.html' else '/'+n) for n in pages if n!='404.html' and n not in redirects}
     if set(locs) != expected: errors.append('Sitemap does not match indexable pages')
     for url in locs: check_link(url,ROOT/'sitemap.xml')
 if errors:
     print('\n'.join(errors),file=sys.stderr)
     sys.exit(1)
-print(f'PASS: {len(pages)} pages, {count} links/assets, headings, SEO and publication gates.')
+print(f'PASS: {len(active_pages)} pages, {len(redirects)} redirects, {count} links/assets, headings, SEO and publication gates.')
