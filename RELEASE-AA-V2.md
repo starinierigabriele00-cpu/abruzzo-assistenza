@@ -2,6 +2,12 @@
 
 Rapporto iniziale del 7 ottobre 2026, aggiornato con le revisioni dell’8 ottobre. Le sezioni successive conservano le misure e la fotografia di stato del candidato iniziale; la revisione corrente è descritta qui sotto. Il committente ha successivamente autorizzato la pubblicazione su GitHub Pages. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
 
+## Autorizzazione alla pubblicazione — 8 ottobre 2026
+
+Il committente ha autorizzato la pubblicazione su **https://abruzzoassistenzaodv.com**, servito da Cloudflare Pages, e il completamento delle attività SEO/Google accessibili. La [PR #2](https://github.com/starinierigabriele00-cpu/abruzzo-assistenza/pull/2) raccoglie la wave istituzionale e il composer con dati del richiedente. Il merge deve seguire i controlli GitHub e Cloudflare verdi sull’ultimo commit; la PR e i check di `main` documentano l’esito effettivo del deploy. Le sezioni sotto descrivono i risultati e lo stato Git **al momento delle rispettive consegne, prima di questa autorizzazione**.
+
+I 62 test e il browser QA del composer descritti sotto riguardano il codice incluso in questa pubblicazione. Nessun tracker viene attivato; le proposte organizzative/privacy non diventano automaticamente procedure adottate. Le verifiche Google richiedono l’effettivo accesso a Search Console o il codice fornito da Google, senza valori di verifica inventati.
+
 ## Request composer — dati del richiedente — 8 ottobre 2026
 
 Revisione circoscritta al composer, all’informativa pertinente e ai relativi controlli. La wave istituzionale sotto è conservata: il suo commit `93b6c44` è nella PR #2 in bozza, con GitHub Actions e preview Cloudflare riusciti. **Le nuove modifiche al richiedente sono soltanto locali**, perché il committente non ha autorizzato deploy; un push sul branch avvierebbe una nuova anteprima Cloudflare. Nessun merge, push, deploy o cambiamento infrastrutturale per questa revisione.

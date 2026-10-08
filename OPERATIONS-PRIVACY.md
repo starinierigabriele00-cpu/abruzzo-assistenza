@@ -98,4 +98,4 @@ Non c’è evidenza nel repository di una proprietà già verificata. Sitemap pr
 
 ## Approvazioni di pubblicazione
 
-Il committente ha già autorizzato contenuti istituzionali e accreditamento generale 5×1000. Restano l’approvazione organizzativa/giuridica dei punti privacy sopra e **l’autorizzazione esplicita al merge su `main` e al conseguente deploy Cloudflare**. Push sul branch della PR significa solo candidato/preview. Non attivare tracker né modificare impostazioni di hosting durante questa revisione.
+Il committente ha autorizzato contenuti istituzionali, accreditamento generale 5×1000 e, l’8 ottobre 2026, il merge su `main` e il conseguente deploy Cloudflare dopo i controlli verdi. Restano l’approvazione organizzativa/giuridica dei punti privacy sopra e l’adozione delle procedure proposte: l’autorizzazione tecnica alla pubblicazione non equivale a queste decisioni. Push sul branch della PR significa solo candidato/preview; l’esito effettivo è documentato nella PR e nei check dei commit. Non attivare tracker o statistiche. Le operazioni Google richiedono un account autorizzato e il codice di verifica reale; nessun codice è stato inventato.
