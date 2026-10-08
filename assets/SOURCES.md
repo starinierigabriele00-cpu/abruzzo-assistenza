@@ -18,7 +18,15 @@ Indirizzo e codice fiscale presenti nel vecchio codice non avevano un documento 
 
 `abruzzo-map.svg` deriva dal confine regionale ISTAT redistribuito nel progetto [guglielmo/geojson-italy](https://github.com/guglielmo/geojson-italy), con licenza [CC BY 4.0](https://github.com/guglielmo/geojson-italy/blob/main/LICENSE). La fonte dichiara confini ISTAT, vintage 1 gennaio 2026. Fonte scaricata il 7 ottobre 2026: `https://raw.githubusercontent.com/guglielmo/geojson-italy/main/geojson/limits_IT_regions.geojson`; SHA-256 `97e9dc4c8ddb83e1d32c9f75f2007f7410f233e465cb529c6f8cf6f5ac488b0f`.
 
-Sono estratti esclusivamente il poligono `reg_istat_code: 13` e le sue coordinate WGS84. La trasformazione usa Web Mercator, scala uniforme e traslazione; la semplificazione Ramer–Douglas–Peucker mantiene un errore massimo di 0,8 px nello spazio SVG. Il contorno non è disegnato a mano. Attribuzione visibile nella legenda e nei metadati SVG. Non sono usati confini GISCO con restrizioni di uso commerciale.
+La revisione dell’8 ottobre 2026 mantiene il poligono `reg_istat_code: 13` e aggiunge il contesto delle regioni confinanti e i confini delle quattro province abruzzesi. Questi ultimi derivano da `https://raw.githubusercontent.com/guglielmo/geojson-italy/main/geojson/limits_IT_provinces.geojson`, stessa provenienza ISTAT e licenza CC BY 4.0; SHA-256 `08db9b436f1cee666a8c789084d2857e1444543b89b2129d3c1d9f1c2efdee66`, scaricato l’8 ottobre 2026.
+
+La trasformazione delle coordinate WGS84 usa Web Mercator, scala uniforme e traslazione. La semplificazione Ramer–Douglas–Peucker mantiene un errore massimo di **0,18 px** nello spazio SVG (prima 0,8 px); la scala dei 40 km tiene conto della latitudine centrale di 42,3°. I confini e la costa derivano dai dati geografici, non sono disegnati a mano. Le etichette delle regioni vicine sono posizionate rispetto al baricentro dei rispettivi poligoni visibili. La mappa non rappresenta strade, itinerari o la posizione corrente dei mezzi. Attribuzione visibile nella legenda e nei metadati SVG. Non sono usati confini GISCO con restrizioni di uso commerciale.
+
+`scripts/build-map.py` riproduce l’SVG con la sola libreria standard Python e controlla gli hash delle due sorgenti prima di scrivere. Non scarica dati e non viene eseguito durante il deploy: la mappa finale, 37.372 byte, è self-hosted e già inclusa nell’elenco degli asset della build. Dopo avere scaricato i due file originali nei percorsi indicati:
+
+```bash
+python3 scripts/build-map.py --regions /tmp/abruzzo-regions.geojson --provinces /tmp/abruzzo-provinces.geojson
+```
 
 I punti rappresentano i centri urbani, non le sedi o la posizione dei mezzi. Fonte: [GeoNames cities15000](https://download.geonames.org/export/dump/cities15000.zip), recuperata il 7 ottobre 2026, [CC BY 4.0](https://www.geonames.org/about.html):
 

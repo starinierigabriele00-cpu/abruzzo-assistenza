@@ -87,6 +87,16 @@ Il candidato tecnico è compilato e verificato. Prima del deploy restano questi 
 
 ## Git state e next action
 
+### Fotografia mobile e cartografia — 8 ottobre 2026
+
+La revisione successiva risponde allo screenshot della sezione territoriale. Su smartphone la fotografia conserva ora l’intera inquadratura originale, senza ingrandire il singolo mezzo e senza sovrapporre le CTA ai veicoli. Il fondo fotografico rimane parte dell’hero; sul desktop il comportamento è conservato. La sezione territoriale dispone introduzione, mappa e dettagli in quest’ordine su mobile, con testo più essenziale e indicazione esplicita che i punti di partenza non sono due sedi legali.
+
+Sostituita la rappresentazione isolata scura con cartografia chiara: veri confini regionali e provinciali ISTAT, contesto delle regioni confinanti, costa adriatica, coordinate GeoNames e scala geografica. L’SVG locale è 37.372 byte; non ci sono tile, iframe o richieste di rete. Il nuovo `scripts/build-map.py` consente la riproduzione e rifiuta sorgenti con hash diversi da quelli documentati. Aggiornati `index.html`, `pescara.html`, `assets/styles.css`, `assets/abruzzo-map.svg`, `assets/SOURCES.md`, `README.md`, `tests/browser.test.mjs` e questo rapporto; nessun file rimosso.
+
+Verifiche completate: controlli sito e template, sintassi JavaScript, 9 test messaggi, 18 interazioni, 7 pubblicazione, build root e con percorso Pages, Prettier e whitespace Git. QA completo: 45 screenshot delle nove pagine a 1440, 1024, 768, 390 e 360 px; zero overflow e zero violazioni axe nelle 18 viste analizzate; tastiera, composer, reflow a 320 px e fallback senza JavaScript superati. I test browser controllano anche che le CTA non coprano la fotografia e che l’ordine mobile mostri la mappa prima dei dettagli. Controllati inoltre hero e sezione geografica a 430 e 600 px, dimensioni SVG e assenza di risorse esterne nella mappa. Screenshot: `/tmp/abruzzo-territory-final/`; QA completo: `/tmp/abruzzo-cartography-qa/`. Nessuna nuova misura Lighthouse attribuita a questa revisione. Safari fisico resta da verificare sul dispositivo dell’utente.
+
+I primi due screenshot allegati dal committente non erano disponibili nei percorsi indicati; la correzione si basa sul terzo screenshot leggibile e sulla riproduzione diretta delle pagine nel browser. Le verifiche legali/operative e la configurazione del dominio personalizzato mantengono lo stato descritto sopra. La pubblicazione su Pages è autorizzata; l’esito del relativo workflow e il commit sono riportati nella consegna.
+
 ### Revisione smartphone — 8 ottobre 2026
 
 Acquisiti e rivisti screenshot di tutte le nove pagine a 390 × 700 e 360 × 640 px, più menu espanso, indice, campi e anteprima del composer e landscape a 844 × 390. Corretto il menu che si disponeva su più colonne nei viewport bassi; ora scorre verticalmente. I servizi della home hanno testi a tutta larghezza, l’indice dei servizi rimane disponibile durante lo scorrimento e le ancore non sono coperte dagli elementi sticky. Nel composer: note facoltative richiudibili, collegamenti tra dettagli e anteprima, valori conservati durante la modifica. Eliminato il collegamento di contatto duplicato nella topbar desktop; mantenuto nel menu mobile.

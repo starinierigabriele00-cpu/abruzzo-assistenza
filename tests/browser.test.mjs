@@ -126,6 +126,30 @@ try {
         await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
         true,
       );
+      if (name === "index" && width <= 700) {
+        const composition = await page.evaluate(() => {
+          const photograph = document.querySelector(".hero-image img");
+          const image = photograph.getBoundingClientRect();
+          const actions = document.querySelector(".hero .actions").getBoundingClientRect();
+          const introduction = document.querySelector(".territory-intro").getBoundingClientRect();
+          const map = document.querySelector(".territory-map").getBoundingClientRect();
+          const details = document.querySelector(".territory-details").getBoundingClientRect();
+          return {
+            photoGap: image.top - actions.bottom,
+            photoRatio: image.width / image.height,
+            originalRatio: photograph.naturalWidth / photograph.naturalHeight,
+            mapFollowsIntro: map.top >= introduction.bottom,
+            detailsFollowMap: details.top >= map.bottom,
+          };
+        });
+        assert.ok(composition.photoGap >= 24, "Mobile CTA covers the photograph");
+        assert.ok(
+          Math.abs(composition.photoRatio / composition.originalRatio - 1) < 0.01,
+          "Mobile photograph crops the vehicles",
+        );
+        assert.ok(composition.mapFollowsIntro, "Mobile map precedes its introduction");
+        assert.ok(composition.detailsFollowMap, "Mobile departure details bury the map");
+      }
       await page.screenshot({ path: `${output}/${name}-${width}.png`, fullPage: true });
       let violations = [];
       if (width === 390 || width === 1440) {

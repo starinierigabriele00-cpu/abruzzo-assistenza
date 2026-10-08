@@ -462,8 +462,15 @@ p a {
 .territory-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 80px;
-  align-items: center;
+  grid-template-areas: "intro map" "details map";
+  gap: 24px 80px;
+  align-items: start;
+}
+.territory-intro {
+  grid-area: intro;
+}
+.territory-details {
+  grid-area: details;
 }
 .territory h2 span {
   color: var(--cyan);
@@ -475,14 +482,15 @@ p a {
 .territory .lead {
   margin-top: 24px;
 }
-.territory p + p {
+.territory .territory-note {
   font-size: 16px;
+  margin-block: 16px 24px;
 }
 .territory a {
   color: var(--cyan);
 }
 .departure-list {
-  margin: 32px 0 12px;
+  margin: 0;
 }
 .departure-list > div {
   border-top: 1px solid rgb(255 255 255 / 18%);
@@ -499,8 +507,15 @@ p a {
   color: #c4d3d9;
   font-size: 15px;
 }
-.territory-map img {
+.territory-map {
+  grid-area: map;
+  align-self: center;
+}
+.territory-map img,
+.local-map img {
   width: 100%;
+  border: 1px solid rgb(255 255 255 / 24%);
+  border-radius: var(--radius);
 }
 figcaption {
   font-size: 12px;
@@ -510,7 +525,7 @@ figcaption {
 }
 .territory-map figcaption {
   color: #b6c8cf;
-  text-align: center;
+  text-align: left;
 }
 .process-layout {
   display: grid;
@@ -1508,6 +1523,7 @@ figcaption {
     --title: clamp(32px, 9vw, 38px);
     --title-section: 32px;
     --hero-position: 50% 50%;
+    --hero-photo-height: 56.12vw;
   }
   body {
     font-size: 16px;
@@ -1542,37 +1558,39 @@ figcaption {
   }
   .hero {
     align-items: start;
-    min-height: 640px;
+    min-height: 0;
   }
   .hero-content {
-    padding-block: 46px 220px;
+    padding-block: 36px calc(var(--hero-photo-height) + 28px);
   }
   .hero h1 {
-    font-size: clamp(36px, 7.5vw, 46px);
+    font-size: clamp(32px, 8.7vw, 42px);
     max-width: 560px;
   }
   .hero p {
     font-size: 17px;
-    margin-top: 22px;
+    margin-top: 20px;
     max-width: 450px;
   }
   .hero .actions {
-    margin-top: 26px;
+    margin-top: 24px;
     gap: 12px;
   }
   .hero::after {
+    inset: auto 0 0;
+    height: var(--hero-photo-height);
     background: linear-gradient(
       180deg,
-      rgb(10 21 28 / 96%) 0%,
-      rgb(10 21 28 / 93%) 35%,
-      rgb(10 21 28 / 77%) 52%,
-      rgb(10 21 28 / 6%) 82%,
-      rgb(10 21 28 / 18%)
+      var(--graphite),
+      rgb(18 37 45 / 75%) 8%,
+      rgb(18 37 45 / 10%) 28%,
+      rgb(18 37 45 / 0%) 65%,
+      rgb(18 37 45 / 12%)
     );
   }
   .hero-image {
     top: auto;
-    height: 70%;
+    height: var(--hero-photo-height);
   }
   .hero-image img {
     object-position: var(--hero-position);
@@ -1613,9 +1631,19 @@ figcaption {
     gap: 36px;
   }
   .territory .lead {
-    font-size: 20px;
+    font-size: 18px;
+    margin-top: 18px;
+  }
+  .territory-grid {
+    grid-template-areas: "intro" "map" "details";
+    gap: 24px;
+  }
+  .territory .territory-note {
+    font-size: 15px;
+    margin-block: 14px 20px;
   }
   .territory-map {
+    width: 100%;
     max-width: 480px;
     margin-inline: auto;
   }
@@ -1904,10 +1932,10 @@ figcaption {
     font-size: 20px;
   }
   .hero-content {
-    padding-top: 36px;
+    padding-top: 32px;
   }
   .hero h1 {
-    font-size: 36px;
+    font-size: clamp(30px, 8.7vw, 36px);
   }
   .hero .actions {
     flex-direction: column;

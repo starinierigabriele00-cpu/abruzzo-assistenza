@@ -10,6 +10,8 @@ Il composer nei Contatti consente di scegliere nove richieste. Mostra solo i cam
 
 Su smartphone il catalogo della home usa righe a tutta larghezza, l’indice dei servizi rimane disponibile durante lo scorrimento e il menu aperto scorre verticalmente anche in landscape. Il footer conserva contatti, social e collegamenti con una composizione più compatta. Nel composer le note facoltative sono richiudibili; “Controlla il messaggio” e “Modifica i dettagli” consentono di passare tra i due punti senza perdere dati. Sul desktop le note rimangono visibili e la composizione delle pagine è conservata. Nell’header desktop resta una sola azione di contatto, “Contattaci”; il menu mobile mantiene “Contatti”.
 
+La fotografia dell’hero mobile conserva le proporzioni originali: i mezzi rimangono visibili e le azioni sono sopra la zona fotografica. La mappa territoriale precede i dettagli dei punti di partenza su smartphone. Usa veri confini regionali e provinciali ISTAT, costa, contesto delle regioni confinanti e coordinate GeoNames, con grafica cartografica chiara. È un SVG locale senza librerie o richieste esterne; la provenienza e la rigenerazione tramite `scripts/build-map.py` sono documentate in [assets/SOURCES.md](assets/SOURCES.md).
+
 Senza JavaScript restano disponibili navigazione, servizi, FAQ e contatti diretti; il composer è assente. La sola informazione sulle emergenze è nel footer e rimanda al 112. Nessuna promessa H24 o disponibilità garantita.
 
 ## Configurazione: un’unica fonte
