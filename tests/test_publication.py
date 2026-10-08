@@ -21,7 +21,8 @@ class PublicationTests(unittest.TestCase):
     def test_unverified_information_never_renders(self):
         config = deepcopy(self.config)
         config['fivePerMille']['verified'] = False
-        for slot in ['five-home','five-support','five-transparency','donation','legal-contact','legal-data','legal-privacy','documents']:
+        config['legal']['verified'] = False
+        for slot in ['five-home','five-support','five-transparency','donation','legal-contact','legal-data','legal-privacy','legal-association','documents']:
             self.assertEqual(layout.verified_content(slot,config),'')
 
     def test_five_per_mille_requires_source_and_tax_id_but_not_year(self):
@@ -45,17 +46,19 @@ class PublicationTests(unittest.TestCase):
         for slot in ['five-home', 'five-support']:
             rendered = layout.verified_content(slot, self.config)
             self.assertIn('02227430663', rendered)
-            self.assertIn('data-copy-tax-id', rendered)
-            self.assertIn('data-tax-copy-status', rendered)
             self.assertNotIn('2026', rendered)
+        home = layout.verified_content('five-home', self.config)
+        self.assertIn('data-copy-tax-id hidden', home)
+        self.assertIn('data-tax-copy-status', home)
+        self.assertNotIn('five-card', layout.verified_content('five-support', self.config))
         self.assertIn('Accreditamento', layout.verified_content('five-transparency', self.config))
 
     def test_verified_five_per_mille_slot_is_static_and_correctly_positioned(self):
         config = deepcopy(self.config)
-        config['fivePerMille'] = {'verified':True,'year':2026,'taxId':'TEST-CODE','source':'test fixture'}
+        config['fivePerMille'] = {'verified':True,'year':None,'taxId':'02227430663','source':'test fixture'}
         rendered = layout.verified_content('five-home',config)
         self.assertIn('data-verified="fivePerMille"',rendered)
-        self.assertIn('TEST-CODE',rendered)
+        self.assertIn('02227430663',rendered)
         source = (ROOT/'index.html').read_text()
         self.assertLess(source.index('service-directory'),source.index('verified:five-home:start'))
         self.assertLess(source.index('verified:five-home:end'),source.index('id="process-title"'))
@@ -67,7 +70,7 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(layout.verified_content('donation',self.config),'')
 
     def test_verified_legal_content_is_escaped_and_does_not_grant_qualification(self):
-        self.config['legal'].update(verified=True,name='<Test>',source='test fixture')
+        self.config['legal'].update(verified=True,name='<Test>',qualification='',runtsRegistered=False,source='test fixture')
         rendered = layout.verified_content('legal-data',self.config)
         self.assertIn('&lt;Test&gt;',rendered)
         self.assertNotIn('ODV',rendered)
@@ -87,8 +90,85 @@ class PublicationTests(unittest.TestCase):
         self.assertFalse((public/'CNAME').exists())
         for name in ['robots.txt','sitemap.xml','_redirects','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
             self.assertTrue((public/name).is_file(),name)
-        for private in ['config','templates','tests','scripts','README.md','assets/SOURCES.md']:
+        for private in ['config','templates','tests','scripts','README.md','OPERATIONS-PRIVACY.md','documents/README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
+
+    def test_annual_distribution_requires_separate_evidence(self):
+        config = deepcopy(self.config)
+        config['redirects'] = {}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'config').mkdir()
+            with patch.object(layout,'ROOT',root):
+                config['fivePerMille'].update(year=2026, yearSource='')
+                (root/'config/site.json').write_text(json.dumps(config))
+                with self.assertRaisesRegex(ValueError,'yearSource'):
+                    layout.load_config()
+                config['fivePerMille']['yearSource'] = 'annual distribution fixture'
+                (root/'config/site.json').write_text(json.dumps(config))
+                approved = layout.load_config()
+                self.assertIn('Ammissione al riparto 2026 documentata',layout.verified_content('five-support',approved))
+                for invalid in [True,'2026',1999,2101]:
+                    config['fivePerMille']['year'] = invalid
+                    (root/'config/site.json').write_text(json.dumps(config))
+                    with self.assertRaisesRegex(ValueError,'invalid documented fiscal year'):
+                        layout.load_config()
+
+    def test_tax_id_matches_the_confirmed_legal_entity(self):
+        config = deepcopy(self.config)
+        config['redirects'] = {}
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'config').mkdir()
+            with patch.object(layout,'ROOT',root):
+                for tax_id, error in [('02227430664','must match'),('invented','11 digits')]:
+                    config['fivePerMille']['taxId'] = tax_id
+                    (root/'config/site.json').write_text(json.dumps(config))
+                    with self.assertRaisesRegex(ValueError,error):
+                        layout.load_config()
+
+    def test_confirmed_institutional_data_and_schema_use_the_same_source(self):
+        import re
+        legal = self.config['legal']
+        self.assertTrue(legal['verified'])
+        self.assertEqual(legal['name'],'Abruzzo Assistenza – Organizzazione di Volontariato – Ente del Terzo Settore')
+        self.assertEqual(legal['address'],"Via Fonte d'Amore SNC, Sulmona (AQ), Italia")
+        self.assertEqual(legal['qualification'],'ODV / ETS')
+        self.assertTrue(legal['runtsRegistered'])
+        for file in ['contatti.html','associazione.html','privacy.html']:
+            text = (ROOT/file).read_text()
+            self.assertIn(legal['taxId'],text)
+            self.assertNotIn('Via Fonte Romana',text)
+        text = (ROOT/'index.html').read_text()
+        schema = json.loads(re.search(r'<script type="application/ld\+json">(.*?)</script>',text,re.S)[1])
+        self.assertEqual(schema['legalName'],legal['name'])
+        self.assertEqual(schema['address'],legal['address'])
+        self.assertEqual(schema['taxID'],legal['taxId'])
+
+    def test_missing_statute_never_generates_a_public_download(self):
+        self.assertEqual(self.config['documents'],[])
+        text = (ROOT/'contatti.html').read_text()
+        self.assertNotIn('href="documents/statuto.pdf"',text)
+        config = deepcopy(self.config)
+        config['redirects'] = {}
+        config['documents'] = [{'verified':True,'title':'Statuto','source':'fixture approval','path':'documents/statuto.pdf'}]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'config').mkdir()
+            (root/'config/site.json').write_text(json.dumps(config))
+            with patch.object(layout,'ROOT',root):
+                with self.assertRaisesRegex(ValueError,'existing local documents/'):
+                    layout.load_config()
+
+    def test_privacy_does_not_invent_retention_or_consent(self):
+        privacy = ' '.join((ROOT/'privacy.html').read_text().split())
+        self.assertIn('ancora formalizzato una politica di conservazione',privacy)
+        self.assertIn('articolo 9',privacy)
+        self.assertIn('una persona incaricata alla volta',privacy)
+        self.assertIn('presidente',privacy)
+        self.assertIn('vicepresidente',privacy)
+        for promise in ['cancellati automaticamente dopo','conservati per 30 giorni','consenso implicito','Google Analytics','Meta Pixel']:
+            self.assertNotIn(promise,privacy)
 
     def test_sitemap_excludes_legacy_routes_and_includes_association_and_volunteers(self):
         import xml.etree.ElementTree as ET

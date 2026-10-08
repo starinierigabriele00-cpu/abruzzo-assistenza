@@ -276,13 +276,55 @@ test("FAQ accordion uses native details and answers useful questions", (t) => {
   assert.equal(faqs[0].open, false);
   assert.match(faqs[5].textContent, /confermato solo dopo/);
 });
-test("unverified tax, donation and legal data are absent with and without JavaScript", (t) => {
+test("confirmed institutional data is static while unverified payment channels remain absent", (t) => {
   for (const run of [true, false])
     for (const file of ["index.html", "volontari.html", "associazione.html", "contatti.html"]) {
       const p = page(t, file, "", 390, run);
-      assert.equal(p.document.querySelector("[data-verified]"), null);
-      assert.doesNotMatch(p.document.body.textContent, /02227430663|Via Fonte|IBAN|PayPal/);
+      assert.ok(p.document.querySelector('[data-verified="legal"]'));
+      assert.match(p.document.body.textContent, /02227430663/);
+      assert.match(p.document.body.textContent, /Via Fonte d'Amore SNC/);
+      assert.equal(p.document.querySelector('[data-verified="donation"]'), null);
+      assert.doesNotMatch(p.document.body.textContent, /IBAN|PayPal|Via Fonte Romana/);
     }
+});
+test("tax code copy writes only the visible verified code after an explicit click", async (t) => {
+  const p = page(t, "index.html");
+  const copied = [];
+  p.window.navigator.clipboard = { writeText: async (value) => copied.push(value) };
+  const button = p.document.querySelector("[data-copy-tax-id]");
+  assert.equal(button.hidden, false);
+  assert.deepEqual(copied, []);
+  button.click();
+  await p.tick();
+  assert.deepEqual(copied, ["02227430663"]);
+  assert.match(p.document.querySelector("[data-tax-copy-status]").textContent, /copiato/);
+  assert.equal(p.document.querySelector("[data-tax-copy-status]").getAttribute("role"), "status");
+});
+test("tax code copy fallback selects and focuses the code when clipboard is missing or denied", async (t) => {
+  for (const denied of [false, true]) {
+    const p = page(t, "index.html");
+    if (denied)
+      p.window.navigator.clipboard = {
+        writeText: async () => {
+          throw new Error("Denied");
+        },
+      };
+    p.document.querySelector("[data-copy-tax-id]").click();
+    await p.tick();
+    assert.equal(p.window.getSelection().toString().trim(), "02227430663");
+    assert.equal(p.document.activeElement, p.document.querySelector("[data-tax-id]"));
+    assert.match(p.document.querySelector("[data-tax-copy-status]").textContent, /Copia/);
+  }
+});
+test("tax code remains readable without JavaScript and unavailable selection still gives feedback", async (t) => {
+  const fallback = page(t, "index.html", "", 390, false);
+  assert.equal(fallback.document.querySelector("[data-copy-tax-id]").hidden, true);
+  assert.equal(fallback.document.querySelector("[data-tax-id]").textContent.trim(), "02227430663");
+  const p = page(t, "index.html");
+  p.window.getSelection = () => null;
+  p.document.querySelector("[data-copy-tax-id]").click();
+  await p.tick();
+  assert.match(p.document.querySelector("[data-tax-copy-status]").textContent, /Copia/);
 });
 test("no-JavaScript pages retain navigation, all services, FAQs and direct channels", (t) => {
   const home = page(t, "index.html", "", 390, false);

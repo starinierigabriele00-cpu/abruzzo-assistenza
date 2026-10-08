@@ -35,6 +35,7 @@ const report = {
   errors: [],
   noJavaScript: [],
   legacyRedirects: [],
+  taxCodeCopy: [],
   metrics: null,
 };
 const browser = await chromium.launch({
@@ -69,6 +70,11 @@ try {
     for (const name of pages) {
       await page.goto(`${base}/${name}.html`, { waitUntil: "networkidle" });
       await page.evaluate(() => document.fonts.ready);
+      assert.deepEqual(
+        await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+        { local: 0, session: 0 },
+        `${name}: the website must not persist visitor data`,
+      );
       if (name === "index") {
         const navigationStyles = await page.evaluate(() => {
           const keys = [
@@ -212,6 +218,11 @@ try {
   const url = new URL(await page.locator("[data-message-link]").getAttribute("href"));
   assert.equal(url.searchParams.get("text"), text);
   assert.equal(page.url(), siteURL("contatti.html?servizio=disabili#richiesta"));
+  assert.deepEqual(
+    await page.evaluate(() => ({ local: localStorage.length, session: sessionStorage.length })),
+    { local: 0, session: 0 },
+    "Composer input stays out of persistent browser storage",
+  );
   assert.equal(await page.locator("[data-request-notes]").evaluate((el) => el.open), false);
   await page.locator(".request-review").click();
   assert.equal(new URL(page.url()).hash, "#anteprima");
@@ -295,8 +306,42 @@ try {
       .evaluateAll((sections) =>
         sections.map((section) => section.getAttribute("aria-labelledby")),
       ),
-    ["hero-title", "servizi-title", "process-title", "territory-title", "faq-title", "cta-title"],
+    [
+      "hero-title",
+      "servizi-title",
+      "five-home-title",
+      "process-title",
+      "territory-title",
+      "faq-title",
+      "cta-title",
+    ],
   );
+  // Clipboard success and fallback are both exercised with a keyboard action.
+  await page.evaluate(() => {
+    window.__taxCopied = [];
+    Object.defineProperty(navigator, "clipboard", {
+      configurable: true,
+      value: { writeText: async (value) => window.__taxCopied.push(value) },
+    });
+  });
+  await page.locator("[data-copy-tax-id]").focus();
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() =>
+    document.querySelector("[data-tax-copy-status]").textContent.includes("copiato"),
+  );
+  assert.deepEqual(await page.evaluate(() => window.__taxCopied), ["02227430663"]);
+  report.taxCodeCopy.push("clipboard after keyboard activation");
+  await page.evaluate(() => {
+    Object.defineProperty(navigator, "clipboard", { configurable: true, value: undefined });
+  });
+  await page.locator("[data-copy-tax-id]").click();
+  await page.waitForFunction(() => window.getSelection().toString().trim() === "02227430663");
+  assert.equal(
+    await page.locator("[data-tax-id]").evaluate((el) => el === document.activeElement),
+    true,
+  );
+  report.taxCodeCopy.push("manual selection fallback after touch-like click");
+  await page.goto(`${base}/index.html`);
   await page.locator("[data-nav-toggle]").click();
   await page.locator('[data-nav] a[href="volontari.html"]').click();
   await page.waitForURL(siteURL("volontari.html"));
@@ -364,7 +409,13 @@ try {
       await fallback.locator('nav[aria-label="Navigazione principale"]').isVisible(),
       true,
     );
-    assert.equal(await fallback.locator("[data-verified]").count(), 0);
+    assert.ok((await fallback.locator('[data-verified="legal"]').count()) > 0);
+    assert.equal(await fallback.locator('[data-verified="donation"]').count(), 0);
+    assert.match(await fallback.locator("footer").innerText(), /Via Fonte d'Amore SNC/);
+    if (name === "index") {
+      assert.equal(await fallback.locator("[data-tax-id]").innerText(), "02227430663");
+      assert.equal(await fallback.locator("[data-copy-tax-id]").isVisible(), false);
+    }
     assert.equal(
       (await fallback.locator('a[href="mailto:abruzzoassistenzaodv@gmail.com"]').count()) > 0,
       true,
@@ -401,6 +452,8 @@ try {
   );
   await page.screenshot({ path: `${output}/404-nested-320.png`, fullPage: true });
   report.nested404 = true;
+  report.cookies = await context.cookies();
+  assert.deepEqual(report.cookies, [], "The local artifact must not install cookies");
   assert.deepEqual(report.errors, []);
   const failures = report.observations.filter((o) => o.violations.length);
   writeFileSync(`${output}/results.json`, JSON.stringify(report, null, 2));

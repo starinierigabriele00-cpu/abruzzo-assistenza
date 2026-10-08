@@ -64,8 +64,15 @@ def load_config():
     if five["verified"]:
         if not re.fullmatch(r"\d{11}", five["taxId"]):
             raise ValueError("fivePerMille: tax ID must contain 11 digits")
-        if five.get("year") is not None and (not isinstance(five["year"], int) or not 2000 <= five["year"] <= 2100):
-            raise ValueError("fivePerMille: invalid documented fiscal year")
+        if five.get("year") is not None:
+            if type(five['year']) is not int or not 2000 <= five['year'] <= 2100:
+                raise ValueError("fivePerMille: invalid documented fiscal year")
+            if not five.get('yearSource'):
+                raise ValueError("fivePerMille: a documented annual distribution needs its own yearSource")
+        if config['legal']['verified'] and five['taxId'] != config['legal']['taxId']:
+            raise ValueError('fivePerMille: tax ID must match the verified association')
+    if config['legal']['verified'] and not re.fullmatch(r'\d{11}', config['legal']['taxId']):
+        raise ValueError('legal: tax ID must contain 11 digits')
     donation = config["donation"]
     if donation["verified"]:
         if not (donation["iban"] or donation["paymentUrl"]):
@@ -99,7 +106,7 @@ def render(template, page, config):
     legal = config["legal"]
     values = {**config, "legalFooter": ""}
     if legal["verified"]:
-        values["legalFooter"] = f'<p>Sede legale: {escape(legal["address"])}</p><p>Codice fiscale: {escape(legal["taxId"])}</p>'
+        values["legalFooter"] = f'<div class="footer-legal" data-verified="legal"><p>{escape(legal["name"])}</p><p>Sede legale: {escape(legal["address"])} · C.F. {escape(legal["taxId"])}</p></div>'
     text = re.sub(r"\{\{(\w+)\}\}", lambda m: values[m[1]] if m[1] == "legalFooter" else escape(str(values[m[1]]), quote=True), text)
     if template.stem == "site-header":
         text = text.replace(f'href="{page}"', f'href="{page}" aria-current="page"')
@@ -125,26 +132,27 @@ def verified_content(slot, config):
     donation = config["donation"]
     if slot.startswith("five-") and five["verified"]:
         tax_id = escape(five["taxId"])
-        annuality = f' per l’anno {escape(str(five["year"]))}' if five.get("year") else ""
+        annuality = f'<p>Ammissione al riparto {escape(str(five["year"]))} documentata.</p>' if five.get("year") and five.get('yearSource') else ""
         if slot == "five-transparency":
-            return f'<div data-verified="fivePerMille"><h3>5×1000</h3><p>Accreditamento al cinque per mille{annuality} confermato dall’associazione. Codice fiscale {tax_id}.</p></div>'
+            return f'<p data-verified="fivePerMille">Accreditamento al 5×1000 confermato. <a class="text-link" href="associazione.html#cinque-per-mille">Come destinare il 5×1000</a>.</p>'
+        if slot == 'five-support':
+            return f'<section class="section section-ice" id="cinque-per-mille" aria-labelledby="five-support-title" data-verified="fivePerMille"><div class="container support-layout"><div><h2 id="five-support-title">Una firma per le nostre attività.</h2><p class="lead">Puoi destinare il tuo 5×1000 ad Abruzzo Assistenza, accreditata al sostegno degli Enti del Terzo Settore.</p></div><div><p>Nella dichiarazione dei redditi, firma nel riquadro dedicato al sostegno degli Enti del Terzo Settore e indica il codice fiscale <strong>{tax_id}</strong>.</p><p>Il 5×1000 è una destinazione di una quota dell’IRPEF; è distinto dai contributi e dalle donazioni private.</p>{annuality}<a class="text-link" href="contatti.html?servizio=sostegno#richiesta">Parla con un referente</a></div></div></section>'
         card = (
             '<div class="five-card">'
             '<div class="five-card-copy">'
-            '<span class="five-card-label">5×1000</span>'
-            '<h2>Sostieni Abruzzo Assistenza con il tuo 5×1000.</h2>'
+            '<h2 id="five-home-title">Sostieni Abruzzo Assistenza con il tuo 5×1000.</h2>'
             '<p>Firma nel riquadro per il sostegno degli Enti del Terzo Settore nella dichiarazione dei redditi e indica il nostro codice fiscale.</p>'
             '</div>'
             '<div class="five-card-code">'
             '<span class="five-card-label">Codice fiscale</span>'
-            f'<strong class="tax-id" data-tax-id>{tax_id}</strong>'
+            f'<strong class="tax-id" data-tax-id tabindex="-1">{tax_id}</strong>'
             '<button class="five-copy-button" type="button" data-copy-tax-id hidden>Copia codice fiscale</button>'
             '<span class="five-copy-status" role="status" aria-live="polite" data-tax-copy-status></span>'
-            '<a class="five-card-link" href="associazione.html#sostegno">Altre modalità di sostegno</a>'
+            '<a class="five-card-link" href="associazione.html#cinque-per-mille">Come destinare il 5×1000</a>'
             '</div>'
             '</div>'
         )
-        return f'<section class="section verified-promo" data-verified="fivePerMille"><div class="container">{card}</div></section>'
+        return f'<section class="section verified-promo" aria-labelledby="five-home-title" data-verified="fivePerMille"><div class="container">{card}</div></section>'
     if slot == "donation" and donation["verified"]:
         parts = ['<div class="notice" data-verified="donation">', f'<p>Intestatario: {escape(donation["beneficiary"])}</p>']
         if donation["iban"]:
@@ -157,7 +165,11 @@ def verified_content(slot, config):
             return f'<div data-verified="legal"><p>Sede legale: {escape(legal["address"])}</p><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query={quote(legal["address"])}" target="_blank" rel="noopener noreferrer">Indicazioni per la sede legale</a></div>'
         if slot == "legal-privacy":
             return f'<p data-verified="legal">Titolare: {escape(legal["name"])}. Sede: {escape(legal["address"])}. Codice fiscale: {escape(legal["taxId"])}.</p>'
+        if slot == 'legal-association':
+            return f'<div class="institutional-summary" data-verified="legal"><p>{escape(legal["name"])}</p><p>{escape(legal["qualification"])}' + (' · Iscrizione RUNTS confermata.' if legal.get('runtsRegistered') else '.') + '<a class="text-link" href="contatti.html#associazione">Dati istituzionali e documenti</a></p></div>'
         rows = ''.join(f'<div><dt>{label}</dt><dd>{escape(legal[key])}</dd></div>' for key, label in [('name','Denominazione legale'),('address','Sede legale'),('taxId','Codice fiscale'),('qualification','Qualifiche documentate')] if legal.get(key))
+        if legal.get('runtsRegistered'):
+            rows += '<div><dt>Registro pubblico</dt><dd>Iscrizione RUNTS confermata</dd></div>'
         return f'<div data-verified="legal"><dl class="data-list">{rows}</dl><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query={quote(legal["address"])}" target="_blank" rel="noopener noreferrer">Indicazioni per la sede legale</a></div>'
     if slot == "documents":
         documents = [d for d in config["documents"] if d.get("verified")]
@@ -231,6 +243,7 @@ def sync_page(text, page, config):
         if config['legal']['verified']:
             data['legalName'] = config['legal']['name']
             data['taxID'] = config['legal']['taxId']
+            data['address'] = config['legal']['address']
         text = re.sub(r'(<script\s+type="application/ld\+json"\s*>).*?(</script>)', lambda m: m[1]+json.dumps(data,ensure_ascii=False).replace('<','\\u003c')+m[2], text, flags=re.S)
     return text
 

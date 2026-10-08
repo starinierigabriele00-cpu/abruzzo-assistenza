@@ -1146,9 +1146,6 @@ figcaption {
   font-weight: 600;
   letter-spacing: 0.055em;
 }
-.five-card-copy .five-card-label {
-  margin-bottom: 15px;
-}
 .five-card-code {
   border-left: 1px solid rgb(210 232 238 / 23%);
   padding-left: clamp(20px, 3vw, 46px);
@@ -1183,9 +1180,6 @@ figcaption {
   display: block;
   color: #cce5e9;
   font-size: 13px;
-}
-.five-copy-status:empty {
-  display: none;
 }
 .five-card-link {
   display: inline-block;
@@ -1291,6 +1285,30 @@ figcaption {
 .footer-bottom a {
   color: #cfdee3;
   padding-block: 8px;
+}
+.footer-legal {
+  margin-top: 24px;
+  color: #cfdee3;
+  font-size: 13px;
+  line-height: 1.6;
+}
+.footer-legal p + p {
+  margin-top: 4px;
+}
+.footer-legal p {
+  color: inherit;
+}
+.institutional-summary {
+  margin-top: 24px;
+  max-width: 820px;
+  color: var(--muted);
+}
+.institutional-summary p + p {
+  margin-top: 8px;
+}
+.institutional-summary a {
+  display: inline-block;
+  margin-left: 12px;
 }
 @media (max-width: 1100px) {
   .container {

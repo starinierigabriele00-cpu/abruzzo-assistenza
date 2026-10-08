@@ -220,10 +220,13 @@ qsa("[data-copy-tax-id]").forEach((button) => {
       if (selection) {
         const range = document.createRange();
         range.selectNodeContents(code);
+        code.focus({ preventScroll: true });
         selection.removeAllRanges();
         selection.addRange(range);
       }
-      status.textContent = "Seleziona e copia il codice fiscale evidenziato.";
+      status.textContent = selection
+        ? "Copia automatica non disponibile. Il codice è selezionato: usa Copia sul dispositivo."
+        : "Copia automatica non disponibile. Seleziona il codice fiscale e usa Copia sul dispositivo.";
     }
   });
 });
