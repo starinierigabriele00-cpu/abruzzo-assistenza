@@ -54,12 +54,18 @@ def load_config():
         raise ValueError("Domain must be an HTTPS origin")
     for section, required in {
         "legal": ["name", "address", "taxId", "source"],
-        "fivePerMille": ["year", "taxId", "source"],
+        "fivePerMille": ["taxId", "source"],
         "donation": ["beneficiary", "source"],
     }.items():
         record = config[section]
         if record["verified"] and any(not record.get(key) for key in required):
             raise ValueError(f"{section}: verification needs complete data and a source")
+    five = config["fivePerMille"]
+    if five["verified"]:
+        if not re.fullmatch(r"\\d{11}", five["taxId"]):
+            raise ValueError("fivePerMille: tax ID must contain 11 digits")
+        if five.get("year") is not None and (not isinstance(five["year"], int) or not 2000 <= five["year"] <= 2100):
+            raise ValueError("fivePerMille: invalid documented fiscal year")
     donation = config["donation"]
     if donation["verified"]:
         if not (donation["iban"] or donation["paymentUrl"]):
@@ -118,8 +124,27 @@ def verified_content(slot, config):
     five = config["fivePerMille"]
     donation = config["donation"]
     if slot.startswith("five-") and five["verified"]:
-        card = f'<div class="five-card"><div><h2>Il tuo 5×1000 per il territorio.</h2><p>Accreditamento verificato per l’anno {escape(str(five["year"]))}. Firma nel riquadro previsto dall’accreditamento dell’associazione e indica il codice fiscale.</p></div><div><p>Codice fiscale</p><strong class="tax-id">{escape(five["taxId"])}</strong><a class="text-link" href="associazione.html#sostegno">Informazioni sul sostegno</a></div></div>'
-        return f'<section class="section verified-promo" data-verified="fivePerMille"><div class="container">{card}</div></section>' if slot != "five-transparency" else f'<div data-verified="fivePerMille"><h3>5×1000 — {escape(str(five["year"]))}</h3><p>Accreditamento documentato. Codice fiscale {escape(five["taxId"])}.</p></div>'
+        tax_id = escape(five["taxId"])
+        annuality = f' per l’anno {escape(str(five["year"]))}' if five.get("year") else ""
+        if slot == "five-transparency":
+            return f'<div data-verified="fivePerMille"><h3>5×1000</h3><p>Accreditamento al cinque per mille{annuality} confermato dall’associazione. Codice fiscale {tax_id}.</p></div>'
+        card = (
+            '<div class="five-card">'
+            '<div class="five-card-copy">'
+            '<span class="five-card-label">5×1000</span>'
+            '<h2>Sostieni Abruzzo Assistenza con il tuo 5×1000.</h2>'
+            '<p>Firma nel riquadro per il sostegno degli Enti del Terzo Settore nella dichiarazione dei redditi e indica il nostro codice fiscale.</p>'
+            '</div>'
+            '<div class="five-card-code">'
+            '<span class="five-card-label">Codice fiscale</span>'
+            f'<strong class="tax-id" data-tax-id>{tax_id}</strong>'
+            '<button class="five-copy-button" type="button" data-copy-tax-id hidden>Copia codice fiscale</button>'
+            '<span class="five-copy-status" role="status" aria-live="polite" data-tax-copy-status></span>'
+            '<a class="five-card-link" href="associazione.html#sostegno">Altre modalità di sostegno</a>'
+            '</div>'
+            '</div>'
+        )
+        return f'<section class="section verified-promo" data-verified="fivePerMille"><div class="container">{card}</div></section>'
     if slot == "donation" and donation["verified"]:
         parts = ['<div class="notice" data-verified="donation">', f'<p>Intestatario: {escape(donation["beneficiary"])}</p>']
         if donation["iban"]:
