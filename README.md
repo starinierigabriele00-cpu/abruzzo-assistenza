@@ -90,14 +90,14 @@ Su iPhone, `viewport-fit=cover`, gli inset di sicurezza e lo sfondo grafite di `
 
 ## Dominio e approvazioni richieste
 
-Canonici, sitemap, robots e Open Graph sono predisposti per `https://abruzzoassistenza.com`. La build predefinita non crea CNAME e non modifica DNS o impostazioni Pages. La 404 usa percorsi root, adatti anche a URL inesistenti annidati. Se si vuole verificare la versione sul path di progetto prima del dominio:
+Canonici, sitemap, robots e Open Graph sono predisposti per `https://abruzzoassistenzaodv.com`. La build predefinita non crea CNAME e non modifica DNS o impostazioni Pages. La 404 usa percorsi root, adatti anche a URL inesistenti annidati. Se si vuole verificare la versione sul path di progetto prima del dominio:
 
 ```bash
 python3 scripts/build-site.py --base-path /abruzzo-assistenza/
 ```
 
-Dopo approvazione e configurazione del dominio, il flag `--custom-domain` include un CNAME nell’artefatto. Con GitHub Actions, l’impostazione effettiva del dominio rimane in **Settings → Pages**: il file non sostituisce quell’operazione. Nessun record DNS è scritto dal progetto. Consultare la [documentazione GitHub sui domini](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages) e verificare HTTPS/redirect dopo la configurazione. Le politiche di caching sono gestite da GitHub Pages, non dal CSS o da intestazioni inventate nel repository.
+Dopo approvazione e configurazione del dominio, il flag `--custom-domain` include un CNAME nell’artefatto. Con GitHub Actions, l’impostazione effettiva del dominio rimane in **Settings → Pages**: il file non sostituisce quell’operazione. Nessun record DNS è scritto dal progetto. Consultare la [documentazione GitHub sui domini](https://docs.github.com/en/pages/configuring-a-custom-domain-for-your-github-pages-site/about-custom-domains-and-github-pages) e verificare HTTPS/redirect dopo la configurazione. Le politiche di caching sono gestite da Cloudflare Pages, non dal CSS o da intestazioni inventate nel repository.
 
-Prima della pubblicazione il responsabile deve validare identità formale del titolare, sede e identificativi fiscali, natura giuridica e iscrizioni, elenco dei servizi effettivi, disponibilità e dotazioni dei mezzi, documenti e obblighi applicabili. Per privacy: basi giuridiche effettive, destinatari, ruoli dei provider, trasferimenti e criteri di conservazione dei messaggi/log. La pagina descrive il funzionamento reale, inclusi IP/log di GitHub Pages; la revisione tecnica non è una certificazione legale. L’assenza di 5×1000 o pagamenti verificati non impedisce tecnicamente il funzionamento del sito: quei canali restano assenti.
+Prima della pubblicazione il responsabile deve validare identità formale del titolare, sede e identificativi fiscali, natura giuridica e iscrizioni, elenco dei servizi effettivi, disponibilità e dotazioni dei mezzi, documenti e obblighi applicabili. Per privacy: basi giuridiche effettive, destinatari, ruoli dei provider, trasferimenti e criteri di conservazione dei messaggi/log. La pagina descrive il funzionamento reale, inclusi IP/log di Cloudflare Pages; la revisione tecnica non è una certificazione legale. L’assenza di 5×1000 o pagamenti verificati non impedisce tecnicamente il funzionamento del sito: quei canali restano assenti.
 
 Il risultato e i controlli della sessione sono documentati in [RELEASE-AA-V2.md](RELEASE-AA-V2.md).
