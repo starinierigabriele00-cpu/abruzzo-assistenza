@@ -129,8 +129,12 @@ if len(titles) != len(set(titles)): errors.append('Page titles must be unique')
 for url in re.findall(r'url\(["\']?([^\)"\']+)', (ROOT/'assets/styles.css').read_text()):
     # CSS URLs are relative to the stylesheet.
     check_link('assets/'+url,ROOT/'assets/styles.css')
-for file in ['robots.txt','sitemap.xml','_redirects','assets/icons.svg','assets/abruzzo-map.svg']:
+for file in ['robots.txt','sitemap.xml','_redirects','_headers','assets/icons.svg','assets/abruzzo-map.svg']:
     if not (ROOT/file).is_file(): errors.append('Missing published asset '+file)
+if (ROOT/'_headers').is_file():
+    headers = [line.strip() for line in (ROOT/'_headers').read_text().splitlines() if line.strip() and not line.startswith('#')]
+    if headers != ['https://abruzzo-assistenza.pages.dev/*','X-Robots-Tag: noindex','https://:version.abruzzo-assistenza.pages.dev/*','X-Robots-Tag: noindex']:
+        errors.append('Search exclusion headers must target only the Cloudflare technical hostnames')
 if (ROOT/'robots.txt').is_file() and 'Sitemap: '+config['domain']+'/sitemap.xml' not in (ROOT/'robots.txt').read_text().splitlines():
     errors.append('Robots sitemap must use the official domain')
 if (ROOT/'_redirects').is_file():

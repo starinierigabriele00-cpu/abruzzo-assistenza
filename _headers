@@ -1,0 +1,6 @@
+# Keep Cloudflare's technical hostnames out of search; the official domain stays indexable.
+https://abruzzo-assistenza.pages.dev/*
+  X-Robots-Tag: noindex
+
+https://:version.abruzzo-assistenza.pages.dev/*
+  X-Robots-Tag: noindex
