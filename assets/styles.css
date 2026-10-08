@@ -856,6 +856,27 @@ figcaption {
 .field-wide {
   grid-column: 1 / -1;
 }
+.field label [data-contact-optional] {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.field-error {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #913327;
+}
+.field [aria-invalid="true"] {
+  border-color: #913327;
+}
+.request-validation {
+  width: 100%;
+  padding: 12px 14px;
+  border-left: 3px solid #913327;
+  background: #fff1ed;
+  color: #773124;
+  font-size: 14px;
+}
 .text-button {
   background: none;
   border: 0;

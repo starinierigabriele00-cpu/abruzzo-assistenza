@@ -2,9 +2,55 @@
 
 Rapporto iniziale del 7 ottobre 2026, aggiornato con le revisioni dell’8 ottobre. Le sezioni successive conservano le misure e la fotografia di stato del candidato iniziale; la revisione corrente è descritta qui sotto. Il committente ha successivamente autorizzato la pubblicazione su GitHub Pages. L’anteprima di sviluppo resta disponibile all’interno della stessa rete Tailscale su `http://100.114.161.87:8080/`, con aggiornamento automatico.
 
+## Request composer — dati del richiedente — 8 ottobre 2026
+
+Revisione circoscritta al composer, all’informativa pertinente e ai relativi controlli. La wave istituzionale sotto è conservata: il suo commit `93b6c44` è nella PR #2 in bozza, con GitHub Actions e preview Cloudflare riusciti. **Le nuove modifiche al richiedente sono soltanto locali**, perché il committente non ha autorizzato deploy; un push sul branch avvierebbe una nuova anteprima Cloudflare. Nessun merge, push, deploy o cambiamento infrastrutturale per questa revisione.
+
+### Comportamento
+
+Nome (`firstName`, `given-name`), Cognome (`lastName`, `family-name`) e Telefono (`phone`, `tel`, `inputmode=tel`) sono integrati dopo la scelta del servizio e prima della tratta. Identificano chi richiede il servizio, anche se il viaggio riguarda un’altra persona. Nome e Cognome condividono una riga desktop; su smartphone i campi occupano tutta la larghezza.
+
+Sono necessari per continuare su WhatsApp nelle richieste di trasporto sanitario, dialisi, carrozzina e trasferimenti nazionali/internazionali; facoltativi per evento, volontariato, sostegno e altro. Partenza, destinazione, data e gli altri campi mantengono il requisito precedente. Il telefono accetta prefissi `+` o `00`, numeri italiani e internazionali, spazi, parentesi, punti, trattini e separatori comuni; la verifica riguarda il formato plausibile, non la titolarità o l’esistenza del numero.
+
+L’anteprima rimane disponibile durante una compilazione incompleta e include i dati del richiedente prima del servizio. Errori sotto i campi dopo l’uscita dal controllo o al tentativo di continuare, `aria-invalid`, descrizioni collegate, riepilogo accessibile e focus sul primo dato da correggere. Il link WhatsApp del composer viene reso disponibile soltanto con dati necessari validi. Contatti diretti sempre utilizzabili. Nessun dato personale aggiunto agli URL interni, trasmesso durante la compilazione o salvato nello storage. Privacy aggiornata senza nuove checkbox o banner.
+
+Il cambio del servizio conserva i contatti modificabili ed esclude i dettagli operativi non pertinenti. Reset: campi, errori, anteprima e URL vengono puliti. Il browser QA ha individuato un problema di sincronizzazione nel primo tentativo di aggiornamento del reset: corretto mantenendo il reset nativo, svuotando subito anteprima/link e rigenerando il contenuto dopo l’applicazione dei valori predefiniti. Test simulati e browser reale ora passano.
+
+### File modificati
+
+`contatti.html`, `assets/app.js`, `assets/styles.css`, `privacy.html`, `scripts/check-site.py`, `tests/request.test.mjs`, `tests/interactions.test.mjs`, `tests/browser.test.mjs`, `README.md` e questo rapporto. Nessun file introdotto o rimosso. Il checker consente soltanto i tre nuovi campi necessari nell’ambito previsto e continua a rifiutare requisiti aggiuntivi non richiesti. Homepage, altre pagine, dati ufficiali, infrastruttura e configurazione Cloudflare invariati rispetto al candidato istituzionale.
+
+### Verifica effettiva
+
+- Checker del sito, sincronizzazione template, sintassi JS, build locale, Prettier e `git diff --check`: superati.
+- `node --test tests/request.test.mjs`: **15 test** superati. `ABRUZZO_TEST_DEPS=/tmp/abruzzo-ui-check node --test tests/interactions.test.mjs`: **29 test** superati. Test Python di pubblicazione: **18 test** superati. Totale **62**, con casi nazionali/internazionali, dati mancanti/non validi, encoding, modifica, precompilazione, cambio del servizio, reset e assenza di persistenza.
+- Chromium sull’artefatto: **40 viste** delle otto pagine a 1440, 1024, 768, 390 e 360 px; nessun overflow e zero violazioni axe nelle 16 viste standard analizzate. Verificato inoltre lo stato di errore del composer con axe, senza violazioni. Passano tastiera, sei richieste da Servizi, carrozzina, reset, reflow a 320 px, menu landscape, otto pagine senza JS, rimandi legacy e 404 annidata. Nessuna richiesta a terze parti, cookie o storage aggiunto durante la compilazione.
+- Revisionati realmente screenshot di campi e anteprima a 1440, 390 e 360 px; acquisiti anche a 768 px. Risultati in `/tmp/abruzzo-requester-qa/`, inclusi `requester-fields-390.png`, `requester-message-390.png` e `composer-errors-390.png`. Safari fisico e screen reader non disponibili; nessuna certificazione WCAG dichiarata.
+
+### Esempio generato
+
+```text
+Buongiorno Abruzzo Assistenza, vorrei prenotare un trasporto.
+
+Nome: Mario
+Cognome: Rossi
+Telefono: +39 333 123 4567
+
+Richiesta: Trasporto sanitario
+Partenza: Sulmona
+Destinazione: Pescara
+Data indicativa: 15/10/2026
+
+Resto in attesa di una valutazione e della conferma dei dettagli.
+```
+
+### Git e pubblicazione
+
+Branch riutilizzato: `feat/five-per-mille-verified-card`. Revisione conservata in un commit locale, con hash finale nel messaggio di consegna; la PR remota resta al precedente `93b6c44`. La CI verde della PR riguarda quel commit precedente, **non le nuove modifiche locali**. `main` resta `24a3ab7`. Il server Tailscale mostra invece il composer aggiornato su `http://100.114.161.87:8080/contatti.html`. Nessun deploy eseguito; autorizzazione esplicita necessaria prima di procedere.
+
 ## Wave finale istituzionale, privacy e produzione — 8 ottobre 2026
 
-Questa è la revisione corrente. Le sezioni successive sono un archivio delle revisioni precedenti: disattivazione del 5×1000, dati legali mancanti e hosting GitHub Pages descritti in quelle sezioni non rappresentano la configurazione del candidato attuale. La migrazione Cloudflare è già pubblicata su `main` al commit `24a3ab7`; questa wave **non viene pubblicata in produzione senza nuova autorizzazione**.
+Questa è la revisione istituzionale precedente al miglioramento del composer sopra. Le sezioni successive sono un archivio delle revisioni precedenti: disattivazione del 5×1000, dati legali mancanti e hosting GitHub Pages descritti in quelle sezioni non rappresentano la configurazione del candidato attuale. La migrazione Cloudflare è già pubblicata su `main` al commit `24a3ab7`; questa wave **non viene pubblicata in produzione senza nuova autorizzazione**.
 
 ### A. Implementazione
 

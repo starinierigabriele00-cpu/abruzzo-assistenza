@@ -8,10 +8,11 @@ const context = vm.createContext({
   document: { querySelector: () => null, querySelectorAll: () => [] },
 });
 vm.runInContext(
-  source + "\nthis.api = { buildRequestMessage, whatsappUrl, SERVICE_LABELS };",
+  source +
+    "\nthis.api = { buildRequestMessage, whatsappUrl, SERVICE_LABELS, requestContactErrors };",
   context,
 );
-const { buildRequestMessage, whatsappUrl, SERVICE_LABELS } = context.api;
+const { buildRequestMessage, whatsappUrl, SERVICE_LABELS, requestContactErrors } = context.api;
 const form = (values) => new Map(Object.entries(values));
 
 test("all nine service choices have meaningful request labels", () => {
@@ -29,7 +30,7 @@ test("booking intent stays an explicit request awaiting confirmation", () => {
   assert.match(buildRequestMessage(form({ service: "volontari" })), /propormi per il volontariato/);
   assert.match(buildRequestMessage(form({ service: "sostegno" })), /proporre un sostegno/);
 });
-test("international request includes route and Italian date without identity requirements", () => {
+test("an international draft still previews the route and date before identification is complete", () => {
   const message = buildRequestMessage(
     form({ service: "esteri", from: " Sulmona ", to: "Lione", date: "2026-10-25" }),
   );
@@ -39,6 +40,100 @@ test("international request includes route and Italian date without identity req
   );
   assert.doesNotMatch(message, /Nome:|Telefono:/);
   assert.match(message, /in attesa di una valutazione/);
+});
+test("requester identity precedes the service and organizational details in the message", () => {
+  const values = {
+    service: "trasporti",
+    firstName: " Mario ",
+    lastName: "Rossi",
+    phone: "+39 333 123 4567",
+    from: "Sulmona",
+    to: "Pescara",
+    date: "2026-10-15",
+  };
+  const message = buildRequestMessage(form(values));
+  assert.equal(
+    message,
+    "Buongiorno Abruzzo Assistenza, vorrei prenotare un trasporto.\n\nNome: Mario\nCognome: Rossi\nTelefono: +39 333 123 4567\n\nRichiesta: Trasporto sanitario\nPartenza: Sulmona\nDestinazione: Pescara\nData indicativa: 15/10/2026\n\nResto in attesa di una valutazione e della conferma dei dettagli.",
+  );
+});
+test("only the three requester fields are necessary for transport completion", () => {
+  for (const service of ["trasporti", "dialisi", "disabili", "nazionali", "esteri"]) {
+    assert.deepEqual(Object.keys(requestContactErrors(form({ service }))), [
+      "firstName",
+      "lastName",
+      "phone",
+    ]);
+    assert.deepEqual(
+      Object.keys(
+        requestContactErrors(
+          form({ service, firstName: "Élodie", lastName: "D’Amico", phone: "+33 6 12 34 56 78" }),
+        ),
+      ),
+      [],
+    );
+    assert.ok(
+      requestContactErrors(form({ service, firstName: "  ", lastName: "\t", phone: " " }))
+        .firstName,
+    );
+  }
+  for (const service of ["eventi", "volontari", "sostegno", "altro"]) {
+    assert.deepEqual(Object.keys(requestContactErrors(form({ service }))), []);
+  }
+});
+test("phone validation accepts Italian and international numbers with common separators", () => {
+  for (const phone of [
+    "3331234567",
+    "+39 333 123 4567",
+    "0864 123456",
+    "+44 (20) 7946-0958",
+    "0044 20 7946 0958",
+    "+1 (202) 555-0123",
+    "+33 6.12.34.56.78",
+    "333/1234567",
+    "+39\u00a0333\u00a0123\u00a04567",
+    "+91 98765 43210",
+  ]) {
+    assert.equal(requestContactErrors(form({ service: "altro", phone })).phone, undefined, phone);
+  }
+  for (const phone of [
+    "123",
+    "1234567890123456",
+    "call me",
+    "+",
+    "++39 333 1234567",
+    "+39 333 1234567 abc",
+  ]) {
+    assert.ok(requestContactErrors(form({ service: "altro", phone })).phone, phone);
+  }
+});
+test("requester names and phone survive WhatsApp encoding without changing their meaning", () => {
+  const message = buildRequestMessage(
+    form({
+      service: "esteri",
+      firstName: "Chloé",
+      lastName: "O’Connor & Rossi",
+      phone: "+44 (20) 7946-0958",
+    }),
+  );
+  assert.equal(new URL(whatsappUrl(message)).searchParams.get("text"), message);
+  assert.match(message, /Nome: Chloé\nCognome: O’Connor & Rossi\nTelefono: \+44 \(20\) 7946-0958/);
+});
+test("optional contact details remain relevant while transport-only values are excluded", () => {
+  const message = buildRequestMessage(
+    form({
+      service: "volontari",
+      firstName: "Mario",
+      lastName: "Rossi",
+      phone: "333 1234567",
+      from: "Hidden origin",
+      wheelchair: "si",
+      zone: "Pescara",
+    }),
+  );
+  assert.match(message, /Nome: Mario\nCognome: Rossi\nTelefono: 333 1234567/);
+  assert.match(message, /Richiesta: Volontariato\nZona: Pescara/);
+  assert.doesNotMatch(message, /Hidden origin|carrozzina/);
 });
 test("empty optional details produce a useful short message without fabricated values", () => {
   const message = buildRequestMessage(form({ service: "dialisi", from: " ", notes: " " }));

@@ -34,6 +34,11 @@ function page(t, file = "contatti.html", query = "", width = 390, run = true) {
       throw new Error("UI persisted a request");
     },
   });
+  Object.defineProperty(window, "sessionStorage", {
+    get() {
+      throw new Error("UI persisted a request in session storage");
+    },
+  });
   window.HTMLElement.prototype.scrollIntoView = function () {};
   if (run) window.eval(code);
   return {
@@ -85,13 +90,17 @@ test("service query preselects all valid services and unknown queries safely fal
     "trasporti",
   );
 });
-test("each service shows only relevant fields and does not require name or telephone", (t) => {
+test("each service keeps optional operational fields and only transport requires contact data", (t) => {
   const p = page(t);
   const form = p.document.querySelector("form");
-  assert.equal(form.querySelectorAll("[required]").length, 0);
-  assert.equal(form.elements.namedItem("name"), null);
-  assert.equal(form.elements.namedItem("phone"), null);
+  assert.equal(form.querySelectorAll("[required]").length, 3);
+  assert.equal(form.elements.from.required, false);
+  assert.equal(form.elements.to.required, false);
+  assert.equal(form.elements.date.required, false);
+  assert.equal(form.elements.firstName.required, true);
+  assert.equal(form.elements.phone.required, true);
   select(p, "volontari");
+  assert.equal(form.querySelectorAll("[required]").length, 0);
   assert.equal(form.elements.from.disabled, true);
   assert.equal(form.elements.zone.disabled, false);
   assert.equal(form.elements.zone.closest("[data-for]").hidden, false);
@@ -116,6 +125,9 @@ test("wheelchair service shows both specific questions and serializes the answer
 test("live preview and encoded destination update locally without navigation", (t) => {
   const p = page(t);
   const originalUrl = p.window.location.href;
+  input(p, "firstName", "Mario");
+  input(p, "lastName", "Rossi");
+  input(p, "phone", "+39 333 123 4567");
   input(p, "from", "Sulmona");
   input(p, "to", "Città & centro");
   input(p, "date", "2026-11-20");
@@ -141,6 +153,9 @@ test("switching services omits hidden values and returning preserves editable de
 test("reset clears all values and returns to the initial transport choice", async (t) => {
   const p = page(t, "contatti.html", "?servizio=eventi");
   input(p, "place", "Pescara");
+  input(p, "firstName", "Mario");
+  input(p, "lastName", "Rossi");
+  input(p, "phone", "+39 333 1234567");
   select(p, "disabili");
   input(p, "wheelchair", "si");
   p.document.querySelector("form").reset();
@@ -148,7 +163,105 @@ test("reset clears all values and returns to the initial transport choice", asyn
   assert.equal(p.document.querySelector('input[name="service"]:checked').value, "trasporti");
   assert.equal(p.document.querySelector("form").elements.place.value, "");
   assert.equal(p.document.querySelector("form").elements.wheelchair.value, "");
+  for (const name of ["firstName", "lastName", "phone"]) {
+    assert.equal(p.document.querySelector("form").elements[name].value, "");
+    assert.equal(
+      p.document.querySelector("form").elements[name].hasAttribute("aria-invalid"),
+      false,
+    );
+  }
+  assert.equal(p.document.querySelector("[data-request-validation]").hidden, true);
+  assert.equal(p.document.querySelector("[data-message-link]").hasAttribute("href"), false);
   assert.doesNotMatch(message(p), /Pescara|carrozzina/);
+});
+test("requester fields have distinct labels and appropriate autofill and phone keyboard attributes", (t) => {
+  const p = page(t);
+  const form = p.document.querySelector("form");
+  for (const [name, autocomplete] of [
+    ["firstName", "given-name"],
+    ["lastName", "family-name"],
+    ["phone", "tel"],
+  ]) {
+    const control = form.elements[name];
+    assert.equal(control.autocomplete, autocomplete);
+    assert.ok(form.querySelector(`label[for="${control.id}"]`));
+    for (const id of control.getAttribute("aria-describedby").split(" "))
+      assert.ok(p.document.getElementById(id));
+  }
+  assert.equal(form.elements.phone.type, "tel");
+  assert.equal(form.elements.phone.inputMode, "tel");
+});
+test("missing requester data blocks only guided completion and reports accessible errors", (t) => {
+  const p = page(t);
+  const originalUrl = p.window.location.href;
+  const link = p.document.querySelector("[data-message-link]");
+  assert.equal(link.hasAttribute("href"), false);
+  assert.equal(p.document.querySelector("[aria-invalid]"), null);
+  const attempt = new p.window.MouseEvent("click", { bubbles: true, cancelable: true });
+  link.dispatchEvent(attempt);
+  assert.equal(attempt.defaultPrevented, true);
+  assert.equal(p.document.activeElement.name, "firstName");
+  assert.equal(p.document.querySelectorAll('[aria-invalid="true"]').length, 3);
+  const summary = p.document.querySelector("[data-request-validation]");
+  assert.equal(summary.hidden, false);
+  assert.equal(summary.getAttribute("role"), "alert");
+  assert.equal(p.document.querySelector("#canali").querySelectorAll("a[href]").length, 3);
+  assert.equal(p.window.location.href, originalUrl);
+});
+test("contact correction enables WhatsApp and identity edits regenerate preview and encoding locally", (t) => {
+  const p = page(t, "contatti.html", "?servizio=disabili#richiesta");
+  const originalUrl = p.window.location.href;
+  p.document.querySelector("[data-message-link]").click();
+  input(p, "firstName", "Élodie");
+  input(p, "lastName", "D’Amico & Rossi");
+  input(p, "phone", "+33 6 12 34 56 78");
+  const link = p.document.querySelector("[data-message-link]");
+  assert.equal(link.hasAttribute("aria-disabled"), false);
+  assert.equal(p.document.querySelectorAll('[aria-invalid="true"]').length, 0);
+  assert.equal(new URL(link.href).searchParams.get("text"), message(p));
+  assert.match(message(p), /Nome: Élodie\nCognome: D’Amico & Rossi\nTelefono: \+33 6 12 34 56 78/);
+  input(p, "firstName", "Anna");
+  assert.match(message(p), /Nome: Anna/);
+  assert.doesNotMatch(message(p), /Élodie/);
+  assert.equal(p.window.location.href, originalUrl);
+});
+test("phone error appears on blur, accepts correction, and does not impose ten digits", (t) => {
+  const p = page(t);
+  input(p, "firstName", "Mario");
+  input(p, "lastName", "Rossi");
+  input(p, "phone", "not a number");
+  const phone = p.document.querySelector("form").elements.phone;
+  assert.equal(phone.hasAttribute("aria-invalid"), false);
+  phone.dispatchEvent(new p.window.FocusEvent("blur"));
+  assert.equal(phone.getAttribute("aria-invalid"), "true");
+  assert.equal(p.document.getElementById("request-phone-error").hidden, false);
+  input(p, "phone", "+44 (20) 7946-0958");
+  assert.equal(phone.hasAttribute("aria-invalid"), false);
+  assert.equal(p.document.querySelector("[data-message-link]").hasAttribute("href"), true);
+});
+test("service changes preserve editable contacts, change necessity and exclude irrelevant route data", (t) => {
+  const p = page(t);
+  input(p, "firstName", "Mario");
+  input(p, "from", "Sulmona");
+  select(p, "volontari");
+  assert.equal(p.document.querySelector("form").elements.firstName.required, false);
+  assert.equal(p.document.querySelector("[data-message-link]").hasAttribute("href"), true);
+  assert.match(message(p), /Nome: Mario/);
+  assert.doesNotMatch(message(p), /Sulmona/);
+  select(p, "nazionali");
+  assert.equal(p.document.querySelector("form").elements.firstName.value, "Mario");
+  assert.equal(p.document.querySelector("[data-message-link]").hasAttribute("href"), false);
+  assert.match(message(p), /Partenza: Sulmona/);
+});
+test("keyboard activation of unavailable WhatsApp completion explains missing contact data", (t) => {
+  const p = page(t);
+  const link = p.document.querySelector("[data-message-link]");
+  link.focus();
+  link.dispatchEvent(
+    new p.window.KeyboardEvent("keydown", { key: "Enter", bubbles: true, cancelable: true }),
+  );
+  assert.equal(p.document.activeElement.name, "firstName");
+  assert.equal(p.document.querySelector("[data-request-validation]").hidden, false);
 });
 
 test("optional notes collapse on phones without losing editable request details", async (t) => {
@@ -170,6 +283,8 @@ test("optional notes collapse on phones without losing editable request details"
 });
 test("user text is never rendered as markup", (t) => {
   const p = page(t);
+  input(p, "firstName", '<img src=x onerror="alert(1)">');
+  input(p, "lastName", "D’Amico & Rossi");
   input(p, "notes", '<img src=x onerror="alert(1)">');
   assert.match(message(p), /<img/);
   assert.equal(p.document.querySelector("[data-message-text] img"), null);
