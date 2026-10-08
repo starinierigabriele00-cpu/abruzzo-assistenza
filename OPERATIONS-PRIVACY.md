@@ -90,11 +90,15 @@ Se in futuro si desiderano statistiche, definire prima lo scopo e valutare concr
 Non c’è evidenza nel repository di una proprietà già verificata. Sitemap pronta: `https://abruzzoassistenzaodv.com/sitemap.xml`, sette pagine principali; 404 e vecchi indirizzi di rimando sono esclusi.
 
 1. Accedere con un account Google autorizzato e aggiungere la proprietà **Dominio** `abruzzoassistenzaodv.com`, oppure il prefisso URL esatto `https://abruzzoassistenzaodv.com/`.
-2. Per la proprietà Dominio usare esclusivamente il TXT fornito da Search Console. Chiedere l’autorizzazione prima di aggiungerlo nella zona Cloudflare. In alternativa scegliere un metodo supportato per il prefisso URL: qualsiasi file o meta tag richiede il valore reale fornito da Google e una modifica separata approvata. Non sono stati inventati codici di verifica.
+2. Per la proprietà Dominio usare esclusivamente il TXT fornito da Search Console con accesso alla zona Cloudflare del titolare. In questa sessione l’integrazione Cloudflare identifica un altro account e non può gestire quella zona. Il percorso disponibile è la proprietà con prefisso URL e il metodo **Tag HTML**: copiare il tag reale generato da Google e fornirlo a chi gestisce il repository, quindi verificarlo in Search Console dopo la pubblicazione. Il committente ha autorizzato le attività SEO; manca il codice effettivo, richiesto nella sessione. Non sono stati inventati codici di verifica e non occorre installare Analytics o Tag Manager.
 3. Dopo la verifica inviare `sitemap.xml`, controllare l’URL canonico della home e delle pagine Servizi, Contatti e Pescara con Ispezione URL e, dove disponibile, richiedere l’indicizzazione.
 4. Controllare successivamente pagine indicizzate, esclusioni e redirect. L’invio della sitemap non garantisce tempi o risultato dell’indicizzazione.
 
 [Verifica proprietà Google](https://support.google.com/webmasters/answer/9008080?hl=it), [gestione sitemap](https://support.google.com/webmasters/answer/7451001?hl=it). Nessuna operazione è stata eseguita sull’account Google, sui DNS o sulla configurazione Cloudflare.
+
+Il controllo pubblico dell’8 ottobre 2026 non ha trovato risultati per `site:abruzzoassistenzaodv.com` o per il dominio tra virgolette. Questa osservazione non attesta lo stato completo dell’indice Google: serve Search Console. Canonical, sitemap, robots, HTTPS, dati strutturati e redirect del dominio sono già verificati; non è stato dichiarato un invio della sitemap o una richiesta di indicizzazione mai eseguiti.
+
+Il vecchio URL `https://starinierigabriele00-cpu.github.io/abruzzo-assistenza/` serve ancora una release obsoleta, con canonical verso `abruzzoassistenza.com`. **Azione del proprietario GitHub:** aprire **Settings → Pages → Unpublish site** per ritirare la copia, oppure decidere un redirect dedicato se sono da preservare i vecchi link. L’account contributor collegato non possiede permessi amministrativi/maintainer; nessuna impostazione è stata cambiata. [Permessi richiesti](https://docs.github.com/en/rest/pages/pages#delete-a-github-pages-site), [istruzioni GitHub](https://docs.github.com/en/pages/getting-started-with-github-pages/unpublishing-a-github-pages-site).
 
 ## Approvazioni di pubblicazione
 

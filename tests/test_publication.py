@@ -88,8 +88,9 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         public = ROOT/'_site'
         self.assertFalse((public/'CNAME').exists())
-        for name in ['robots.txt','sitemap.xml','_redirects','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
+        for name in ['robots.txt','sitemap.xml','_redirects','_headers','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
             self.assertTrue((public/name).is_file(),name)
+        self.assertEqual((public/'_headers').read_text(),(ROOT/'_headers').read_text())
         for private in ['config','templates','tests','scripts','README.md','OPERATIONS-PRIVACY.md','documents/README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
 
@@ -199,6 +200,22 @@ class PublicationTests(unittest.TestCase):
         self.assertIn('/trasparenza /contatti#associazione 301',rules)
         self.assertEqual(layout.public_path('index.html'),'/')
         self.assertEqual(layout.public_path('contatti.html#associazione'),'/contatti#associazione')
+
+    def test_search_exclusion_does_not_cover_the_official_domain(self):
+        import re
+        patterns = [line for line in (ROOT/'_headers').read_text().splitlines() if line.startswith('https://')]
+        def excluded(url):
+            for pattern in patterns:
+                expression = re.escape(pattern).replace(r'\*','.*')
+                expression = re.sub(r':[A-Za-z]\w*','[^./]+',expression)
+                if re.fullmatch(expression,url): return True
+            return False
+        for origin in ['https://abruzzo-assistenza.pages.dev','https://preview.abruzzo-assistenza.pages.dev','https://db447800.abruzzo-assistenza.pages.dev']:
+            for path in ['/','/servizi','/contatti?servizio=disabili']:
+                self.assertTrue(excluded(origin+path),origin+path)
+        for path in ['/','/servizi','/contatti','/sitemap.xml']:
+            self.assertFalse(excluded(self.config['domain']+path))
+        self.assertFalse(excluded('https://unrelated.example/'))
 
     def test_public_email_anchors_opt_out_of_edge_obfuscation_without_js(self):
         import re

@@ -31,7 +31,7 @@ for page in ROOT.glob('*.html'):
     shutil.copy2(page, OUTPUT/page.name)
 for asset in ASSETS: shutil.copy2(ROOT/'assets'/asset,OUTPUT/'assets'/asset)
 shutil.copytree(ROOT/'assets/fonts',OUTPUT/'assets/fonts')
-for file in ['robots.txt','sitemap.xml','_redirects']: shutil.copy2(ROOT/file,OUTPUT/file)
+for file in ['robots.txt','sitemap.xml','_redirects','_headers']: shutil.copy2(ROOT/file,OUTPUT/file)
 for document in config['documents']:
     if document.get('verified'):
         target = OUTPUT/document['path']
