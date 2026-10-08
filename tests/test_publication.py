@@ -68,7 +68,7 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
         public = ROOT/'_site'
         self.assertFalse((public/'CNAME').exists())
-        for name in ['robots.txt','sitemap.xml','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
+        for name in ['robots.txt','sitemap.xml','_redirects','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
             self.assertTrue((public/name).is_file(),name)
         for private in ['config','templates','tests','scripts','README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
@@ -76,8 +76,9 @@ class PublicationTests(unittest.TestCase):
     def test_sitemap_excludes_legacy_routes_and_includes_association_and_volunteers(self):
         import xml.etree.ElementTree as ET
         urls = {item.text for item in ET.parse(ROOT/'sitemap.xml').iter() if item.tag.endswith('}loc')}
-        self.assertIn(self.config['domain']+'/associazione.html',urls)
-        self.assertIn(self.config['domain']+'/volontari.html',urls)
+        self.assertIn(self.config['domain']+'/associazione',urls)
+        self.assertIn(self.config['domain']+'/volontari',urls)
+        self.assertTrue(all(url.startswith(self.config['domain']+'/') and not url.endswith('.html') for url in urls))
         for legacy in self.config['redirects']:
             self.assertNotIn(self.config['domain']+'/'+legacy,urls)
 
@@ -92,6 +93,36 @@ class PublicationTests(unittest.TestCase):
                 with patch.object(layout,'ROOT',root):
                     with self.assertRaisesRegex(ValueError,'Redirect'):
                         layout.load_config()
+
+    def test_cloudflare_legacy_redirects_preserve_destination_anchors(self):
+        rules = (ROOT/'_redirects').read_text().splitlines()
+        self.assertIn('/sostienici.html /associazione#sostegno 301',rules)
+        self.assertIn('/sostienici /associazione#sostegno 301',rules)
+        self.assertIn('/trasparenza.html /contatti#associazione 301',rules)
+        self.assertIn('/trasparenza /contatti#associazione 301',rules)
+        self.assertEqual(layout.public_path('index.html'),'/')
+        self.assertEqual(layout.public_path('contatti.html#associazione'),'/contatti#associazione')
+
+    def test_public_email_anchors_opt_out_of_edge_obfuscation_without_js(self):
+        import re
+        for path in ROOT.glob('*.html'):
+            text = path.read_text()
+            anchors = re.findall(r'<a\b[^>]*href="mailto:[^"]*"[^>]*>.*?</a>',text,re.S)
+            exempted = re.findall(r'<!--email_off-->\s*(<a\b[^>]*href="mailto:[^"]*"[^>]*>.*?</a>)\s*<!--/email_off-->',text,re.S)
+            self.assertEqual(anchors,exempted,path.name)
+            rendered = layout.sync_page(text,path.name,self.config)
+            self.assertEqual(layout.Markup(text).tokens,layout.Markup(rendered).tokens,path.name)
+
+    def test_hosting_disclosure_and_ci_match_cloudflare(self):
+        privacy = (ROOT/'privacy.html').read_text()
+        self.assertIn('Cloudflare Pages',privacy)
+        self.assertIn('https://www.cloudflare.com/privacypolicy/',privacy)
+        self.assertNotIn('GitHub Pages',privacy)
+        workflow = (ROOT/'.github/workflows/pages.yml').read_text()
+        self.assertIn('node tests/browser.test.mjs',workflow)
+        self.assertIn('prettier',workflow)
+        for obsolete in ['actions/deploy-pages','actions/configure-pages','actions/upload-pages-artifact','pages: write','id-token: write','git push','git commit']:
+            self.assertNotIn(obsolete,workflow)
 
 if __name__ == '__main__':
     unittest.main()

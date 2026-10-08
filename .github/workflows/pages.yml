@@ -2,7 +2,7 @@ name: Validate Cloudflare Pages static site
 
 on:
   push:
-    branches: [main, feat/abruzzo-assistenza-v2]
+    branches: [main, chore/cloudflare-domain-migration]
   pull_request:
   workflow_dispatch:
 
@@ -38,21 +38,15 @@ jobs:
         run: |
           "$RUNNER_TEMP/abruzzo-ui-check/node_modules/.bin/prettier" --check '*.html' 'templates/*.html' assets/styles.css assets/app.js 'tests/*.mjs' '*.md' assets/SOURCES.md config/site.json .prettierrc.json .github/workflows/pages.yml
       - name: Build and verify published artifact
-        id: build
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          echo "base_path=/" >> "$GITHUB_OUTPUT"
-          python3 scripts/build-site.py
+        run: python3 scripts/build-site.py
       - name: Install the pinned Playwright browser
         run: '"$RUNNER_TEMP/abruzzo-ui-check/node_modules/.bin/playwright" install --with-deps chromium'
       - name: Browser QA on the published artifact
         run: |
-          site_path="${{ steps.build.outputs.base_path }}"
-          python3 scripts/preview-site.py --port 8080 --directory _site --base-path "$site_path" &
+          python3 scripts/preview-site.py --port 8080 --directory _site &
           preview_pid=$!
           trap 'kill "$preview_pid"' EXIT
-          ABRUZZO_BASE_URL="http://127.0.0.1:8080${site_path%/}" ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" ABRUZZO_QA_OUTPUT="$RUNNER_TEMP/abruzzo-qa" node tests/browser.test.mjs
+          ABRUZZO_BASE_URL="http://127.0.0.1:8080" ABRUZZO_TEST_DEPS="$RUNNER_TEMP/abruzzo-ui-check" ABRUZZO_QA_OUTPUT="$RUNNER_TEMP/abruzzo-qa" node tests/browser.test.mjs
       - name: Upload QA captures
         if: always()
         uses: actions/upload-artifact@v4
