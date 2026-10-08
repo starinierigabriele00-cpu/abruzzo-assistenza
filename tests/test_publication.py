@@ -19,19 +19,35 @@ class PublicationTests(unittest.TestCase):
         self.config = layout.load_config()
 
     def test_unverified_information_never_renders(self):
-        for slot in ['five-home','five-support','five-transparency','donation','legal-contact','legal-data','legal-privacy','documents']:
-            self.assertEqual(layout.verified_content(slot,self.config),'')
-
-    def test_five_per_mille_requires_source_year_and_tax_id(self):
         config = deepcopy(self.config)
-        config['fivePerMille']['verified'] = True
+        config['fivePerMille']['verified'] = False
+        for slot in ['five-home','five-support','five-transparency','donation','legal-contact','legal-data','legal-privacy','documents']:
+            self.assertEqual(layout.verified_content(slot,config),'')
+
+    def test_five_per_mille_requires_source_and_tax_id_but_not_year(self):
+        config = deepcopy(self.config)
+        config['fivePerMille'].update(taxId='', source='', year=None)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root/'config').mkdir()
-            (root/'config/site.json').write_text(json.dumps(config))
             with patch.object(layout,'ROOT',root):
+                (root/'config/site.json').write_text(json.dumps(config))
                 with self.assertRaisesRegex(ValueError,'verification needs'):
                     layout.load_config()
+                config['fivePerMille'].update(taxId='02227430663', source='confirmed by representative')
+                (root/'config/site.json').write_text(json.dumps(config))
+                self.assertTrue(layout.load_config()['fivePerMille']['verified'])
+
+    def test_verified_card_without_fiscal_year_has_no_year_specific_claim(self):
+        self.assertTrue(self.config['fivePerMille']['verified'])
+        self.assertIsNone(self.config['fivePerMille']['year'])
+        for slot in ['five-home', 'five-support']:
+            rendered = layout.verified_content(slot, self.config)
+            self.assertIn('02227430663', rendered)
+            self.assertIn('data-copy-tax-id', rendered)
+            self.assertIn('data-tax-copy-status', rendered)
+            self.assertNotIn('2026', rendered)
+        self.assertIn('Accreditamento', layout.verified_content('five-transparency', self.config))
 
     def test_verified_five_per_mille_slot_is_static_and_correctly_positioned(self):
         config = deepcopy(self.config)
