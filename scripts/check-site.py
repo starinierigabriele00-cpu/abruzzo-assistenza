@@ -63,6 +63,8 @@ def check_link(url, source):
         errors.append(f'{source.name}: placeholder link')
         return
     target = ROOT / path
+    if not target.suffix and not target.is_file() and target.with_suffix('.html').is_file():
+        target = target.with_suffix('.html')
     count += 1
     if source.name in active_pages and target.name in redirects:
         errors.append(f'{source.name}: link directly to {redirects[target.name]} instead of the legacy route')
@@ -80,7 +82,7 @@ for name, page in pages.items():
             errors.append(f'{name}: missing immediate legacy redirect')
         if not any(t == 'meta' and a.get('name') == 'robots' and a.get('content') == 'noindex,follow' for t,a in page.elements):
             errors.append(f'{name}: redirect must not be indexed')
-        canonical = config['domain'] + '/' + destination.split('#')[0]
+        canonical = config['domain'] + '/' + destination.split('#')[0].removesuffix('.html')
         if not any(t == 'link' and a.get('rel') == 'canonical' and a.get('href') == canonical for t,a in page.elements):
             errors.append(f'{name}: redirect canonical must identify the destination')
         check_link(destination, page.path)
@@ -95,12 +97,14 @@ for name, page in pages.items():
     title = re.search(r'<title>(.*?)</title>',page.text,re.S)
     if not title or not title[1].strip(): errors.append(f'{name}: missing title')
     else: titles.append(title[1].strip())
-    canonical = config['domain'] + ('/' if name == 'index.html' else '/' + name)
+    canonical = config['domain'] + ('/' if name == 'index.html' else '/' + name.removesuffix('.html'))
     if not any(t == 'link' and a.get('rel') == 'canonical' and a.get('href') == canonical for t,a in page.elements): errors.append(f'{name}: invalid canonical')
     for key in ['description']:
         if not any(t == 'meta' and a.get('name') == key and a.get('content') for t,a in page.elements): errors.append(f'{name}: missing {key}')
     for key in ['og:title','og:description','og:url','og:image']:
         if not any(t == 'meta' and a.get('property') == key and a.get('content') for t,a in page.elements): errors.append(f'{name}: missing {key}')
+    for key, value in [('og:url',canonical), ('og:image',config['domain']+'/assets/social-preview.jpg')]:
+        if not any(t == 'meta' and a.get('property') == key and a.get('content') == value for t,a in page.elements): errors.append(f'{name}: invalid {key}')
     previous_heading = 0
     labels = {a['for'] for t,a in page.elements if t == 'label' and 'for' in a}
     for tag, attrs in page.elements:
@@ -123,11 +127,17 @@ if len(titles) != len(set(titles)): errors.append('Page titles must be unique')
 for url in re.findall(r'url\(["\']?([^\)"\']+)', (ROOT/'assets/styles.css').read_text()):
     # CSS URLs are relative to the stylesheet.
     check_link('assets/'+url,ROOT/'assets/styles.css')
-for file in ['robots.txt','sitemap.xml','assets/icons.svg','assets/abruzzo-map.svg']:
+for file in ['robots.txt','sitemap.xml','_redirects','assets/icons.svg','assets/abruzzo-map.svg']:
     if not (ROOT/file).is_file(): errors.append('Missing published asset '+file)
+if (ROOT/'robots.txt').is_file() and 'Sitemap: '+config['domain']+'/sitemap.xml' not in (ROOT/'robots.txt').read_text().splitlines():
+    errors.append('Robots sitemap must use the official domain')
+if (ROOT/'_redirects').is_file():
+    rules = {line for line in (ROOT/'_redirects').read_text().splitlines() if line and not line.startswith('#')}
+    expected_rules = {source+' /'+destination.replace('.html','')+' 301' for legacy,destination in redirects.items() for source in ['/'+legacy,'/'+legacy.removesuffix('.html')]}
+    if rules != expected_rules: errors.append('Cloudflare redirect rules must match the configured legacy pages')
 if (ROOT/'sitemap.xml').is_file():
     locs = [el.text for el in ET.parse(ROOT/'sitemap.xml').iter() if el.tag.endswith('}loc')]
-    expected = {config['domain']+('/' if n=='index.html' else '/'+n) for n in pages if n!='404.html' and n not in redirects}
+    expected = {config['domain']+('/' if n=='index.html' else '/'+n.removesuffix('.html')) for n in pages if n!='404.html' and n not in redirects}
     if set(locs) != expected: errors.append('Sitemap does not match indexable pages')
     for url in locs: check_link(url,ROOT/'sitemap.xml')
 if errors:

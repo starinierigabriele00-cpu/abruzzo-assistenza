@@ -107,7 +107,7 @@ Il candidato tecnico è compilato e verificato. Prima del deploy restano questi 
 - **Titolare e dati ufficiali:** confermare denominazione legale, sede, identificativi fiscali, iscrizioni, obblighi/documenti e gestione effettiva dei dati. L’informativa non viene presentata come certificazione legale.
 - **Operatività:** confermare servizi effettivi, disponibilità e dotazioni dei mezzi, recapiti e diritti degli asset autentici. I testi pubblici descrivono una valutazione della richiesta, non una prenotazione confermata.
 - **Canali opzionali:** 5×1000, donazioni e documenti rimangono esclusi finché manca la verifica; nessun dato inventato. Questi canali possono restare disabilitati alla pubblicazione.
-- **Dominio:** il controllo DNS locale del 7 ottobre ha restituito NXDOMAIN per A/AAAA di `abruzzoassistenza.com`; HTTPS non verificabile. DNS, dominio in Settings → Pages e certificato non sono stati configurati. Nessun record inventato o modificato.
+- **Dominio, audit storico del 7 ottobre:** NXDOMAIN per A/AAAA di `abruzzoassistenza.com`, il dominio inizialmente previsto. Questo risultato non riguarda il nuovo dominio ufficiale `abruzzoassistenzaodv.com`; vedere l’aggiornamento Cloudflare sotto.
 
 ## Git state e next action
 
@@ -140,3 +140,15 @@ Successivamente il committente ha autorizzato il deploy GitHub, chiedendo prima 
 Branch locale: `feat/abruzzo-assistenza-v2`, derivato da `main` a `fd22e37`. Le modifiche sono raccolte in un commit locale di consegna; hash e stato finale sono riportati nel messaggio di consegna. Nessun push, PR, merge o deploy.
 
 **Prossima azione:** far validare all’associazione questo candidato e i dati obbligatori sopra elencati, per ottenere l’autorizzazione alla successiva pubblicazione sul dominio.
+
+## Cloudflare migration (2026-10-08)
+
+La PR #1 migra i metadati e l’informativa al dominio ufficiale `https://abruzzoassistenzaodv.com` e a Cloudflare Pages. Il progetto indicato dal controllo GitHub è `abruzzo-assistenza`; l’artefatto resta prodotto da `python3 scripts/build-site.py` in `_site`. La grafica e i dati legali non verificati sono preservati; 5×1000 e donazioni rimangono disabilitati.
+
+La revisione corregge Prettier in `privacy.html`, usa canonici/Open Graph/sitemap senza estensione come gli URL serviti da Cloudflare, include redirect HTTP 301 per entrambe le forme dei due indirizzi legacy e mantiene gli anchor email disponibili senza JavaScript nonostante l’obfuscation del provider. La CI GitHub esegue verifiche e browser QA, senza job di deploy, permessi Pages di scrittura, commit o push. Cloudflare pubblica autonomamente quando cambia `main`; il merge della PR deve seguire la CI verde.
+
+DNS e TLS del dominio ufficiale sono stati verificati con richieste reali l’8 ottobre: HTTP rimanda a HTTPS e le pagine/asset sono disponibili. `www` serve lo stesso sito con HTTPS, ma durante l’audit iniziale non rimanda all’apex. Il redirect richiede una regola della zona: le impostazioni esatte sono nel README. Il plugin di questa sessione autentica l’account Mothx e rifiuta l’account del progetto, quindi non consente di applicare quella regola. Nessuna modifica alla zona è stata effettuata.
+
+La privacy descrive Cloudflare Pages, i possibili cookie tecnici di sicurezza, il composer locale e i servizi esterni. Non sono aggiunti analytics, tracker o banner di consenso per strumenti assenti. Identità formale del titolare, basi giuridiche operative, ruoli dei provider e conservazione restano soggetti alla verifica dell’associazione; la revisione tecnica non è una certificazione legale.
+
+Verifica del candidato: checker statico e sincronizzazione, sintassi JavaScript, 10 test richieste, 20 interazioni, 12 test pubblicazione, Prettier, build e `git diff --check` superati. QA locale sull’artefatto: 40 catture a 1440/1024/768/390/360 px, axe su 16 viste senza violazioni, reflow a 320 px, composer, navigazione, otto pagine senza JavaScript, fallback legacy e 404 annidata. L’audit HTTP della preview Cloudflare del commit `5a8fe07` conferma metadati delle otto pagine, sitemap/robots, nove asset identici alla build, quattro redirect legacy HTTP 301 e query del composer preservata. La prova browser su rete reale ha evidenziato un’attesa mancante nel test del composer: il test ora attende che il JavaScript renda visibile il form prima di verificarlo. Il merge deve attendere la CI dell’ultimo commit e la verifica della preview.

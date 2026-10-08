@@ -9,6 +9,13 @@ const require = createRequire(
 const { chromium } = require("playwright");
 const { AxeBuilder } = require("@axe-core/playwright");
 const base = process.env.ABRUZZO_BASE_URL || "http://127.0.0.1:8080";
+// Keep requesting .html to exercise Cloudflare's normalization; expect the final URL.
+const siteURL = (path) => {
+  const url = new URL(`${base}/${path}`);
+  if (process.env.ABRUZZO_CLEAN_URLS === "1")
+    url.pathname = url.pathname.replace(/\/index\.html$/, "/").replace(/\.html$/, "");
+  return url.href;
+};
 const output = process.env.ABRUZZO_QA_OUTPUT || "/tmp/abruzzo-qa";
 mkdirSync(output, { recursive: true });
 const pages = [
@@ -114,8 +121,7 @@ try {
       assert.match(footerCanvas.viewport, /viewport-fit=cover/);
       if (name === "index" && width === 390)
         report.metrics = {
-          context:
-            "Chromium locale, cache calda, nessun throttling; non misure sul dominio pubblico",
+          context: `Chromium, endpoint ${base}, cache calda, nessun throttling; non una misura Lighthouse`,
           ...(await page.evaluate(() => window.__observed)),
         };
       // Full-page capture alone does not load below-fold lazy images.
@@ -205,7 +211,7 @@ try {
   assert.match(text, /restare sulla carrozzina durante il viaggio: Sì/);
   const url = new URL(await page.locator("[data-message-link]").getAttribute("href"));
   assert.equal(url.searchParams.get("text"), text);
-  assert.equal(page.url(), `${base}/contatti.html?servizio=disabili#richiesta`);
+  assert.equal(page.url(), siteURL("contatti.html?servizio=disabili#richiesta"));
   assert.equal(await page.locator("[data-request-notes]").evaluate((el) => el.open), false);
   await page.locator(".request-review").click();
   assert.equal(new URL(page.url()).hash, "#anteprima");
@@ -276,7 +282,8 @@ try {
     const booking = page.locator(`#${service} .service-start .button`);
     assert.match(await booking.innerText(), /^Prenota/);
     await booking.click();
-    assert.equal(new URL(page.url()).pathname, new URL(base + "/contatti.html").pathname);
+    await page.locator("[data-request-form]").waitFor({ state: "visible" });
+    assert.equal(new URL(page.url()).pathname, new URL(siteURL("contatti.html")).pathname);
     assert.equal(new URL(page.url()).searchParams.get("servizio"), service);
     assert.equal(await page.locator('input[name="service"]:checked').inputValue(), service);
     assert.equal(await page.locator("[data-request-form]").isVisible(), true);
@@ -292,13 +299,13 @@ try {
   );
   await page.locator("[data-nav-toggle]").click();
   await page.locator('[data-nav] a[href="volontari.html"]').click();
-  await page.waitForURL(`${base}/volontari.html`);
+  await page.waitForURL(siteURL("volontari.html"));
   assert.equal(
     await page.locator('[data-nav] a[href="volontari.html"]').getAttribute("aria-current"),
     "page",
   );
   await page.locator('main a[href="contatti.html?servizio=volontari#richiesta"]').first().click();
-  await page.waitForURL(`${base}/contatti.html?servizio=volontari#richiesta`);
+  await page.waitForURL(siteURL("contatti.html?servizio=volontari#richiesta"));
   assert.equal(await page.locator('input[name="service"]:checked').inputValue(), "volontari");
   assert.equal(await page.locator("#request-zone").isVisible(), true);
   await page.goto(`${base}/index.html`);
@@ -320,7 +327,7 @@ try {
   await page.locator("[data-nav-toggle]").click();
   await page.locator('[data-nav] a[href="associazione.html"]').focus();
   await page.keyboard.press("Enter");
-  await page.waitForURL(`${base}/associazione.html`);
+  await page.waitForURL(siteURL("associazione.html"));
   assert.equal(await page.locator("[data-nav] details").count(), 0);
   assert.equal(
     await page.locator('[data-nav] a[aria-current="page"]').getAttribute("href"),
@@ -358,6 +365,11 @@ try {
       true,
     );
     assert.equal(await fallback.locator("[data-verified]").count(), 0);
+    assert.equal(
+      (await fallback.locator('a[href="mailto:abruzzoassistenzaodv@gmail.com"]').count()) > 0,
+      true,
+      `Direct email works without JavaScript: ${name}`,
+    );
     if (name === "contatti") {
       assert.equal(await fallback.locator("[data-request-form]").isVisible(), false);
       assert.equal(await fallback.locator("#canali a").count(), 3);
@@ -370,7 +382,7 @@ try {
   ]) {
     for (const targetPage of [page, fallback]) {
       await targetPage.goto(`${base}/${legacy}`);
-      await targetPage.waitForURL(`${base}/${destination}`);
+      await targetPage.waitForURL(siteURL(destination));
       const anchor = new URL(targetPage.url()).hash;
       assert.equal(await targetPage.locator(anchor).isVisible(), true);
     }
