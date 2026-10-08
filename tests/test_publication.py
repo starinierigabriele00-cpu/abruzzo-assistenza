@@ -26,6 +26,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_five_per_mille_requires_source_and_tax_id_but_not_year(self):
         config = deepcopy(self.config)
+        config['redirects'] = {}
         config['fivePerMille'].update(taxId='', source='', year=None)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
