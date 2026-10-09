@@ -50,7 +50,6 @@ function buildRequestMessage(data) {
   for (const [key, label] of [
     ["firstName", "Nome"],
     ["lastName", "Cognome"],
-    ["phone", "Telefono"],
   ])
     add(key, label);
   if (lines.length > 2) lines.push("");
@@ -98,16 +97,6 @@ function requestContactErrors(data) {
     errors.firstName = "Inserisci il nome di chi richiede il servizio.";
   if (required && !value("lastName"))
     errors.lastName = "Inserisci il cognome di chi richiede il servizio.";
-  const phone = value("phone");
-  if (required && !phone) errors.phone = "Inserisci un numero di telefono per essere ricontattato.";
-  else if (phone) {
-    // Check plausibility, not assignment: support international prefixes and common separators.
-    const number = phone.replace(/[\s().\/-]/g, "");
-    const digits = number.replace(/^\+/, "").replace(/^00/, "");
-    if (!/^\+?\d+$/.test(number) || digits.length < 6 || digits.length > 15)
-      errors.phone =
-        "Controlla il numero: usa un numero italiano o internazionale completo, anche con prefisso, spazi o trattini.";
-  }
   return errors;
 }
 
@@ -205,8 +194,8 @@ if (requestForm) {
     contactErrors = requestContactErrors(data);
     const required = TRANSPORT_SERVICES.includes(selected);
     qs("[data-contact-hint]", requestForm).textContent = required
-      ? "Per i trasporti sono necessari nome, cognome e telefono di chi ci contatta. Gli altri dettagli sono facoltativi."
-      : "Nome, cognome, telefono e gli altri dettagli sono facoltativi per questa richiesta.";
+      ? "Per i trasporti sono necessari nome e cognome di chi ci contatta. Gli altri dettagli sono facoltativi."
+      : "Nome, cognome e gli altri dettagli sono facoltativi per questa richiesta.";
     qsa("[data-contact-optional]", requestForm).forEach((label) => {
       label.hidden = required;
     });

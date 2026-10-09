@@ -220,7 +220,7 @@ try {
     await page.locator("#request-firstName").evaluate((el) => el === document.activeElement),
     true,
   );
-  assert.equal(await page.locator('[aria-invalid="true"]').count(), 3);
+  assert.equal(await page.locator('[aria-invalid="true"]').count(), 2);
   assert.equal(await page.locator("[data-request-validation]").isVisible(), true);
   const validationAxe = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
@@ -239,22 +239,25 @@ try {
   await page.keyboard.type("Rossi");
   await page.keyboard.press("Tab");
   assert.equal(
-    await page.locator("#request-phone").evaluate((el) => el === document.activeElement),
+    await page.locator("#request-from").evaluate((el) => el === document.activeElement),
     true,
   );
-  await page.keyboard.type("123");
-  await page.keyboard.press("Tab");
-  assert.equal(await page.locator("#request-phone").getAttribute("aria-invalid"), "true");
-  await page.locator("#request-phone").fill("+39 333 123 4567");
+  assert.equal(await page.locator('input[name="phone"]').count(), 0);
   assert.equal(await page.locator('[aria-invalid="true"]').count(), 0);
   assert.equal(await page.locator("[data-request-validation]").isVisible(), false);
   assert.equal(page.url(), originalRequestURL, "Contact details must not enter internal URLs");
   await page.locator("#request-from").fill("Sulmona");
   await page.locator("#request-to").fill("Città & centro");
+  await page.locator("#request-date").fill("2026-11-20");
   await page.locator("#request-wheelchair").selectOption("si");
   await page.locator("#request-stayWheelchair").selectOption("si");
   const text = await page.locator("[data-message-text]").innerText();
-  assert.match(text, /Nome: Mario\nCognome: Rossi\nTelefono: \+39 333 123 4567/);
+  assert.match(text, /Nome: Mario\nCognome: Rossi/);
+  assert.match(
+    text,
+    /Partenza: Sulmona\nDestinazione: Città & centro\nData indicativa: 20\/11\/2026/,
+  );
+  assert.doesNotMatch(text, /Telefono:/);
   assert.match(text, /restare sulla carrozzina durante il viaggio: Sì/);
   const url = new URL(await page.locator("[data-message-link]").getAttribute("href"));
   assert.equal(url.searchParams.get("text"), text);
@@ -306,7 +309,7 @@ try {
         .textContent.includes("Richiesta: Trasporto sanitario"),
   );
   assert.equal(await page.locator("#request-from").inputValue(), "");
-  for (const name of ["firstName", "lastName", "phone"])
+  for (const name of ["firstName", "lastName"])
     assert.equal(await page.locator(`#request-${name}`).inputValue(), "");
   assert.equal(await page.locator("[data-message-link]").getAttribute("href"), null);
   // Short landscape screens must scroll the menu vertically, preserving touch targets.
@@ -361,13 +364,16 @@ try {
     );
     await page.locator("#request-firstName").fill("Élodie");
     await page.locator("#request-lastName").fill("D’Amico");
-    await page.locator("#request-phone").fill("+44 (20) 7946-0958");
+    assert.equal(await page.locator('input[name="phone"]').count(), 0);
+    assert.equal(await page.locator("#request-date").isVisible(), true);
+    for (const name of ["from", "to"])
+      assert.equal(await page.locator(`#request-${name}`).isVisible(), service !== "eventi");
     const link = new URL(await page.locator("[data-message-link]").getAttribute("href"));
     assert.equal(
       link.searchParams.get("text"),
       await page.locator("[data-message-text]").innerText(),
     );
-    assert.match(link.searchParams.get("text"), /Telefono: \+44 \(20\) 7946-0958/);
+    assert.doesNotMatch(link.searchParams.get("text"), /Telefono:/);
   }
   await page.goto(`${base}/index.html`);
   assert.deepEqual(

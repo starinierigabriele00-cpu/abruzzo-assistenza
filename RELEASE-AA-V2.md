@@ -2,6 +2,18 @@
 
 Rapporto iniziale del 7 ottobre 2026, aggiornato con le revisioni dell’8 e del 9 ottobre. Le sezioni successive conservano le misure e la fotografia di stato delle rispettive consegne; il dominio ufficiale corrente è `https://abruzzoassistenzaodv.com`, servito da Cloudflare Pages. Le informazioni su GitHub Pages nelle sezioni storiche descrivono la situazione precedente al suo ritiro.
 
+## Composer senza telefono — 9 ottobre 2026
+
+Su richiesta del committente è rimosso il campo Telefono dal composer, dalla generazione del messaggio e dalla validazione. Nome e cognome restano necessari per i cinque servizi di trasporto e facoltativi per le altre richieste; i contatti diretti sono sempre disponibili. Partenza, destinazione e data indicativa sono presenti per tutti i trasporti; la loro visibilità dipende dal servizio selezionato. Privacy e README descrivono i dati realmente inseriti nel composer. Il recapito della comunicazione viene ricevuto nel successivo contatto WhatsApp, senza duplicarlo nel testo preparato.
+
+File modificati: `contatti.html`, `assets/app.js`, `privacy.html`, `scripts/check-site.py`, i tre test JavaScript, README e questo rapporto. Nessun nuovo file o cambiamento al design, alle altre pagine, a DNS, Cloudflare o strumenti di analisi. Le attività esterne Google/Search Console restano in attesa del “fatto” del committente.
+
+Verifiche locali effettive: checker, sincronizzazione, sintassi JavaScript, build, formattazione e whitespace superati; **66 test** (15 richieste, 29 interazioni, 22 pubblicazione). Aggiornati i casi dei dati necessari, encoding, errori accessibili, reset e tastiera; aggiunta la verifica che eventuali valori telefono da vecchi input siano ignorati. Verificata la presenza di partenza, destinazione e data per ciascun trasporto, anche aprendo i sei collegamenti di prenotazione dalla pagina Servizi.
+
+Chromium sull’artefatto: 40 viste delle otto pagine a 1440/1024/768/390/360 px, nessun overflow e zero violazioni axe nelle 16 viste analizzate. Passano compilazione senza telefono, tastiera (Cognome → Partenza), errore sul cognome, reset, carrozzina, reflow a 320 px, no-JS e rimandi legacy. Evidenze: `/tmp/abruzzo-composer-no-phone-qa/results.json`. Nessuna trasmissione durante la compilazione o salvataggio persistente.
+
+Branch `fix/composer-transport-details`, basato su `main` `057bcae`. La pubblicazione segue CI e preview verdi sul commit corrente; commit finale e deploy effettivo sono documentati nella PR e nei check.
+
 ## Completamento Google, posizione e statuto — 9 ottobre 2026
 
 **Implementazione:** file Search Console `googleece696937ad74014.html` con contenuto fornito dal committente, validazione del nome/token, esclusione dalla sincronizzazione editoriale e dalla sitemap, inclusione invariata nell’artefatto. `_redirects` genera una riscrittura interna HTTP 200 per conservare l’URL esatto di verifica; il browser QA controlla stato e contenuto senza seguire redirect. La verifica nell’account Google e l’invio della sitemap restano operazioni del proprietario, senza introdurre analytics o cookie.

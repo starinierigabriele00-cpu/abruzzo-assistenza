@@ -93,12 +93,20 @@ test("service query preselects all valid services and unknown queries safely fal
 test("each service keeps optional operational fields and only transport requires contact data", (t) => {
   const p = page(t);
   const form = p.document.querySelector("form");
-  assert.equal(form.querySelectorAll("[required]").length, 3);
+  assert.equal(form.querySelectorAll("[required]").length, 2);
   assert.equal(form.elements.from.required, false);
   assert.equal(form.elements.to.required, false);
   assert.equal(form.elements.date.required, false);
   assert.equal(form.elements.firstName.required, true);
-  assert.equal(form.elements.phone.required, true);
+  assert.equal(form.elements.lastName.required, true);
+  assert.equal(form.querySelector('input[name="phone"]'), null);
+  for (const service of ["trasporti", "dialisi", "disabili", "nazionali", "esteri"]) {
+    select(p, service);
+    for (const name of ["from", "to", "date"]) {
+      assert.equal(form.elements[name].disabled, false);
+      assert.equal(form.elements[name].closest("[data-for]").hidden, false);
+    }
+  }
   select(p, "volontari");
   assert.equal(form.querySelectorAll("[required]").length, 0);
   assert.equal(form.elements.from.disabled, true);
@@ -127,7 +135,6 @@ test("live preview and encoded destination update locally without navigation", (
   const originalUrl = p.window.location.href;
   input(p, "firstName", "Mario");
   input(p, "lastName", "Rossi");
-  input(p, "phone", "+39 333 123 4567");
   input(p, "from", "Sulmona");
   input(p, "to", "Città & centro");
   input(p, "date", "2026-11-20");
@@ -155,7 +162,6 @@ test("reset clears all values and returns to the initial transport choice", asyn
   input(p, "place", "Pescara");
   input(p, "firstName", "Mario");
   input(p, "lastName", "Rossi");
-  input(p, "phone", "+39 333 1234567");
   select(p, "disabili");
   input(p, "wheelchair", "si");
   p.document.querySelector("form").reset();
@@ -163,7 +169,7 @@ test("reset clears all values and returns to the initial transport choice", asyn
   assert.equal(p.document.querySelector('input[name="service"]:checked').value, "trasporti");
   assert.equal(p.document.querySelector("form").elements.place.value, "");
   assert.equal(p.document.querySelector("form").elements.wheelchair.value, "");
-  for (const name of ["firstName", "lastName", "phone"]) {
+  for (const name of ["firstName", "lastName"]) {
     assert.equal(p.document.querySelector("form").elements[name].value, "");
     assert.equal(
       p.document.querySelector("form").elements[name].hasAttribute("aria-invalid"),
@@ -174,13 +180,12 @@ test("reset clears all values and returns to the initial transport choice", asyn
   assert.equal(p.document.querySelector("[data-message-link]").hasAttribute("href"), false);
   assert.doesNotMatch(message(p), /Pescara|carrozzina/);
 });
-test("requester fields have distinct labels and appropriate autofill and phone keyboard attributes", (t) => {
+test("requester names have distinct labels and autofill without collecting a phone number", (t) => {
   const p = page(t);
   const form = p.document.querySelector("form");
   for (const [name, autocomplete] of [
     ["firstName", "given-name"],
     ["lastName", "family-name"],
-    ["phone", "tel"],
   ]) {
     const control = form.elements[name];
     assert.equal(control.autocomplete, autocomplete);
@@ -188,8 +193,7 @@ test("requester fields have distinct labels and appropriate autofill and phone k
     for (const id of control.getAttribute("aria-describedby").split(" "))
       assert.ok(p.document.getElementById(id));
   }
-  assert.equal(form.elements.phone.type, "tel");
-  assert.equal(form.elements.phone.inputMode, "tel");
+  assert.equal(form.querySelector('input[name="phone"]'), null);
 });
 test("missing requester data blocks only guided completion and reports accessible errors", (t) => {
   const p = page(t);
@@ -201,7 +205,7 @@ test("missing requester data blocks only guided completion and reports accessibl
   link.dispatchEvent(attempt);
   assert.equal(attempt.defaultPrevented, true);
   assert.equal(p.document.activeElement.name, "firstName");
-  assert.equal(p.document.querySelectorAll('[aria-invalid="true"]').length, 3);
+  assert.equal(p.document.querySelectorAll('[aria-invalid="true"]').length, 2);
   const summary = p.document.querySelector("[data-request-validation]");
   assert.equal(summary.hidden, false);
   assert.equal(summary.getAttribute("role"), "alert");
@@ -214,29 +218,26 @@ test("contact correction enables WhatsApp and identity edits regenerate preview 
   p.document.querySelector("[data-message-link]").click();
   input(p, "firstName", "Élodie");
   input(p, "lastName", "D’Amico & Rossi");
-  input(p, "phone", "+33 6 12 34 56 78");
   const link = p.document.querySelector("[data-message-link]");
   assert.equal(link.hasAttribute("aria-disabled"), false);
   assert.equal(p.document.querySelectorAll('[aria-invalid="true"]').length, 0);
   assert.equal(new URL(link.href).searchParams.get("text"), message(p));
-  assert.match(message(p), /Nome: Élodie\nCognome: D’Amico & Rossi\nTelefono: \+33 6 12 34 56 78/);
+  assert.match(message(p), /Nome: Élodie\nCognome: D’Amico & Rossi/);
   input(p, "firstName", "Anna");
   assert.match(message(p), /Nome: Anna/);
   assert.doesNotMatch(message(p), /Élodie/);
   assert.equal(p.window.location.href, originalUrl);
 });
-test("phone error appears on blur, accepts correction, and does not impose ten digits", (t) => {
+test("surname error appears on blur and correction completes a request without a phone", (t) => {
   const p = page(t);
   input(p, "firstName", "Mario");
+  const surname = p.document.querySelector("form").elements.lastName;
+  assert.equal(surname.hasAttribute("aria-invalid"), false);
+  surname.dispatchEvent(new p.window.FocusEvent("blur"));
+  assert.equal(surname.getAttribute("aria-invalid"), "true");
+  assert.equal(p.document.getElementById("request-lastName-error").hidden, false);
   input(p, "lastName", "Rossi");
-  input(p, "phone", "not a number");
-  const phone = p.document.querySelector("form").elements.phone;
-  assert.equal(phone.hasAttribute("aria-invalid"), false);
-  phone.dispatchEvent(new p.window.FocusEvent("blur"));
-  assert.equal(phone.getAttribute("aria-invalid"), "true");
-  assert.equal(p.document.getElementById("request-phone-error").hidden, false);
-  input(p, "phone", "+44 (20) 7946-0958");
-  assert.equal(phone.hasAttribute("aria-invalid"), false);
+  assert.equal(surname.hasAttribute("aria-invalid"), false);
   assert.equal(p.document.querySelector("[data-message-link]").hasAttribute("href"), true);
 });
 test("service changes preserve editable contacts, change necessity and exclude irrelevant route data", (t) => {
