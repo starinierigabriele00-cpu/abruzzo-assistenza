@@ -1,7 +1,7 @@
 // Optional real-browser QA. Test packages and screenshots are never shipped.
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import assert from "node:assert/strict";
 const require = createRequire(
   resolve(process.env.ABRUZZO_TEST_DEPS || "/tmp/abruzzo-ui-check", "package.json"),
@@ -9,6 +9,9 @@ const require = createRequire(
 const { chromium } = require("playwright");
 const { AxeBuilder } = require("@axe-core/playwright");
 const base = process.env.ABRUZZO_BASE_URL || "http://127.0.0.1:8080";
+const configuration = JSON.parse(
+  readFileSync(new URL("../config/site.json", import.meta.url), "utf8"),
+);
 // Keep requesting .html to exercise Cloudflare's normalization; expect the final URL.
 const siteURL = (path) => {
   const url = new URL(`${base}/${path}`);
@@ -507,6 +510,40 @@ try {
     report.legacyRedirects.push({ legacy, destination, withoutJavaScript: true });
   }
   await nojs.close();
+  const ownershipFile = configuration.googleVerificationFile;
+  const verificationResponse = await context.request.get(`${base}/${ownershipFile}`, {
+    maxRedirects: 0,
+  });
+  assert.equal(verificationResponse.status(), 200, "Google ownership file must not redirect");
+  assert.equal(
+    (await verificationResponse.text()).trim(),
+    `google-site-verification: ${ownershipFile}`,
+  );
+  const sitemapResponse = await context.request.get(`${base}/sitemap.xml`);
+  assert.equal(sitemapResponse.status(), 200);
+  assert.ok(
+    !(await sitemapResponse.text()).includes(ownershipFile),
+    "Ownership response is not an indexed content page",
+  );
+  const statuteResponse = await context.request.get(`${base}/documents/statuto.pdf`);
+  assert.equal(statuteResponse.status(), 200);
+  assert.ok((await statuteResponse.body()).subarray(0, 5).equals(Buffer.from("%PDF-")));
+  await page.goto(`${base}/contatti.html`, { waitUntil: "networkidle" });
+  assert.equal(await page.locator(`a[href="${configuration.legal.mapsUrl}"]`).count(), 1);
+  assert.equal(await page.locator('a[href="documents/statuto.pdf"]').count(), 1);
+  assert.match(
+    await page.locator("#associazione").innerText(),
+    /non è un punto di ricevimento del pubblico/,
+  );
+  report.googleVerification = {
+    filename: ownershipFile,
+    status: verificationResponse.status(),
+    redirects: 0,
+  };
+  report.statute = {
+    status: statuteResponse.status(),
+    size: (await statuteResponse.body()).length,
+  };
   const missing = await page.goto(`${base}/__qa_missing/nested/path`);
   assert.equal(missing.status(), 404);
   assert.equal(await page.locator("h1").innerText(), "Questo percorso\nnon porta a una pagina.");

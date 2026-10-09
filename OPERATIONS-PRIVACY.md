@@ -1,6 +1,6 @@
 # Abruzzo Assistenza — decisioni e procedura da approvare
 
-Preparato l’8 ottobre 2026 per il presidente e il responsabile dell’associazione. Questo documento contiene **proposte, non procedure già adottate**. Non è una certificazione GDPR e non entra nell’artefatto Cloudflare. Il repository è pubblico: non aggiungere credenziali, nomi degli incaricati, richieste reali o informazioni sanitarie.
+Preparato l’8 ottobre 2026 e aggiornato il 9 ottobre per il presidente e il responsabile dell’associazione. Questo documento contiene **proposte, non procedure già adottate**. Non è una certificazione GDPR e non entra nell’artefatto Cloudflare. Il repository è pubblico: non aggiungere credenziali, nomi degli incaricati, richieste reali o informazioni sanitarie.
 
 ## Dati e comportamenti confermati
 
@@ -12,7 +12,7 @@ Il sito prepara il messaggio nel browser. Non invia richieste durante la compila
 
 ## Decisioni necessarie prima dell’approvazione finale della privacy
 
-La pagina `privacy.html` descrive i fatti confermati e rende esplicite le informazioni ancora mancanti. È un candidato da revisionare: non rappresenta un’informativa definitivamente completa finché le decisioni sotto non sono state adottate e riportate nella pagina.
+Il committente ha approvato il testo fattuale della pagina `privacy.html` il 9 ottobre 2026. La pagina descrive i processi confermati e rende esplicite le informazioni ancora mancanti. Questa approvazione non introduce criteri di conservazione, condizioni per il trattamento sanitario o misure organizzative non ancora definite: le decisioni sotto restano necessarie e dovranno essere riportate nella pagina quando adottate.
 
 | Ambito                            | Decisione richiesta al titolare                                                                                                                                                                                       |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -77,7 +77,7 @@ Nessuna password, autorizzazione, account o impostazione esterna è stata modifi
 
 ## Statuto e trasparenza
 
-Non è presente una copia approvata pubblicabile dello statuto. [documents/README.md](documents/README.md) indica la posizione e il gate per una futura copia realmente disponibile, autorizzata e priva di firme o dati personali non necessari. Nessun PDF fittizio, download mancante o rendiconto inventato. Identità e informazioni confermate sono raggiungibili dai Contatti e dal footer.
+Il committente ha fornito il PDF registrato il 9 ottobre 2026, in risposta alla richiesta della copia da pubblicare. `documents/statuto.pdf` è la copia per consultazione con autografo, nominativi e firme oscurati; l’originale resta invariato fuori dal repository. Dieci pagine e testo degli articoli conservati, PDF ricostruito dalle immagini già oscurate con OCR delle stesse immagini, senza incorporare il materiale rimosso. [documents/README.md](documents/README.md) documenta preparazione e gate. Lo statuto riporta la sede alla data della registrazione: la sede attuale confermata resta Via Fonte d’Amore SNC e la distinzione è esplicita vicino al download. Non sono stati inventati altri documenti o rendiconti. Identità, statuto e informazioni confermate sono raggiungibili dai Contatti e dal footer.
 
 ## Cookie e possibili analytics futuri
 
@@ -89,17 +89,47 @@ Se in futuro si desiderano statistiche, definire prima lo scopo e valutare concr
 
 Non c’è evidenza nel repository di una proprietà già verificata. Sitemap pronta: `https://abruzzoassistenzaodv.com/sitemap.xml`, sette pagine principali; 404 e vecchi indirizzi di rimando sono esclusi.
 
-1. Accedere con un account Google autorizzato e aggiungere la proprietà **Dominio** `abruzzoassistenzaodv.com`, oppure il prefisso URL esatto `https://abruzzoassistenzaodv.com/`.
-2. Per la proprietà Dominio usare esclusivamente il TXT fornito da Search Console con accesso alla zona Cloudflare del titolare. In questa sessione l’integrazione Cloudflare identifica un altro account e non può gestire quella zona. Il percorso disponibile è la proprietà con prefisso URL e il metodo **Tag HTML**: copiare il tag reale generato da Google e fornirlo a chi gestisce il repository, quindi verificarlo in Search Console dopo la pubblicazione. Il committente ha autorizzato le attività SEO; manca il codice effettivo, richiesto nella sessione. Non sono stati inventati codici di verifica e non occorre installare Analytics o Tag Manager.
+1. Accedere a [Search Console](https://search.google.com/search-console) con l’account Google che ha generato il file di verifica e selezionare la proprietà con prefisso URL esatto **`https://abruzzoassistenzaodv.com/`**. È possibile usare l’account personale autorizzato dal committente e aggiungere poi l’account dell’associazione come proprietario, tramite **Impostazioni → Utenti e autorizzazioni**, per garantire continuità di accesso. Cambiare account non rende automaticamente valido il token generato per un altro proprietario. [Autorizzazioni Search Console](https://support.google.com/webmasters/answer/7687615?hl=it).
+2. Il committente ha fornito il contenuto `google-site-verification: googleece696937ad74014.html`. Il file `googleece696937ad74014.html` è incluso nella build, escluso dalle pagine editoriali e dalla sitemap, con riscrittura interna HTTP 200 per l’URL esatto `.html`. Dopo la pubblicazione aprire **`https://abruzzoassistenzaodv.com/googleece696937ad74014.html`**, quindi premere **Verifica** nel metodo **File HTML** di Search Console. Lasciare il file pubblicato anche dopo l’esito positivo. Questo non equivale a una proprietà già verificata: la conferma nell’account deve ancora essere eseguita. Non occorrono Analytics, Tag Manager o nuovi cookie.
 3. Dopo la verifica inviare `sitemap.xml`, controllare l’URL canonico della home e delle pagine Servizi, Contatti e Pescara con Ispezione URL e, dove disponibile, richiedere l’indicizzazione.
 4. Controllare successivamente pagine indicizzate, esclusioni e redirect. L’invio della sitemap non garantisce tempi o risultato dell’indicizzazione.
 
 [Verifica proprietà Google](https://support.google.com/webmasters/answer/9008080?hl=it), [gestione sitemap](https://support.google.com/webmasters/answer/7451001?hl=it). Nessuna operazione è stata eseguita sull’account Google, sui DNS o sulla configurazione Cloudflare.
 
+Il metodo File HTML vale per il prefisso URL. Per una proprietà **Dominio** `abruzzoassistenzaodv.com` servirebbe invece il record TXT realmente fornito da Google e un intervento autorizzato sull’account DNS titolare: nessun TXT è stato inventato o configurato.
+
 Il controllo pubblico dell’8 ottobre 2026 non ha trovato risultati per `site:abruzzoassistenzaodv.com` o per il dominio tra virgolette. Questa osservazione non attesta lo stato completo dell’indice Google: serve Search Console. Canonical, sitemap, robots, HTTPS, dati strutturati e redirect del dominio sono già verificati; non è stato dichiarato un invio della sitemap o una richiesta di indicizzazione mai eseguiti.
 
-Il vecchio URL `https://starinierigabriele00-cpu.github.io/abruzzo-assistenza/` serve ancora una release obsoleta, con canonical verso `abruzzoassistenza.com`. **Azione del proprietario GitHub:** aprire **Settings → Pages → Unpublish site** per ritirare la copia, oppure decidere un redirect dedicato se sono da preservare i vecchi link. L’account contributor collegato non possiede permessi amministrativi/maintainer; nessuna impostazione è stata cambiata. [Permessi richiesti](https://docs.github.com/en/rest/pages/pages#delete-a-github-pages-site), [istruzioni GitHub](https://docs.github.com/en/pages/getting-started-with-github-pages/unpublishing-a-github-pages-site).
+Il committente ha rimosso il vecchio GitHub Pages. Il controllo HTTP del 9 ottobre 2026 su `https://starinierigabriele00-cpu.github.io/abruzzo-assistenza/` restituisce **404**, confermando il ritiro della copia obsoleta osservata il giorno precedente. Nessuna impostazione GitHub Pages è stata modificata dall’agente.
+
+## Google Maps / Business Profile: dati pronti per il titolare
+
+Il segnaposto comunicato dal committente è [l’ingresso della sede](https://maps.app.goo.gl/ekd8XqvuJXf81C4t8), alle coordinate **42°04′55.6″N 13°55′48.2″E**. È il collegamento usato sul sito per la posizione della sede legale; non costituisce la creazione o verifica di una scheda dell’attività.
+
+Il committente conferma servizi presso gli utenti e con i mezzi, senza ricevimento del pubblico alla sede, che dispone di insegna e personale quando non in uscita. Il profilo va quindi configurato come **attività con area di servizio e indirizzo nascosto**. Il fatto che la sede legale rimanga dichiarata sul sito istituzionale non la rende un luogo di ricevimento pubblico. Non aggiungere una seconda sede a Pescara: è un punto di partenza dei mezzi. [Linee guida Google](https://support.google.com/business/answer/3038177?hl=it), [aree coperte dal servizio](https://support.google.com/business/answer/9157481?hl=it).
+
+| Campo                                 | Dato da usare                                                                                                                                                                  |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Nome pubblico                         | Abruzzo Assistenza, coerente con logo, sito e insegna, senza aggiunte di parole chiave.                                                                                        |
+| Telefono                              | +39 333 682 3324                                                                                                                                                               |
+| Sito                                  | `https://abruzzoassistenzaodv.com/`                                                                                                                                            |
+| Sede per l’eventuale verifica privata | Via Fonte d’Amore SNC, Sulmona (AQ), Italia; usare il segnaposto confermato se il numero civico mancante impedisce l’individuazione.                                           |
+| Visualizzazione indirizzo             | Nascosto: l’associazione non riceve il pubblico in sede.                                                                                                                       |
+| Categoria                             | Scegliere tra le categorie effettivamente offerte da Google quella corrispondente all’attività principale; non attribuire categorie o autorizzazioni sanitarie non confermate. |
+| Area di servizio                      | Località realmente servite in Abruzzo, da selezionare nell’interfaccia Google; i trasferimenti nazionali/internazionali programmati non richiedono schede locali fittizie.     |
+| Orari                                 | Nessuna promessa H24 o orario di ricevimento; aggiungere solo disponibilità operative confermate dal responsabile.                                                             |
+
+Descrizione pronta per il profilo, senza link:
+
+> Abruzzo Assistenza è un’Organizzazione di Volontariato e un Ente del Terzo Settore con sede legale a Sulmona. Organizza trasporti sanitari programmati per dimissioni, visite, terapie ricorrenti e mobilità assistita, con partenze dall’Abruzzo e trasferimenti nazionali e internazionali. Le richieste vengono valutate in base alla tratta, alle esigenze del trasporto e alla disponibilità. Contatta l’associazione per concordare i dettagli del servizio.
+
+1. Con l’account Google autorizzato dal committente, anche personale, cercare prima un profilo già esistente per nome e telefono, così da evitare duplicazioni. Aggiungere poi l’account dell’associazione come proprietario in **Impostazioni del profilo dell’attività → Persone e accesso**, per garantire la continuità della gestione. [Gestione della proprietà](https://support.google.com/business/answer/3415281?hl=it).
+2. Se presente, richiederne la gestione; altrimenti avviare la creazione da [Google Business Profile](https://business.google.com/create). Usare i dati sopra, specificare che non si ricevono clienti all’indirizzo e nascondere la sede al pubblico.
+3. Completare il metodo di verifica scelto da Google. Potrebbero servire al responsabile prove reali di sede, insegna, mezzi o gestione dell’attività; non simulare la verifica. [Aggiunta/rivendicazione](https://support.google.com/business/answer/2911778?hl=it), [verifica](https://support.google.com/business/answer/7107242?hl=it).
+4. Dopo l’approvazione, comunicare il link della scheda effettiva: potrà sostituire il collegamento al semplice segnaposto. Controllare numero, sito e assenza di indirizzo pubblico/orari inventati.
+
+Nella sessione non è disponibile un collegamento capace di creare o verificare sedi Google Business Profile né di completare la verifica Search Console. La ricerca dei plugin non ha individuato queste capacità operative: un’integrazione che legge statistiche o gestisce recensioni non documenta la possibilità di creare una scheda. La proprietà deve rimanere sotto il controllo del committente e dell’associazione; non fornire password, codici temporanei o sessioni di accesso nel repository o nella chat. Non pubblicare l’email personale del gestore nei contatti del sito: il recapito istituzionale confermato è centralizzato in `config/site.json`.
 
 ## Approvazioni di pubblicazione
 
-Il committente ha autorizzato contenuti istituzionali, accreditamento generale 5×1000 e, l’8 ottobre 2026, il merge su `main` e il conseguente deploy Cloudflare dopo i controlli verdi. Restano l’approvazione organizzativa/giuridica dei punti privacy sopra e l’adozione delle procedure proposte: l’autorizzazione tecnica alla pubblicazione non equivale a queste decisioni. Push sul branch della PR significa solo candidato/preview; l’esito effettivo è documentato nella PR e nei check dei commit. Non attivare tracker o statistiche. Le operazioni Google richiedono un account autorizzato e il codice di verifica reale; nessun codice è stato inventato.
+Il committente ha autorizzato contenuti istituzionali, accreditamento generale 5×1000 e, l’8 ottobre 2026, il merge su `main` e il conseguente deploy Cloudflare dopo i controlli verdi. Il 9 ottobre ha autorizzato il completamento Google, fornito il file di verifica e lo statuto, approvato il testo privacy sui fatti disponibili e confermato la posizione e il modello di servizio per Maps. Restano l’approvazione organizzativa/giuridica dei punti privacy sopra e l’adozione delle procedure proposte: l’autorizzazione tecnica alla pubblicazione non equivale a queste decisioni. Push sul branch della PR significa solo candidato/preview; l’esito effettivo è documentato nella PR e nei check dei commit. Non attivare tracker o statistiche. Le operazioni Google richiedono un account autorizzato dell’associazione; il codice reale fornito è implementato, mentre verifica della proprietà, indicizzazione e creazione/verifica del profilo Maps non sono dichiarate completate senza evidenza nell’account.

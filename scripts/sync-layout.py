@@ -92,6 +92,17 @@ def load_config():
             path = document.get("path", "")
             if not document.get("source") or not document.get("title") or not path.startswith("documents/") or ".." in Path(path).parts or not (ROOT / path).is_file():
                 raise ValueError("Document needs a source, title and existing local documents/ file")
+    verification = config.get('googleVerificationFile', '')
+    if verification:
+        if not re.fullmatch(r'google[a-f0-9]+\.html', verification):
+            raise ValueError('Google verification must use a local Google HTML filename')
+        file = ROOT / verification
+        if not file.is_file() or file.read_text().strip() != 'google-site-verification: ' + verification:
+            raise ValueError('Google verification file must contain the exact supplied token')
+    legal = config['legal']
+    if legal.get('mapsUrl'):
+        if not legal.get('locationSource') or not re.fullmatch(r'https://maps\.app\.goo\.gl/[A-Za-z0-9]+', legal['mapsUrl']):
+            raise ValueError('Map location needs a confirmed Google Maps link and source')
     for source, destination in config.get('redirects', {}).items():
         if not re.fullmatch(r'[a-z0-9-]+\.html', source) or not re.fullmatch(r'[a-z0-9-]+\.html(?:#[a-z0-9-]+)?', destination):
             raise ValueError('Redirects must use local HTML filenames and optional anchors')
@@ -99,6 +110,11 @@ def load_config():
         if target in config['redirects'] or not (ROOT / target).is_file():
             raise ValueError('Redirect must point to an existing active page, without a chain')
     return config
+
+
+def site_pages(config):
+    """The Google ownership file is not a content page or sitemap entry."""
+    return [page for page in sorted(ROOT.glob('*.html')) if page.name != config.get('googleVerificationFile')]
 
 
 def render(template, page, config):
@@ -161,8 +177,10 @@ def verified_content(slot, config):
             parts.append(f'<a class="text-link" href="{escape(donation["paymentUrl"], quote=True)}" target="_blank" rel="noopener noreferrer">Apri il canale di donazione</a>')
         return ''.join(parts) + '</div>'
     if slot.startswith("legal-") and legal["verified"]:
+        map_url = escape(legal.get('mapsUrl') or 'https://www.google.com/maps/search/?api=1&query=' + quote(legal['address']), quote=True)
+        access_note = '<p>La sede legale non è un punto di ricevimento del pubblico. I servizi vengono organizzati presso gli utenti e con i mezzi dell’associazione.</p>' if legal.get('receivesVisitors') is False else ''
         if slot == "legal-contact":
-            return f'<div data-verified="legal"><p>Sede legale: {escape(legal["address"])}</p><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query={quote(legal["address"])}" target="_blank" rel="noopener noreferrer">Indicazioni per la sede legale</a></div>'
+            return f'<div data-verified="legal"><p>Sede legale: {escape(legal["address"])}</p><a class="text-link" href="{map_url}" target="_blank" rel="noopener noreferrer">Posizione della sede legale</a>{access_note}</div>'
         if slot == "legal-privacy":
             return f'<p data-verified="legal">Titolare: {escape(legal["name"])}. Sede: {escape(legal["address"])}. Codice fiscale: {escape(legal["taxId"])}.</p>'
         if slot == 'legal-association':
@@ -170,10 +188,10 @@ def verified_content(slot, config):
         rows = ''.join(f'<div><dt>{label}</dt><dd>{escape(legal[key])}</dd></div>' for key, label in [('name','Denominazione legale'),('address','Sede legale'),('taxId','Codice fiscale'),('qualification','Qualifiche documentate')] if legal.get(key))
         if legal.get('runtsRegistered'):
             rows += '<div><dt>Registro pubblico</dt><dd>Iscrizione RUNTS confermata</dd></div>'
-        return f'<div data-verified="legal"><dl class="data-list">{rows}</dl><a class="text-link" href="https://www.google.com/maps/search/?api=1&amp;query={quote(legal["address"])}" target="_blank" rel="noopener noreferrer">Indicazioni per la sede legale</a></div>'
+        return f'<div data-verified="legal"><dl class="data-list">{rows}</dl><a class="text-link" href="{map_url}" target="_blank" rel="noopener noreferrer">Posizione della sede legale</a>{access_note}</div>'
     if slot == "documents":
         documents = [d for d in config["documents"] if d.get("verified")]
-        return '<ul class="document-list">' + ''.join(f'<li><a href="{escape(d["path"], quote=True)}">{escape(d["title"])}</a></li>' for d in documents) + '</ul>' if documents else ''
+        return '<ul class="document-list">' + ''.join(f'<li><a class="text-link" href="{escape(d["path"], quote=True)}">{escape(d["title"])}</a>' + (f'<p>{escape(d["note"])}</p>' if d.get('note') else '') + '</li>' for d in documents) + '</ul>' if documents else ''
     return ""
 
 
@@ -254,7 +272,7 @@ def main():
     args = parser.parse_args()
     config = load_config()
     changed = []
-    for page in sorted(ROOT.glob('*.html')):
+    for page in site_pages(config):
         before = page.read_text()
         after = sync_page(before, page.name, config)
         if Markup(before).tokens != Markup(after).tokens if args.check else before != after:
@@ -274,8 +292,8 @@ def main():
         if not args.check: app.write_text(after)
     generated = {
         'robots.txt': 'User-agent: *\nAllow: /\nSitemap: ' + config['domain'] + '/sitemap.xml\n',
-        'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + config['domain'] + public_path(p.name) + '</loc></url>' for p in sorted(ROOT.glob('*.html')) if p.name != '404.html' and p.name not in config.get('redirects', {})) + '</urlset>\n',
-        '_redirects': '# Generated by scripts/sync-layout.py: permanent legacy page redirects.\n' + ''.join(source + ' ' + public_path(destination) + ' 301\n' for legacy, destination in config.get('redirects', {}).items() for source in ['/' + legacy, public_path(legacy)]),
+        'sitemap.xml': '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">' + ''.join('<url><loc>' + config['domain'] + public_path(p.name) + '</loc></url>' for p in site_pages(config) if p.name != '404.html' and p.name not in config.get('redirects', {})) + '</urlset>\n',
+        '_redirects': '# Generated by scripts/sync-layout.py: legacy redirects and Google verification response.\n' + ''.join(source + ' ' + public_path(destination) + ' 301\n' for legacy, destination in config.get('redirects', {}).items() for source in ['/' + legacy, public_path(legacy)]) + ('/' + config['googleVerificationFile'] + ' ' + public_path(config['googleVerificationFile']) + ' 200\n' if config.get('googleVerificationFile') else ''),
     }
     for name, content in generated.items():
         file = ROOT / name
@@ -283,7 +301,7 @@ def main():
             changed.append(name)
             if not args.check: file.write_text(content)
     if args.check and changed: raise SystemExit('Run python3 scripts/sync-layout.py, then format: '+', '.join(changed))
-    print(f'{"PASS" if args.check else "Synced"}: {len(list(ROOT.glob("*.html")))} HTML routes, contacts, configuration and verified publication gates.')
+    print(f'{"PASS" if args.check else "Synced"}: {len(site_pages(config))} HTML routes, contacts, configuration and verified publication gates.')
 
 
 if __name__ == '__main__':
