@@ -20,7 +20,7 @@ class PublicationTests(unittest.TestCase):
 
     def isolated_config(self):
         config = deepcopy(self.config)
-        config.update(redirects={}, documents=[], googleVerificationFile='')
+        config.update(redirects={}, documents=[], googleVerificationFiles=[])
         return config
 
     def test_unverified_information_never_renders(self):
@@ -97,7 +97,8 @@ class PublicationTests(unittest.TestCase):
         for name in ['robots.txt','sitemap.xml','_redirects','_headers','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
             self.assertTrue((public/name).is_file(),name)
         self.assertEqual((public/'_headers').read_text(),(ROOT/'_headers').read_text())
-        self.assertEqual((public/self.config['googleVerificationFile']).read_bytes(),(ROOT/self.config['googleVerificationFile']).read_bytes())
+        for filename in self.config['googleVerificationFiles']:
+            self.assertEqual((public/filename).read_bytes(),(ROOT/filename).read_bytes())
         self.assertEqual((public/'documents/statuto.pdf').read_bytes(),(ROOT/'documents/statuto.pdf').read_bytes())
         for private in ['config','templates','tests','scripts','README.md','OPERATIONS-PRIVACY.md','documents/README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
@@ -231,12 +232,13 @@ class PublicationTests(unittest.TestCase):
             self.assertEqual(layout.Markup(text).tokens,layout.Markup(rendered).tokens,path.name)
 
     def test_google_ownership_response_is_exact_and_never_becomes_a_content_page(self):
-        filename = self.config['googleVerificationFile']
-        self.assertEqual(filename,'googleece696937ad74014.html')
-        self.assertEqual((ROOT/filename).read_text().strip(),'google-site-verification: '+filename)
-        self.assertNotIn(filename,{page.name for page in layout.site_pages(self.config)})
-        self.assertNotIn(filename,(ROOT/'sitemap.xml').read_text())
-        self.assertIn('/'+filename+' /'+filename.removesuffix('.html')+' 200',(ROOT/'_redirects').read_text().splitlines())
+        self.assertEqual(self.config['googleVerificationFiles'],['googleece696937ad74014.html','google2a0eacdcefe0b100.html'])
+        for filename in self.config['googleVerificationFiles']:
+            with self.subTest(filename=filename):
+                self.assertEqual((ROOT/filename).read_text().strip(),'google-site-verification: '+filename)
+                self.assertNotIn(filename,{page.name for page in layout.site_pages(self.config)})
+                self.assertNotIn(filename,(ROOT/'sitemap.xml').read_text())
+                self.assertIn('/'+filename+' /'+filename.removesuffix('.html')+' 200',(ROOT/'_redirects').read_text().splitlines())
 
     def test_google_ownership_rejects_changed_content_or_nonlocal_paths(self):
         config = self.isolated_config()
@@ -244,16 +246,22 @@ class PublicationTests(unittest.TestCase):
             root = Path(directory)
             (root/'config').mkdir()
             with patch.object(layout,'ROOT',root):
-                for filename in ['../google123.html','https://example.test/google123.html','index.html']:
-                    config['googleVerificationFile'] = filename
+                for filename in ['../google123.html','https://example.test/google123.html','index.html',{'file':'google123.html'}]:
+                    config['googleVerificationFiles'] = [filename]
                     (root/'config/site.json').write_text(json.dumps(config))
                     with self.assertRaisesRegex(ValueError,'local Google HTML filename'): layout.load_config()
-                config['googleVerificationFile'] = 'google123.html'
+                config['googleVerificationFiles'] = 'google123.html'
+                (root/'config/site.json').write_text(json.dumps(config))
+                with self.assertRaisesRegex(ValueError,'must be a list'): layout.load_config()
+                config['googleVerificationFiles'] = ['google123.html']
                 (root/'config/site.json').write_text(json.dumps(config))
                 (root/'google123.html').write_text('wrong verification content')
                 with self.assertRaisesRegex(ValueError,'exact supplied token'): layout.load_config()
                 (root/'google123.html').write_text('google-site-verification: google123.html\n')
-                self.assertEqual(layout.load_config()['googleVerificationFile'],'google123.html')
+                self.assertEqual(layout.load_config()['googleVerificationFiles'],['google123.html'])
+                config['googleVerificationFiles'] = ['google123.html','google123.html']
+                (root/'config/site.json').write_text(json.dumps(config))
+                with self.assertRaisesRegex(ValueError,'must not contain duplicates'): layout.load_config()
 
     def test_confirmed_location_and_public_statute_are_available_without_javascript(self):
         text = (ROOT/'contatti.html').read_text()
