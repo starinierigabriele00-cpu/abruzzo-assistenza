@@ -54,15 +54,14 @@ test("requester identity precedes the service and organizational details in the 
   const message = buildRequestMessage(form(values));
   assert.equal(
     message,
-    "Buongiorno Abruzzo Assistenza, vorrei prenotare un trasporto.\n\nNome: Mario\nCognome: Rossi\nTelefono: +39 333 123 4567\n\nRichiesta: Trasporto sanitario\nPartenza: Sulmona\nDestinazione: Pescara\nData indicativa: 15/10/2026\n\nResto in attesa di una valutazione e della conferma dei dettagli.",
+    "Buongiorno Abruzzo Assistenza, vorrei prenotare un trasporto.\n\nNome: Mario\nCognome: Rossi\n\nRichiesta: Trasporto sanitario\nPartenza: Sulmona\nDestinazione: Pescara\nData indicativa: 15/10/2026\n\nResto in attesa di una valutazione e della conferma dei dettagli.",
   );
 });
-test("only the three requester fields are necessary for transport completion", () => {
+test("only name and surname are necessary for transport completion", () => {
   for (const service of ["trasporti", "dialisi", "disabili", "nazionali", "esteri"]) {
     assert.deepEqual(Object.keys(requestContactErrors(form({ service }))), [
       "firstName",
       "lastName",
-      "phone",
     ]);
     assert.deepEqual(
       Object.keys(
@@ -81,33 +80,16 @@ test("only the three requester fields are necessary for transport completion", (
     assert.deepEqual(Object.keys(requestContactErrors(form({ service }))), []);
   }
 });
-test("phone validation accepts Italian and international numbers with common separators", () => {
-  for (const phone of [
-    "3331234567",
-    "+39 333 123 4567",
-    "0864 123456",
-    "+44 (20) 7946-0958",
-    "0044 20 7946 0958",
-    "+1 (202) 555-0123",
-    "+33 6.12.34.56.78",
-    "333/1234567",
-    "+39\u00a0333\u00a0123\u00a04567",
-    "+91 98765 43210",
-  ]) {
-    assert.equal(requestContactErrors(form({ service: "altro", phone })).phone, undefined, phone);
-  }
-  for (const phone of [
-    "123",
-    "1234567890123456",
-    "call me",
-    "+",
-    "++39 333 1234567",
-    "+39 333 1234567 abc",
-  ]) {
-    assert.ok(requestContactErrors(form({ service: "altro", phone })).phone, phone);
+test("phone is neither required nor serialized, even when legacy input is present", () => {
+  for (const service of Object.keys(SERVICE_LABELS)) {
+    for (const phone of ["", "+39 333 123 4567", "not a number"]) {
+      const data = form({ service, firstName: "Mario", lastName: "Rossi", phone });
+      assert.deepEqual(Object.keys(requestContactErrors(data)), []);
+      assert.doesNotMatch(buildRequestMessage(data), /Telefono:|333 123 4567|not a number/);
+    }
   }
 });
-test("requester names and phone survive WhatsApp encoding without changing their meaning", () => {
+test("requester names survive WhatsApp encoding without a redundant phone field", () => {
   const message = buildRequestMessage(
     form({
       service: "esteri",
@@ -117,7 +99,7 @@ test("requester names and phone survive WhatsApp encoding without changing their
     }),
   );
   assert.equal(new URL(whatsappUrl(message)).searchParams.get("text"), message);
-  assert.match(message, /Nome: Chloé\nCognome: O’Connor & Rossi\nTelefono: \+44 \(20\) 7946-0958/);
+  assert.match(message, /Nome: Chloé\nCognome: O’Connor & Rossi/);
 });
 test("optional contact details remain relevant while transport-only values are excluded", () => {
   const message = buildRequestMessage(
@@ -131,7 +113,7 @@ test("optional contact details remain relevant while transport-only values are e
       zone: "Pescara",
     }),
   );
-  assert.match(message, /Nome: Mario\nCognome: Rossi\nTelefono: 333 1234567/);
+  assert.match(message, /Nome: Mario\nCognome: Rossi/);
   assert.match(message, /Richiesta: Volontariato\nZona: Pescara/);
   assert.doesNotMatch(message, /Hidden origin|carrozzina/);
 });

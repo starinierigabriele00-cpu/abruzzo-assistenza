@@ -122,7 +122,7 @@ for name, page in pages.items():
         if tag == 'a' and attrs.get('target') == '_blank' and 'noopener' not in attrs.get('rel','').split(): errors.append(f'{name}: external tab without noopener')
         if tag in {'input','select','textarea'} and attrs.get('type') not in {'radio','hidden'} and attrs.get('id') not in labels: errors.append(f'{name}: input without explicit label')
         if tag in {'input','select','textarea'} and 'required' in attrs:
-            if attrs.get('name') not in {'firstName','lastName','phone'} or attrs.get('data-required-for') != 'trasporti dialisi disabili nazionali esteri':
+            if attrs.get('name') not in {'firstName','lastName'} or attrs.get('data-required-for') != 'trasporti dialisi disabili nazionali esteri':
                 errors.append(f'{name}: unnecessary required composer field')
         if 'aria-controls' in attrs and attrs['aria-controls'] not in page.ids: errors.append(f'{name}: missing controlled element')
         if attrs.get('data-verified') and not config[attrs['data-verified']]['verified']: errors.append(f'{name}: unverified {attrs["data-verified"]} is published')
