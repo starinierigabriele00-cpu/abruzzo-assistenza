@@ -516,21 +516,29 @@ try {
     report.legacyRedirects.push({ legacy, destination, withoutJavaScript: true });
   }
   await nojs.close();
-  const ownershipFile = configuration.googleVerificationFile;
-  const verificationResponse = await context.request.get(`${base}/${ownershipFile}`, {
-    maxRedirects: 0,
-  });
-  assert.equal(verificationResponse.status(), 200, "Google ownership file must not redirect");
-  assert.equal(
-    (await verificationResponse.text()).trim(),
-    `google-site-verification: ${ownershipFile}`,
-  );
   const sitemapResponse = await context.request.get(`${base}/sitemap.xml`);
   assert.equal(sitemapResponse.status(), 200);
-  assert.ok(
-    !(await sitemapResponse.text()).includes(ownershipFile),
-    "Ownership response is not an indexed content page",
-  );
+  const sitemap = await sitemapResponse.text();
+  report.googleVerification = [];
+  for (const ownershipFile of configuration.googleVerificationFiles) {
+    const verificationResponse = await context.request.get(`${base}/${ownershipFile}`, {
+      maxRedirects: 0,
+    });
+    assert.equal(verificationResponse.status(), 200, "Google ownership file must not redirect");
+    assert.equal(
+      (await verificationResponse.text()).trim(),
+      `google-site-verification: ${ownershipFile}`,
+    );
+    assert.ok(
+      !sitemap.includes(ownershipFile),
+      "Ownership response is not an indexed content page",
+    );
+    report.googleVerification.push({
+      filename: ownershipFile,
+      status: verificationResponse.status(),
+      redirects: 0,
+    });
+  }
   const statuteResponse = await context.request.get(`${base}/documents/statuto.pdf`);
   assert.equal(statuteResponse.status(), 200);
   assert.ok((await statuteResponse.body()).subarray(0, 5).equals(Buffer.from("%PDF-")));
@@ -541,11 +549,6 @@ try {
     await page.locator("#associazione").innerText(),
     /non è un punto di ricevimento del pubblico/,
   );
-  report.googleVerification = {
-    filename: ownershipFile,
-    status: verificationResponse.status(),
-    redirects: 0,
-  };
   report.statute = {
     status: statuteResponse.status(),
     size: (await statuteResponse.body()).length,
