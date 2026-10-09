@@ -38,8 +38,14 @@ class Page(HTMLParser):
             if key in attrs:
                 self.links.extend(item.strip().split()[0] for item in attrs[key].split(','))
 
-pages = {p.name: Page(p) for p in sorted(ROOT.glob('*.html'))}
+verification = config.get('googleVerificationFile', '')
+pages = {p.name: Page(p) for p in sorted(ROOT.glob('*.html')) if p.name != verification}
 errors = []
+if verification:
+    if not re.fullmatch(r'google[a-f0-9]+\.html', verification):
+        errors.append('Invalid Google verification filename')
+    elif not (ROOT / verification).is_file() or (ROOT / verification).read_text().strip() != 'google-site-verification: ' + verification:
+        errors.append('Missing or changed Google verification response')
 count = 0
 redirects = config.get('redirects', {})
 active_pages = {'index.html','servizi.html','volontari.html','associazione.html','contatti.html','privacy.html','pescara.html','404.html'}
@@ -140,6 +146,8 @@ if (ROOT/'robots.txt').is_file() and 'Sitemap: '+config['domain']+'/sitemap.xml'
 if (ROOT/'_redirects').is_file():
     rules = {line for line in (ROOT/'_redirects').read_text().splitlines() if line and not line.startswith('#')}
     expected_rules = {source+' /'+destination.replace('.html','')+' 301' for legacy,destination in redirects.items() for source in ['/'+legacy,'/'+legacy.removesuffix('.html')]}
+    if verification:
+        expected_rules.add('/'+verification+' /'+verification.removesuffix('.html')+' 200')
     if rules != expected_rules: errors.append('Cloudflare redirect rules must match the configured legacy pages')
 if (ROOT/'sitemap.xml').is_file():
     locs = [el.text for el in ET.parse(ROOT/'sitemap.xml').iter() if el.tag.endswith('}loc')]

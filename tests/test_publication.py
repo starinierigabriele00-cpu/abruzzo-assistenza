@@ -18,16 +18,22 @@ class PublicationTests(unittest.TestCase):
     def setUp(self):
         self.config = layout.load_config()
 
+    def isolated_config(self):
+        config = deepcopy(self.config)
+        config.update(redirects={}, documents=[], googleVerificationFile='')
+        return config
+
     def test_unverified_information_never_renders(self):
         config = deepcopy(self.config)
         config['fivePerMille']['verified'] = False
         config['legal']['verified'] = False
+        for document in config['documents']:
+            document['verified'] = False
         for slot in ['five-home','five-support','five-transparency','donation','legal-contact','legal-data','legal-privacy','legal-association','documents']:
             self.assertEqual(layout.verified_content(slot,config),'')
 
     def test_five_per_mille_requires_source_and_tax_id_but_not_year(self):
-        config = deepcopy(self.config)
-        config['redirects'] = {}
+        config = self.isolated_config()
         config['fivePerMille'].update(taxId='', source='', year=None)
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -91,12 +97,13 @@ class PublicationTests(unittest.TestCase):
         for name in ['robots.txt','sitemap.xml','_redirects','_headers','assets/icons.svg','assets/abruzzo-map.svg','assets/mezzi-1440.webp','assets/mezzi-800.webp','assets/favicon.png','assets/social-preview.jpg']:
             self.assertTrue((public/name).is_file(),name)
         self.assertEqual((public/'_headers').read_text(),(ROOT/'_headers').read_text())
+        self.assertEqual((public/self.config['googleVerificationFile']).read_bytes(),(ROOT/self.config['googleVerificationFile']).read_bytes())
+        self.assertEqual((public/'documents/statuto.pdf').read_bytes(),(ROOT/'documents/statuto.pdf').read_bytes())
         for private in ['config','templates','tests','scripts','README.md','OPERATIONS-PRIVACY.md','documents/README.md','assets/SOURCES.md']:
             self.assertFalse((public/private).exists(),private)
 
     def test_annual_distribution_requires_separate_evidence(self):
-        config = deepcopy(self.config)
-        config['redirects'] = {}
+        config = self.isolated_config()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root/'config').mkdir()
@@ -116,8 +123,7 @@ class PublicationTests(unittest.TestCase):
                         layout.load_config()
 
     def test_tax_id_matches_the_confirmed_legal_entity(self):
-        config = deepcopy(self.config)
-        config['redirects'] = {}
+        config = self.isolated_config()
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             (root/'config').mkdir()
@@ -147,11 +153,8 @@ class PublicationTests(unittest.TestCase):
         self.assertEqual(schema['taxID'],legal['taxId'])
 
     def test_missing_statute_never_generates_a_public_download(self):
-        self.assertEqual(self.config['documents'],[])
-        text = (ROOT/'contatti.html').read_text()
-        self.assertNotIn('href="documents/statuto.pdf"',text)
-        config = deepcopy(self.config)
-        config['redirects'] = {}
+        config = self.isolated_config()
+        self.assertEqual(layout.verified_content('documents',config),'')
         config['documents'] = [{'verified':True,'title':'Statuto','source':'fixture approval','path':'documents/statuto.pdf'}]
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
@@ -182,7 +185,7 @@ class PublicationTests(unittest.TestCase):
 
     def test_redirect_configuration_rejects_external_destinations_and_chains(self):
         for destination in ['https://example.test/', 'sostienici.html', '../contatti.html']:
-            config = deepcopy(self.config)
+            config = self.isolated_config()
             config['redirects']['trasparenza.html'] = destination
             with tempfile.TemporaryDirectory() as directory:
                 root = Path(directory)
@@ -219,13 +222,51 @@ class PublicationTests(unittest.TestCase):
 
     def test_public_email_anchors_opt_out_of_edge_obfuscation_without_js(self):
         import re
-        for path in ROOT.glob('*.html'):
+        for path in layout.site_pages(self.config):
             text = path.read_text()
             anchors = re.findall(r'<a\b[^>]*href="mailto:[^"]*"[^>]*>.*?</a>',text,re.S)
             exempted = re.findall(r'<!--email_off-->\s*(<a\b[^>]*href="mailto:[^"]*"[^>]*>.*?</a>)\s*<!--/email_off-->',text,re.S)
             self.assertEqual(anchors,exempted,path.name)
             rendered = layout.sync_page(text,path.name,self.config)
             self.assertEqual(layout.Markup(text).tokens,layout.Markup(rendered).tokens,path.name)
+
+    def test_google_ownership_response_is_exact_and_never_becomes_a_content_page(self):
+        filename = self.config['googleVerificationFile']
+        self.assertEqual(filename,'googleece696937ad74014.html')
+        self.assertEqual((ROOT/filename).read_text().strip(),'google-site-verification: '+filename)
+        self.assertNotIn(filename,{page.name for page in layout.site_pages(self.config)})
+        self.assertNotIn(filename,(ROOT/'sitemap.xml').read_text())
+        self.assertIn('/'+filename+' /'+filename.removesuffix('.html')+' 200',(ROOT/'_redirects').read_text().splitlines())
+
+    def test_google_ownership_rejects_changed_content_or_nonlocal_paths(self):
+        config = self.isolated_config()
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root/'config').mkdir()
+            with patch.object(layout,'ROOT',root):
+                for filename in ['../google123.html','https://example.test/google123.html','index.html']:
+                    config['googleVerificationFile'] = filename
+                    (root/'config/site.json').write_text(json.dumps(config))
+                    with self.assertRaisesRegex(ValueError,'local Google HTML filename'): layout.load_config()
+                config['googleVerificationFile'] = 'google123.html'
+                (root/'config/site.json').write_text(json.dumps(config))
+                (root/'google123.html').write_text('wrong verification content')
+                with self.assertRaisesRegex(ValueError,'exact supplied token'): layout.load_config()
+                (root/'google123.html').write_text('google-site-verification: google123.html\n')
+                self.assertEqual(layout.load_config()['googleVerificationFile'],'google123.html')
+
+    def test_confirmed_location_and_public_statute_are_available_without_javascript(self):
+        text = (ROOT/'contatti.html').read_text()
+        content = ' '.join(text.split())
+        self.assertIn(self.config['legal']['mapsUrl'],text)
+        self.assertIn('non è un punto di ricevimento del pubblico',content)
+        self.assertEqual(self.config['legal']['address'],"Via Fonte d'Amore SNC, Sulmona (AQ), Italia")
+        document = next(item for item in self.config['documents'] if item['path']=='documents/statuto.pdf')
+        self.assertTrue(document['verified'] and document['source'])
+        self.assertTrue((ROOT/document['path']).read_bytes().startswith(b'%PDF-'))
+        self.assertIn('href="documents/statuto.pdf"',text)
+        self.assertIn('Firme e nominativi oscurati',content)
+        self.assertIn('sede alla data della registrazione',content)
 
     def test_hosting_disclosure_and_ci_match_cloudflare(self):
         privacy = (ROOT/'privacy.html').read_text()

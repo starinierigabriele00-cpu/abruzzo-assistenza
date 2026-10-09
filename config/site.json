@@ -1,5 +1,6 @@
 {
   "domain": "https://abruzzoassistenzaodv.com",
+  "googleVerificationFile": "googleece696937ad74014.html",
   "phone": "+393336823324",
   "whatsapp": "393336823324",
   "phoneDisplay": "333 682 3324",
@@ -14,6 +15,9 @@
     "taxId": "02227430663",
     "qualification": "ODV / ETS",
     "runtsRegistered": true,
+    "mapsUrl": "https://maps.app.goo.gl/ekd8XqvuJXf81C4t8",
+    "receivesVisitors": false,
+    "locationSource": "Segnaposto e coordinate 42°04'55.6\"N 13°55'48.2\"E forniti dal committente il 9 ottobre 2026. Servizi svolti presso gli utenti e con i mezzi; nessun ricevimento del pubblico presso la sede.",
     "source": "Conferma esplicita del committente nella wave Institutional, Privacy & Production Finalization dell'8 ottobre 2026: denominazione statutaria, qualifica, iscrizione RUNTS, codice fiscale e sede trasferita già comunicata agli enti."
   },
   "fivePerMille": {
@@ -30,7 +34,15 @@
     "paymentUrl": "",
     "source": ""
   },
-  "documents": [],
+  "documents": [
+    {
+      "verified": true,
+      "title": "Statuto — copia per consultazione (PDF, 10 pagine)",
+      "path": "documents/statuto.pdf",
+      "note": "Firme e nominativi oscurati nella copia per il sito. Lo statuto riporta la sede alla data della registrazione; la sede attuale è quella indicata nei dati dell’associazione.",
+      "source": "Statuto registrato fornito dal committente il 9 ottobre 2026 in risposta alla richiesta della copia da pubblicare. Copia per consultazione con firme e nominativi oscurati, senza modificare il testo degli articoli; originale conservato fuori dal repository."
+    }
+  ],
   "redirects": {
     "sostienici.html": "associazione.html#sostegno",
     "trasparenza.html": "contatti.html#associazione"
